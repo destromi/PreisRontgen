@@ -1,0 +1,23 @@
+<!-- Projet de DÉMONSTRATION : lance l'écran frmAlertes avec des données d'exemple (sans MySQL). À ne pas livrer au chef si inutile. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>  <!-- Application Windows -->
+    <TargetFramework>net8.0-windows</TargetFramework>  <!-- Même cible que l'application -->
+    <RootNamespace>PreisRontgen.Demo</RootNamespace>  <!-- Espace de noms de ce projet -->
+    <AssemblyName>PreisRontgen.Demo</AssemblyName>  <!-- Nom du programme produit -->
+    <UseWindowsForms>true</UseWindowsForms>  <!-- Active Windows Forms -->
+    <MyType>WindowsFormsWithCustomSubMain</MyType>  <!-- On fournit notre propre Main (pas de formulaire de démarrage imposé) -->
+    <StartupObject>PreisRontgen.Demo.ProgrammeDemo</StartupObject>  <!-- Le Module qui contient Main -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Import Include="System.Drawing" />  <!-- Imports globaux -->
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PreisRontgen.vbproj" />  <!-- Utilise l'application (frmAlertes, modèles, interfaces) -->
+  </ItemGroup>
+
+</Project>

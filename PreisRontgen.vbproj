@@ -1,15 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- Fichier projet de l'application PreisRontgen : décrit comment la compiler. Les lignes marquées (T3) ont été ajoutées pour le module de normalisation et de détection. -->
+<Project Sdk="Microsoft.NET.Sdk">  <!-- Projet au format SDK .NET moderne -->
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <StartupObject>Sub Main</StartupObject>
-    <UseWindowsForms>true</UseWindowsForms>
-    <MyType>WindowsForms</MyType>
+    <OutputType>WinExe</OutputType>  <!-- Application Windows avec fenêtres (sans console noire) -->
+    <TargetFramework>net8.0-windows</TargetFramework>  <!-- .NET 8 LTS pour Windows : imposé par le cahier des charges -->
+    <StartupObject>Sub Main</StartupObject>  <!-- Point de départ : géré par le cadre applicatif de Visual Basic -->
+    <UseWindowsForms>true</UseWindowsForms>  <!-- Active Windows Forms (fenêtres, boutons, grilles...) -->
+    <MyType>WindowsForms</MyType>  <!-- Active l'espace « My » de Visual Basic pour Windows Forms -->
   </PropertyGroup>
 
   <ItemGroup>
-    <Import Include="System.Data" />
+    <Import Include="System.Data" />  <!-- Imports globaux : évitent de répéter « Imports ... » dans chaque fichier -->
     <Import Include="System.Drawing" />
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
@@ -27,6 +28,20 @@
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Le projet de tests (dossier Tests) a son propre fichier projet : on l'exclut de la compilation de l'application. -->
+    <Compile Remove="Tests\**" />  <!-- (T3) Ne compile pas les fichiers du dossier Tests dans l'application -->
+    <EmbeddedResource Remove="Tests\**" />  <!-- (T3) Idem pour les ressources -->
+    <None Remove="Tests\**" />  <!-- (T3) Idem pour les autres fichiers -->
+  <Compile Remove="Demo\**" />
+  <EmbeddedResource Remove="Demo\**" />
+  <None Remove="Demo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="2.3.7" />  <!-- (T3) Bibliothèque NuGet pour dialoguer avec MySQL ; à ne pas dupliquer si T2 l'ajoute aussi -->
   </ItemGroup>
 
 </Project>

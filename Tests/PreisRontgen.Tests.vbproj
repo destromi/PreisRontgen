@@ -1,0 +1,27 @@
+<!-- Fichier projet des tests automatiques : décrit comment compiler et exécuter les tests. -->
+<Project Sdk="Microsoft.NET.Sdk">  <!-- Projet au format SDK .NET moderne -->
+
+  <PropertyGroup>  <!-- Réglages généraux -->
+    <TargetFramework>net8.0-windows</TargetFramework>  <!-- Même plateforme que l'application (.NET 8 pour Windows), nécessaire pour la référencer -->
+    <RootNamespace>PreisRontgen.Tests</RootNamespace>  <!-- Espace de noms de base du projet de tests -->
+    <OptionStrict>On</OptionStrict>  <!-- Option Strict activée pour tout le projet (exigence du cahier des charges) -->
+    <OptionExplicit>On</OptionExplicit>  <!-- Option Explicit activée pour tout le projet -->
+    <IsPackable>false</IsPackable>  <!-- Ce projet ne sera pas publié comme paquet NuGet -->
+    <IsTestProject>true</IsTestProject>  <!-- Indique à Visual Studio que c'est un projet de tests -->
+  </PropertyGroup>
+
+  <ItemGroup>  <!-- Bibliothèques NuGet nécessaires -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />  <!-- Moteur d'exécution des tests -->
+    <PackageReference Include="xunit" Version="2.9.2" />  <!-- Bibliothèque de tests xUnit (Fact, Theory, Assert) -->
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />  <!-- Permet à l'Explorateur de tests de Visual Studio de lancer xUnit -->
+  </ItemGroup>
+
+  <ItemGroup>  <!-- Références vers d'autres projets -->
+    <ProjectReference Include="..\PreisRontgen.vbproj" />  <!-- Les tests utilisent le code de l'application -->
+  </ItemGroup>
+
+  <ItemGroup>  <!-- Imports globaux -->
+    <Import Include="Xunit" />  <!-- Évite d'écrire « Imports Xunit » dans chaque fichier de test -->
+  </ItemGroup>
+
+</Project>

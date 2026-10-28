@@ -13,9 +13,23 @@
     <Import Include="System.Drawing" />
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
-
+	
+  <ItemGroup>
+  <Compile Remove="Tests\**" />
+  <Compile Remove="Demo\**" />
+  <Compile Remove="**\obj\**" />
+  <Compile Remove="**\bin\**" />
+  <EmbeddedResource Remove="Tests\**" />
+  <EmbeddedResource Remove="Demo\**" />
+  <None Remove="Tests\**" />
+  <None Remove="Demo\**" />
+</ItemGroup>
+	
+	
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <PackageReference Include="xunit.assert" Version="2.9.2" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.9.2" />
   </ItemGroup>
 
   <ItemGroup>

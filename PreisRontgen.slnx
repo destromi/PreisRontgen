@@ -1,3 +1,9 @@
+<!-- Fichier de solution (nouveau format .slnx de Visual Studio) : liste les projets ouverts ensemble. -->
 <Solution>
+  <!-- Le projet de l'application (Windows Forms, VB.NET) -->
   <Project Path="PreisRontgen.vbproj" />
+  <!-- Le projet des tests automatiques (xUnit) -->
+  <Project Path="Tests/PreisRontgen.Tests.vbproj" />
+   <Project Path="Demo/PreisRontgen.Demo.vbproj" />
+
 </Solution>

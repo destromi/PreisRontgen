@@ -1,0 +1,110 @@
+' ============================================================================
+' FICHIER : Demo/DepotDemo.vb
+' RÔLE    : faux dépôt d'alertes EN MÉMOIRE, pour essayer l'écran frmAlertes
+'           sans base MySQL. Il contient quelques alertes d'exemple.
+' NOTION  : DepotDemo « implémente » IAlerteRepository, exactement comme la vraie
+'           classe MySQL. L'écran ne voit aucune différence : c'est l'intérêt d'une interface.
+' ============================================================================
+Option Strict On      ' Conversions implicites dangereuses interdites
+Option Explicit On    ' Variables obligatoirement déclarées
+
+Imports System.Linq          ' Pour Where, OrderBy, Select, Count...
+Imports PreisRontgen.Data    ' Pour IAlerteRepository
+Imports PreisRontgen.Models  ' Pour Alerte, FiltreAlerte, TypeAlerte
+
+''' <summary>Dépôt d'alertes en mémoire, avec des données d'exemple (démonstration uniquement).</summary>
+Public Class DepotDemo                          ' Début de la classe
+    Implements IAlerteRepository                ' S'engage à fournir toutes les méthodes du contrat
+
+    Private ReadOnly _alertes As New List(Of Alerte)()    ' Les alertes « enregistrées » (perdues à la fermeture du programme)
+    Private _prochainId As Integer = 1                    ' Prochain identifiant à attribuer
+
+    Public Sub New()                            ' Constructeur : prépare les données d'exemple
+        Dim aujourdhui As Date = Date.Today     ' Date du jour, pour que les exemples soient toujours récents
+
+        ' --- Hausses (EF-07) : le prix unitaire a augmenté de plus de 5 % ---
+        Ajouter(Creer(1, "Lait UHT 1 L", 1, "Supermarché Akwa", TypeAlerte.Hausse, 0.0824D, aujourdhui.AddDays(-1),
+                      "Prix unitaire : 850,00 vers 920,00 (8,2 %)."))                                  ' Hausse récente, non lue
+        Ajouter(Creer(2, "Riz parfumé 5 kg", 2, "Marché Mboppi", TypeAlerte.Hausse, 0.0612D, aujourdhui.AddDays(-4),
+                      "Prix unitaire : 980,00 vers 1 040,00 (6,1 %)."))                                ' Autre magasin, autre produit
+        Ajouter(Creer(3, "Huile végétale 1 L", 1, "Supermarché Akwa", TypeAlerte.Hausse, 0.1500D, aujourdhui.AddDays(-12),
+                      "Prix unitaire : 1 300,00 vers 1 495,00 (15,0 %)."))                             ' Grosse hausse
+
+        ' --- Shrinkflation (EF-08) : quantité en baisse, prix identique ou plus élevé ---
+        Ajouter(Creer(4, "Café moulu", 3, "Boutique Bonamoussadi", TypeAlerte.Shrinkflation, 0.1111D, aujourdhui.AddDays(-2),
+                      "Quantité : 500 vers 450 (-10,0 %) pour un prix de 2 400,00 vers 2 400,00 ; hausse réelle du prix unitaire : 11,1 %.")) ' Shrinkflation classique
+        Ajouter(Creer(5, "Biscuits au beurre", 2, "Marché Mboppi", TypeAlerte.Shrinkflation, 0.0638D, aujourdhui.AddDays(-9),
+                      "Quantité : 200 vers 188 (-6,0 %) pour un prix de 500,00 vers 500,00 ; hausse réelle du prix unitaire : 6,4 %."))        ' Shrinkflation plus légère
+        Ajouter(Creer(6, "Sucre en poudre 1 kg", 3, "Boutique Bonamoussadi", TypeAlerte.Hausse, 0.0700D, aujourdhui.AddDays(-20),
+                      "Prix unitaire : 800,00 vers 856,00 (7,0 %)."))                                  ' Plus ancienne
+
+        _alertes(4).Lue = True                  ' Les alertes 5 et 6 sont déjà « lues » :
+        _alertes(5).Lue = True                  ' elles servent à tester le filtre Statut
+    End Sub                                     ' Fin du constructeur
+
+    ''' <summary>Fabrique une alerte d'exemple (évite de répéter dix lignes d'initialisation).</summary>
+    Private Shared Function Creer(idProduit As Integer, nomProduit As String, idMagasin As Integer, nomMagasin As String,
+                                  type As TypeAlerte, valeur As Decimal, dateAlerte As Date, detail As String) As Alerte
+        Return New Alerte With {                ' Crée l'alerte et remplit ses propriétés
+            .IdProduit = idProduit,             ' Produit concerné
+            .NomProduit = nomProduit,           ' Nom affiché dans la grille
+            .IdMagasin = idMagasin,             ' Magasin concerné
+            .NomMagasin = nomMagasin,           ' Nom affiché dans la grille
+            .Type = type,                       ' Hausse ou Shrinkflation
+            .Valeur = valeur,                   ' Variation en fraction (0,0824 = 8,24 %)
+            .DateAlerte = dateAlerte,           ' Date de l'alerte
+            .Lue = False,                       ' Nouvelle alerte : non lue
+            .Detail = detail                    ' Phrase explicative
+        }
+    End Function                                ' Fin de Creer
+
+    Private Shared Function Copie(a As Alerte) As Alerte   ' Renvoie une copie : l'écran ne modifie pas directement le stockage
+        Return New Alerte With {.Id = a.Id, .IdProduit = a.IdProduit, .IdMagasin = a.IdMagasin, .Type = a.Type,
+                                .Valeur = a.Valeur, .DateAlerte = a.DateAlerte, .Lue = a.Lue, .Detail = a.Detail,
+                                .NomProduit = a.NomProduit, .NomMagasin = a.NomMagasin}   ' Recopie chaque propriété
+    End Function                                ' Fin de Copie
+
+    Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Enregistre une alerte
+        alerte.Id = _prochainId                 ' Attribue l'identifiant
+        _prochainId += 1                        ' Prépare le suivant
+        _alertes.Add(alerte)                    ' Ajoute à la liste
+        Return alerte.Id                        ' Rend l'identifiant
+    End Function                                ' Fin de Ajouter
+
+    Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher   ' Applique les filtres
+        Return _alertes.Where(Function(a) (Not filtre.DateDebut.HasValue OrElse a.DateAlerte.Date >= filtre.DateDebut.Value.Date) _
+                                  AndAlso (Not filtre.DateFin.HasValue OrElse a.DateAlerte.Date <= filtre.DateFin.Value.Date) _
+                                  AndAlso (Not filtre.IdMagasin.HasValue OrElse a.IdMagasin = filtre.IdMagasin.Value) _
+                                  AndAlso (Not filtre.Type.HasValue OrElse a.Type = filtre.Type.Value) _
+                                  AndAlso (Not filtre.Lue.HasValue OrElse a.Lue = filtre.Lue.Value)) _
+                       .OrderByDescending(Function(a) a.DateAlerte) _
+                       .ThenByDescending(Function(a) a.Id) _
+                       .Select(Function(a) Copie(a)) _
+                       .ToList()                ' Garde les alertes qui respectent tous les critères, de la plus récente à la plus ancienne
+    End Function                                ' Fin de Rechercher
+
+    Public Sub MarquerCommeLue(idAlerte As Integer) Implements IAlerteRepository.MarquerCommeLue   ' Passe une alerte à « lue »
+        For Each a As Alerte In _alertes        ' Parcourt les alertes
+            If a.Id = idAlerte Then a.Lue = True   ' Marque celle qui correspond
+        Next                                    ' Fin de la boucle
+    End Sub                                     ' Fin de MarquerCommeLue
+
+    Public Sub MarquerToutesCommeLues() Implements IAlerteRepository.MarquerToutesCommeLues   ' Passe tout à « lu »
+        For Each a As Alerte In _alertes        ' Parcourt les alertes
+            a.Lue = True                        ' Marque chacune
+        Next                                    ' Fin de la boucle
+    End Sub                                     ' Fin de MarquerToutesCommeLues
+
+    Public Function CompterNonLues() As Integer Implements IAlerteRepository.CompterNonLues   ' Compte les non lues
+        Return _alertes.Where(Function(a) Not a.Lue).Count()   ' Nombre d'alertes dont Lue vaut False
+    End Function                                ' Fin de CompterNonLues
+
+    Public Function ListerMagasins() As List(Of KeyValuePair(Of Integer, String)) Implements IAlerteRepository.ListerMagasins   ' Magasins du filtre
+        Return New List(Of KeyValuePair(Of Integer, String)) From {
+            New KeyValuePair(Of Integer, String)(1, "Supermarché Akwa"),
+            New KeyValuePair(Of Integer, String)(2, "Marché Mboppi"),
+            New KeyValuePair(Of Integer, String)(3, "Boutique Bonamoussadi")
+        }                                       ' Trois magasins d'exemple
+    End Function                                ' Fin de ListerMagasins
+
+End Class                                       ' Fin de DepotDemo

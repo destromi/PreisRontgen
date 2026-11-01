@@ -42,8 +42,8 @@ Partial Class Inscription
         ' 
         Label1Titre.AutoSize = True
         Label1Titre.Font = New Font("Times New Roman", 36F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        Label1Titre.ForeColor = Color.LimeGreen
-        Label1Titre.Location = New Point(161, 23)
+        Label1Titre.ForeColor = Color.ForestGreen
+        Label1Titre.Location = New Point(161, 9)
         Label1Titre.Name = "Label1Titre"
         Label1Titre.Size = New Size(230, 68)
         Label1Titre.TabIndex = 0
@@ -53,7 +53,7 @@ Partial Class Inscription
         ' 
         Label1.AutoSize = True
         Label1.Font = New Font("Bookman Old Style", 10F)
-        Label1.Location = New Point(25, 150)
+        Label1.Location = New Point(25, 117)
         Label1.Name = "Label1"
         Label1.Size = New Size(166, 21)
         Label1.TabIndex = 1
@@ -62,7 +62,7 @@ Partial Class Inscription
         ' TextBoxUser
         ' 
         TextBoxUser.Font = New Font("Bookman Old Style", 10.2F)
-        TextBoxUser.Location = New Point(289, 144)
+        TextBoxUser.Location = New Point(289, 111)
         TextBoxUser.Name = "TextBoxUser"
         TextBoxUser.Size = New Size(239, 27)
         TextBoxUser.TabIndex = 2
@@ -71,7 +71,7 @@ Partial Class Inscription
         ' 
         Label2.AutoSize = True
         Label2.Font = New Font("Bookman Old Style", 10.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        Label2.Location = New Point(25, 201)
+        Label2.Location = New Point(25, 168)
         Label2.Name = "Label2"
         Label2.Size = New Size(132, 21)
         Label2.TabIndex = 1
@@ -80,7 +80,7 @@ Partial Class Inscription
         ' TextBoxPwd
         ' 
         TextBoxPwd.Font = New Font("Bookman Old Style", 10.2F)
-        TextBoxPwd.Location = New Point(289, 199)
+        TextBoxPwd.Location = New Point(289, 166)
         TextBoxPwd.Name = "TextBoxPwd"
         TextBoxPwd.Size = New Size(239, 27)
         TextBoxPwd.TabIndex = 2
@@ -90,7 +90,7 @@ Partial Class Inscription
         ' 
         Label3.AutoSize = True
         Label3.Font = New Font("Bookman Old Style", 10.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        Label3.Location = New Point(25, 255)
+        Label3.Location = New Point(25, 222)
         Label3.Name = "Label3"
         Label3.Size = New Size(241, 21)
         Label3.TabIndex = 1
@@ -99,7 +99,7 @@ Partial Class Inscription
         ' TextBoxPwdC
         ' 
         TextBoxPwdC.Font = New Font("Bookman Old Style", 10.2F)
-        TextBoxPwdC.Location = New Point(289, 249)
+        TextBoxPwdC.Location = New Point(289, 216)
         TextBoxPwdC.Name = "TextBoxPwdC"
         TextBoxPwdC.Size = New Size(239, 27)
         TextBoxPwdC.TabIndex = 2
@@ -108,8 +108,8 @@ Partial Class Inscription
         ' Label4
         ' 
         Label4.AutoSize = True
-        Label4.ForeColor = Color.LimeGreen
-        Label4.Location = New Point(166, 83)
+        Label4.ForeColor = Color.ForestGreen
+        Label4.Location = New Point(166, 69)
         Label4.Name = "Label4"
         Label4.Size = New Size(221, 20)
         Label4.TabIndex = 3
@@ -119,7 +119,7 @@ Partial Class Inscription
         ' 
         CheckBox1.AutoSize = True
         CheckBox1.Font = New Font("Bookman Old Style", 10.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        CheckBox1.Location = New Point(25, 322)
+        CheckBox1.Location = New Point(25, 301)
         CheckBox1.Name = "CheckBox1"
         CheckBox1.Size = New Size(441, 25)
         CheckBox1.TabIndex = 4
@@ -131,7 +131,7 @@ Partial Class Inscription
         BtnInscrire.BackColor = Color.LimeGreen
         BtnInscrire.Font = New Font("Bookman Old Style", 16.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
         BtnInscrire.ForeColor = Color.White
-        BtnInscrire.Location = New Point(198, 376)
+        BtnInscrire.Location = New Point(201, 350)
         BtnInscrire.Name = "BtnInscrire"
         BtnInscrire.Size = New Size(150, 50)
         BtnInscrire.TabIndex = 5
@@ -141,9 +141,10 @@ Partial Class Inscription
         ' LabelConnecter
         ' 
         LabelConnecter.AutoSize = True
+        LabelConnecter.FlatStyle = FlatStyle.Flat
         LabelConnecter.Font = New Font("Bookman Old Style", 10.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
         LabelConnecter.ForeColor = Color.RoyalBlue
-        LabelConnecter.Location = New Point(212, 436)
+        LabelConnecter.Location = New Point(217, 403)
         LabelConnecter.Name = "LabelConnecter"
         LabelConnecter.Size = New Size(119, 21)
         LabelConnecter.TabIndex = 6
@@ -152,7 +153,7 @@ Partial Class Inscription
         ' Label6
         ' 
         Label6.AutoSize = True
-        Label6.Location = New Point(155, 463)
+        Label6.Location = New Point(266, 437)
         Label6.Name = "Label6"
         Label6.Size = New Size(0, 20)
         Label6.TabIndex = 7
@@ -161,7 +162,7 @@ Partial Class Inscription
         ' 
         LabelError.AutoSize = True
         LabelError.ForeColor = Color.Red
-        LabelError.Location = New Point(118, 289)
+        LabelError.Location = New Point(118, 256)
         LabelError.Name = "LabelError"
         LabelError.Size = New Size(0, 20)
         LabelError.TabIndex = 8
@@ -170,7 +171,7 @@ Partial Class Inscription
         ' 
         AutoScaleDimensions = New SizeF(8F, 20F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(552, 496)
+        ClientSize = New Size(552, 472)
         Controls.Add(LabelError)
         Controls.Add(Label6)
         Controls.Add(LabelConnecter)

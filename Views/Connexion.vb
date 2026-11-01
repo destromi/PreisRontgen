@@ -1,5 +1,7 @@
 Option Strict On
 Option Explicit On
+Imports MySqlConnector
+
 Public Class Connexion
     Public Sub New()
         Text = "Pricieux - Connexion"
@@ -26,4 +28,36 @@ Public Class Connexion
         Close()
     End Sub
 
+    Private Sub labelInsc(sender As Object, e As EventArgs) Handles LabelInscrire.MouseEnter
+        LabelInscrire.Font = New Font(LabelInscrire.Font, FontStyle.Underline)
+        LabelInscrire.Cursor = Cursors.Hand
+    End Sub
+
+    Private Sub labelInscI(sender As Object, e As EventArgs) Handles LabelInscrire.MouseLeave
+        LabelInscrire.Font = New Font(LabelInscrire.Font, FontStyle.Regular)
+    End Sub
+
+    Private Sub Conn(sender As Object, e As EventArgs) Handles BtnConnect.MouseEnter
+        BtnConnect.BackColor = Color.ForestGreen
+        BtnConnect.Cursor = Cursors.Hand
+    End Sub
+
+    Private Sub Connleave(sender As Object, e As EventArgs) Handles BtnConnect.MouseLeave
+        BtnConnect.BackColor = Color.LimeGreen
+    End Sub
+
+    Private Async Sub BtnConnect_Click(sender As Object, e As EventArgs) Handles BtnConnect.Click
+        Try
+            Dim user As Utilisateurs = Await _authentification.ConnectionCompte(TextBoxUser.Text, TextBoxPwd.Text)
+            Hide()
+            MessageBox.Show("Bienvenue Monsieur " & user.Login)
+        Catch ex As ArgumentException
+            LabelError.Text = ex.Message
+        Catch ex As MySqlException
+            LabelError.Text = "Impossible de connecter la base de données"
+        End Try
+    End Sub
+    Public Property Utilisateur As Utilisateurs
+
+    Private _authentification As New Authentification()
 End Class

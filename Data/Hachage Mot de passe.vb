@@ -13,12 +13,12 @@ Public Class Hachage_Mot_de_passe
         Return $"{repetition}.{Convert.ToBase64String(sel)}.{Convert.ToBase64String(hash)}"
     End Function
 
-    Public Shared Function VerifPasd(pswd As String, hash As String) As Boolean
-        Dim partie As String() = hash.Split(".")
-        Dim interation As Integer = CType(partie(0), Integer)
-        Dim sel As Byte() = Convert.FromBase64String(partie(1))
-        Dim hashAttendu As Byte() = Convert.FromBase64String(partie(2))
-        Dim hashCalculer As Byte() = Rfc2898DeriveBytes.Pbkdf2(pswd, sel, interation, HashAlgorithmName.SHA256, hashAttendu.Length)
+    Public Shared Function VerifPasd(pswd As String, sel As String, hash As String) As Boolean
+        'Dim partie As String() = hash.Split(".")
+        'Dim interation As Integer = CType(partie(0), Integer)
+        Dim _sel As Byte() = Convert.FromBase64String(sel)
+        Dim hashAttendu As Byte() = Convert.FromBase64String(hash)
+        Dim hashCalculer As Byte() = Rfc2898DeriveBytes.Pbkdf2(pswd, _sel, repetition, HashAlgorithmName.SHA256, hashAttendu.Length)
         Return CryptographicOperations.FixedTimeEquals(hashAttendu, hashCalculer)
     End Function
 End Class

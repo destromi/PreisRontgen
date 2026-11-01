@@ -190,7 +190,7 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
     Private Sub btnReinitialiser_Click(sender As Object, e As EventArgs) Handles btnReinitialiser.Click   ' Clic sur « Réinitialiser »
         chkPeriode.Checked = False                    ' Décoche la période
         'Todo ://
-        cmbMagasin.SelectedIndex = 0                  ' Magasin : Tous
+        'cmbMagasin.SelectedIndex = 0                  ' Magasin : Tous
         cmbType.SelectedIndex = 0                     ' Type : Tous
         cmbStatut.SelectedIndex = 0                   ' Statut : Tous
         Rafraichir()                                  ' Recharge la liste sans aucun filtre

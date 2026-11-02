@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="P&amp;T pricieux\Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="P&amp;T pricieux\Forms\FrmProduits.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="P&amp;T pricieux\Forms\FrmTickets.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\Connexion.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\frmAlertes.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\Inscription.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\Tableau de bord.vb">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Pricieux</RootNamespace>
+    <StartupObject>Pricieux.Program</StartupObject>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <MyType>WindowsForms</MyType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Views\AnalysesUi.resx">
+      <ManifestResourceName>Pricieux.Views.AnalysesUi</ManifestResourceName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\MainForm.resx">
+      <ManifestResourceName>Pricieux.Views.MainForm</ManifestResourceName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ReferentielsUi.resx">
+      <ManifestResourceName>Pricieux.Views.ReferentielsUi</ManifestResourceName>
+    </EmbeddedResource>
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+  </ItemGroup>
+</Project>

@@ -24,29 +24,24 @@
 **T1 (formulaire principal)** :
 - s'abonne à `DetectionService.AlerteDetectee` (ou à `frmAlertes.CompteurChange`) pour mettre à jour le compteur ;
 - fournit `ParametresDetection` (seuils de la table `parametre`, 5 % et 3 % par défaut) ;
-- fournit la chaîne de connexion (hors du code) à `AlerteRepositoryMySql` et `ObservationLecteurMySql`.
+- fournit la chaîne de connexion (hors du code) et l'identifiant de l'utilisateur connecté à `AlerteRepositoryMySql` et `ObservationLecteurMySql` ;
+- enregistre l'observation AVANT d'appeler `DetectionService.Analyser`.
 
-## Ajouts demandés au script SQL (T2) par rapport au modèle indicatif
+## Compatibilité avec le script SQL du groupe (T2)
 
-```sql
--- observation_prix : le prix payé pour l'article est nécessaire à la shrinkflation
-ALTER TABLE observation_prix ADD COLUMN prix_total DECIMAL(12,4) NOT NULL;
+Le code a été adapté au script SQL fourni par T2 : **aucune colonne à ajouter**.
 
--- alerte : magasin (filtre EF-09) et texte explicatif
-CREATE TABLE alerte (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    id_produit  INT NOT NULL,
-    id_magasin  INT NULL,
-    `type`      ENUM('HAUSSE','SHRINKFLATION') NOT NULL,
-    valeur      DECIMAL(12,6) NOT NULL,      -- variation relative (0,05 = +5 %)
-    date_alerte DATE NOT NULL,
-    lue         TINYINT(1) NOT NULL DEFAULT 0,
-    detail      VARCHAR(500) NULL,
-    FOREIGN KEY (id_produit) REFERENCES produit(id),
-    FOREIGN KEY (id_magasin) REFERENCES magasin(id),
-    INDEX idx_alerte_filtre (date_alerte, id_magasin, `type`, lue)
-);
-```
+| Sujet | Choix retenu |
+|---|---|
+| `prix_total` (prix de l'article, utile à la shrinkflation) | Non stocké : lu dans `ligne_ticket.prix` via `observation_prix.id_ligne_ticket`, sinon `prix_unitaire x quantite_base` (observation importée). |
+| `id_magasin` de l'alerte | Déduit de l'observation (`alerte.id_observation` vers `observation_prix.id_magasin`). |
+| `detail` (texte explicatif) | Non stocké : reconstruit à la lecture à partir du type, de la valeur et de l'observation. |
+| `id_utilisateur` | Toutes les requêtes sont limitées à l'utilisateur connecté : le constructeur de `AlerteRepositoryMySql` et de `ObservationLecteurMySql` reçoit `(chaineConnexion, idUtilisateur)`. |
+| `id_observation` (obligatoire) | `Alerte.IdObservation` est renseigné par `DetectionService` : **T2 doit enregistrer l'observation (Id > 0) AVANT d'appeler `Analyser`**. |
+| `date_alerte` (DATETIME) | Le filtre « Au » inclut toute la journée de fin. |
+| `parametre.valeur` | Stockée en pourcentage (5.000, 3.000) ; `ParametresDetectionMySql` convertit en fractions (0,05 ; 0,03). |
+| `alerte.valeur` | Stocke une fraction (0,082 = + 8,2 %), DECIMAL(12,4). |
+| Observation précédente | Même utilisateur, même produit, même magasin, strictement antérieure (date puis identifiant). |
 
 ## Règles appliquées (cahier des charges §4.2)
 

@@ -25,6 +25,12 @@ Namespace Models      ' Espace de noms : PreisRontgen.Models
 
         Public Property IdProduit As Integer   ' Produit concerné par l'alerte
 
+        ''' <summary>
+        ''' Observation de prix à l'origine de l'alerte (colonne id_observation de la table alerte).
+        ''' L'observation doit déjà être enregistrée (Id &gt; 0) avant l'analyse.
+        ''' </summary>
+        Public Property IdObservation As Integer   ' Clé étrangère vers observation_prix ; le magasin de l'alerte se déduit de cette observation
+
         Public Property IdMagasin As Integer   ' Magasin concerné par l'alerte
 
         Public Property Type As TypeAlerte     ' Hausse ou Shrinkflation

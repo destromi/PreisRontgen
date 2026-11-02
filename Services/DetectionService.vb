@@ -123,6 +123,7 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
             Return New Alerte With {      ' Crée l'alerte (pas encore enregistrée) et remplit ses champs
                 .IdProduit = nouvelle.IdProduit,      ' Produit concerné
                 .IdMagasin = nouvelle.IdMagasin,      ' Magasin concerné
+                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (doit déjà être enregistrée)
                 .Type = TypeAlerte.Hausse,            ' Type : hausse de prix
                 .Valeur = variation.Value,            ' Valeur de la hausse en fraction (0,0525 = +5,25 %)
                 .DateAlerte = nouvelle.DateObs,       ' Date du ticket qui a révélé la hausse
@@ -162,6 +163,7 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
             Return New Alerte With {      ' Crée l'alerte de shrinkflation
                 .IdProduit = nouvelle.IdProduit,      ' Produit concerné
                 .IdMagasin = nouvelle.IdMagasin,      ' Magasin concerné
+                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (doit déjà être enregistrée)
                 .Type = TypeAlerte.Shrinkflation,     ' Type : shrinkflation
                 .Valeur = hausseReelle.Value,         ' Valeur = hausse réelle du prix unitaire (exigence EF-08)
                 .DateAlerte = nouvelle.DateObs,       ' Date du ticket

@@ -20,28 +20,36 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
         Implements IObservationLecteur           ' S'engage à fournir ObtenirPrecedente
 
         Private ReadOnly _chaineConnexion As String   ' Texte de connexion à MySQL
+        Private ReadOnly _idUtilisateur As Integer    ' Utilisateur connecté : on ne compare qu'avec SES observations (isolation des foyers)
 
-        Public Sub New(chaineConnexion As String)     ' Constructeur
+        Public Sub New(chaineConnexion As String, idUtilisateur As Integer)   ' Constructeur : chaîne de connexion + utilisateur connecté
             If String.IsNullOrWhiteSpace(chaineConnexion) Then   ' Texte absent ou vide
                 Throw New ArgumentException("La chaîne de connexion est obligatoire.", NameOf(chaineConnexion))   ' Refus explicite
             End If                                    ' Fin du contrôle
+            If idUtilisateur <= 0 Then                ' Identifiant d'utilisateur invalide
+                Throw New ArgumentOutOfRangeException(NameOf(idUtilisateur), "L'identifiant de l'utilisateur doit être positif.")   ' Refus explicite
+            End If                                    ' Fin du contrôle
             _chaineConnexion = chaineConnexion        ' Mémorise la chaîne
+            _idUtilisateur = idUtilisateur            ' Mémorise l'utilisateur connecté
         End Sub                                       ' Fin du constructeur
 
         Public Function ObtenirPrecedente(observation As Observation) As Observation Implements IObservationLecteur.ObtenirPrecedente   ' Cherche l'observation précédente
             Const sql As String =
-                "SELECT id, id_produit, id_magasin, date_obs, prix_unitaire, quantite_base, prix_total " &
-                "FROM observation_prix " &
-                "WHERE id_produit = @produit AND id_magasin = @magasin " &
-                "AND date_obs <= @date AND id <> @id " &
-                "ORDER BY date_obs DESC, id DESC LIMIT 1"   ' Même produit, même magasin, date antérieure ou égale, différente de l'observation elle-même ; on garde la plus récente
+                "SELECT o.id, o.id_produit, o.id_magasin, o.date_obs, o.prix_unitaire, o.quantite_base, " &
+                "COALESCE(l.prix, o.prix_unitaire * o.quantite_base) AS prix_total " &
+                "FROM observation_prix o " &
+                "LEFT JOIN ligne_ticket l ON l.id = o.id_ligne_ticket " &
+                "WHERE o.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
+                "AND (o.date_obs < @date OR (o.date_obs = @date AND o.id < @id)) " &
+                "ORDER BY o.date_obs DESC, o.id DESC LIMIT 1"   ' Même utilisateur, produit et magasin ; strictement avant l'observation (date puis identifiant) ; prix de l'article = prix de la ligne de ticket, sinon prix unitaire x quantité (observation importée)
             Try                                       ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion (fermée automatiquement)
                     cn.Open()                         ' Ouvre
                     Using cmd As New MySqlCommand(sql, cn)          ' Commande SQL
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)          ' Utilisateur connecté
                         cmd.Parameters.AddWithValue("@produit", observation.IdProduit)       ' Produit cherché
                         cmd.Parameters.AddWithValue("@magasin", observation.IdMagasin)       ' Magasin cherché
-                        cmd.Parameters.AddWithValue("@date", observation.DateObs.Date)       ' Date de la nouvelle observation
+                        cmd.Parameters.AddWithValue("@date", observation.DateObs)            ' Date et heure de la nouvelle observation
                         cmd.Parameters.AddWithValue("@id", observation.Id)                   ' Exclut l'observation elle-même
                         Using lecteur As MySqlDataReader = cmd.ExecuteReader()               ' Exécute et obtient le lecteur
                             If Not lecteur.Read() Then                                        ' Aucune ligne trouvée

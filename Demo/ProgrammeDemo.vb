@@ -1,6 +1,6 @@
 ' ============================================================================
 ' FICHIER : Demo/ProgrammeDemo.vb
-' RÔLE    : point de départ du programme de DÉMONSTRATION : ouvre frmAlertes
+' RÔLE    : point de départ du programme de DÉMONSTRATION : ouvre FenetreDemo (bandeau vert + onglets, avec frmAlertes dans l'onglet Alertes)
 '           branché sur un faux dépôt en mémoire (DepotDemo).
 ' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
@@ -15,7 +15,7 @@ Module ProgrammeDemo                    ' Un Module regroupe des méthodes parta
     Public Sub Main()                   ' Point d'entrée : exécuté au lancement
         Application.EnableVisualStyles()                    ' Active l'apparence moderne des contrôles
         Application.SetCompatibleTextRenderingDefault(False)   ' Réglage standard du rendu du texte
-        Application.Run(New PreisRontgen.frmAlertes(New DepotDemo()))   ' Ouvre l'écran, alimenté par le faux dépôt
+        Application.Run(New FenetreDemo(New DepotDemo()))   ' Ouvre la fenêtre de démonstration (bandeau + onglets), alimentée par le faux dépôt
     End Sub                             ' Fin de Main
 
 End Module                              ' Fin du module

@@ -2,8 +2,9 @@
 ' FICHIER : Views/frmAlertes.vb  (partie « code » du formulaire)
 '           Le fichier frmAlertes.Designer.vb contient la partie « dessin »
 '           (création et placement des contrôles) ; les deux forment UNE classe.
-' RÔLE    : EF-09, liste des alertes avec filtres (période, magasin, type) et
-'           statut lu / non lu.
+' RÔLE    : EF-09, liste des alertes avec filtres (période, magasin, type), case
+'           « Non lues uniquement » et statut lu / non lu. La présentation suit
+'           la maquette du groupe (onglet « Alertes », vert forêt).
 ' RÈGLE   : un formulaire ne contient QUE la logique d'interface (gestionnaires
 '           d'événements). Les accès aux données passent par IAlerteRepository.
 ' NOTION  : « Handles X.Evenement » relie une méthode à un événement : quand
@@ -30,9 +31,9 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
         Public Property DateTexte As String = String.Empty     ' Date formatée (colonne « Date »)
         Public Property Produit As String = String.Empty       ' Nom du produit (colonne « Produit »)
         Public Property Magasin As String = String.Empty       ' Nom du magasin (colonne « Magasin »)
-        Public Property TypeTexte As String = String.Empty     ' « Hausse » ou « Shrinkflation » (colonne « Type »)
-        Public Property VariationTexte As String = String.Empty   ' Variation en pourcentage (colonne « Variation du prix unitaire »)
-        Public Property Detail As String = String.Empty        ' Phrase explicative (colonne « Détail »)
+        Public Property TypeTexte As String = String.Empty     ' « HAUSSE » ou « SHRINKFLATION » (colonne « Type »)
+        Public Property VariationTexte As String = String.Empty   ' Variation en pourcentage (colonne « Variation prix unitaire »)
+        Public Property Detail As String = String.Empty        ' Phrase explicative (affichée dans le panneau « Détail de l'alerte sélectionnée »)
         Public Property StatutTexte As String = String.Empty   ' « Lue » ou « Non lue » (colonne « Statut »)
     End Class                                                  ' Fin de LigneAlerte
 
@@ -42,7 +43,10 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
     ''' </summary>
     Public Event CompteurChange(nombreNonLues As Integer)      ' Événement personnalisé : transmet le nombre d'alertes non lues
 
-    Private Const ChoixTous As String = "Tous"                 ' Texte du choix « pas de filtre » des listes déroulantes
+    Private Const ChoixTous As String = "Tous"                 ' Texte du choix « pas de filtre » de la liste des magasins
+    Private Const ChoixToutes As String = "Toutes"             ' Texte du choix « pas de filtre » de la liste des types (comme la maquette)
+    Private Const TexteHausse As String = "HAUSSE"             ' Libellé affiché pour une hausse
+    Private Const TexteShrinkflation As String = "SHRINKFLATION"   ' Libellé affiché pour une shrinkflation
 
     Private ReadOnly _depot As IAlerteRepository               ' Accès aux données (reçu à la création du formulaire)
     Private _policeGras As Font                                ' Police en gras pour les alertes non lues (créée au chargement)
@@ -67,10 +71,9 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
         dtpDebut.Value = Date.Today.AddMonths(-3)     ' Période proposée : début = il y a 3 mois
         dtpFin.Value = Date.Today                     ' Période proposée : fin = aujourd'hui
 
-        cmbType.Items.AddRange(New Object() {ChoixTous, "Hausse", "Shrinkflation"})   ' Remplit la liste des types
-        cmbType.SelectedIndex = 0                     ' Sélectionne « Tous »
-        cmbStatut.Items.AddRange(New Object() {ChoixTous, "Non lues", "Lues"})        ' Remplit la liste des statuts
-        cmbStatut.SelectedIndex = 1   ' par défaut : alertes non lues
+        cmbType.Items.AddRange(New Object() {ChoixToutes, "Hausse", "Shrinkflation"})   ' Remplit la liste des types
+        cmbType.SelectedIndex = 0                     ' Sélectionne « Toutes »
+        chkNonLues.Checked = False                    ' Par défaut, on voit les alertes lues et non lues
 
         ChargerMagasins()                             ' Remplit la liste des magasins depuis la base
         Rafraichir()                                  ' Affiche les alertes avec les filtres par défaut
@@ -127,10 +130,8 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
     Private Function ConstruireFiltre() As FiltreAlerte   ' Lit l'écran et en déduit le filtre
         Dim filtre As New FiltreAlerte()              ' Crée un filtre vide (aucun critère)
 
-        If chkPeriode.Checked Then                    ' La case « Filtrer par période » est cochée
-            filtre.DateDebut = dtpDebut.Value.Date    ' Date de début choisie
-            filtre.DateFin = dtpFin.Value.Date        ' Date de fin choisie
-        End If                                        ' Fin de la période
+        filtre.DateDebut = dtpDebut.Value.Date        ' Date de début choisie (« Du »)
+        filtre.DateFin = dtpFin.Value.Date            ' Date de fin choisie (« Au »)
 
         If cmbMagasin.SelectedItem IsNot Nothing Then   ' Un élément est sélectionné dans la liste des magasins
             Dim choix As KeyValuePair(Of Integer, String) = CType(cmbMagasin.SelectedItem, KeyValuePair(Of Integer, String))   ' Convertit l'élément en couple (id, nom)
@@ -146,12 +147,9 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
                 filtre.Type = TypeAlerte.Shrinkflation   ' Filtre sur la shrinkflation
         End Select                                    ' Position 0 = « Tous » : aucun filtre
 
-        Select Case cmbStatut.SelectedIndex           ' Selon la position choisie dans la liste des statuts
-            Case 1                                    ' Position 1 = « Non lues »
-                filtre.Lue = False                    ' Filtre sur les non lues
-            Case 2                                    ' Position 2 = « Lues »
-                filtre.Lue = True                     ' Filtre sur les lues
-        End Select                                    ' Position 0 = « Tous » : aucun filtre
+        If chkNonLues.Checked Then                    ' La case « Non lues uniquement » est cochée
+            filtre.Lue = False                        ' Filtre sur les non lues
+        End If                                        ' Sinon : aucun filtre sur le statut
 
         Return filtre                                 ' Rend le filtre construit
     End Function                                      ' Fin de ConstruireFiltre
@@ -163,8 +161,8 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
             .DateTexte = a.DateAlerte.ToString("d"),  ' Date courte selon la langue de Windows (ex. 15/10/2026)
             .Produit = a.NomProduit,                  ' Nom du produit
             .Magasin = a.NomMagasin,                  ' Nom du magasin
-            .TypeTexte = If(a.Type = TypeAlerte.Hausse, "Hausse", "Shrinkflation"),   ' Libellé du type
-            .VariationTexte = a.Valeur.ToString("+0.0 %;-0.0 %;0.0 %"),   ' Format : +5,3 % si positif ; -2,0 % si négatif ; 0,0 % si nul
+            .TypeTexte = If(a.Type = TypeAlerte.Hausse, TexteHausse, TexteShrinkflation),   ' Libellé du type (en majuscules comme la maquette)
+            .VariationTexte = a.Valeur.ToString("+ 0.0 %;- 0.0 %;0.0 %"),   ' Format : + 5,3 % si positif ; - 2,0 % si négatif ; 0,0 % si nul
             .Detail = a.Detail,                       ' Phrase explicative
             .StatutTexte = If(a.Lue, "Lue", "Non lue")   ' Libellé du statut
         }                                             ' Fin de l'initialisation
@@ -172,13 +170,8 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
 
     ' ---------------------------------------------------------------- événements
 
-    Private Sub chkPeriode_CheckedChanged(sender As Object, e As EventArgs) Handles chkPeriode.CheckedChanged   ' Quand on coche ou décoche « Filtrer par période »
-        dtpDebut.Enabled = chkPeriode.Checked         ' Active le sélecteur de date de début seulement si coché
-        dtpFin.Enabled = chkPeriode.Checked           ' Active le sélecteur de date de fin seulement si coché
-    End Sub                                           ' Fin du gestionnaire
-
     Private Sub btnFiltrer_Click(sender As Object, e As EventArgs) Handles btnFiltrer.Click   ' Clic sur « Filtrer »
-        If chkPeriode.Checked AndAlso dtpDebut.Value.Date > dtpFin.Value.Date Then   ' Période cochée mais début après la fin
+        If dtpDebut.Value.Date > dtpFin.Value.Date Then   ' La date « Du » est après la date « Au »
             MessageBox.Show("La date de début doit précéder la date de fin.", "Alertes",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning)   ' Message de validation clair
             dtpDebut.Focus()                          ' Replace le curseur sur la date de début
@@ -187,22 +180,38 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
         Rafraichir()                                  ' Recharge la liste avec les filtres choisis
     End Sub                                           ' Fin du gestionnaire
 
-    Private Sub btnReinitialiser_Click(sender As Object, e As EventArgs) Handles btnReinitialiser.Click   ' Clic sur « Réinitialiser »
-        chkPeriode.Checked = False                    ' Décoche la période
-        cmbMagasin.SelectedIndex = 0                  ' Magasin : Tous
-        cmbType.SelectedIndex = 0                     ' Type : Tous
-        cmbStatut.SelectedIndex = 0                   ' Statut : Tous
-        Rafraichir()                                  ' Recharge la liste sans aucun filtre
-    End Sub                                           ' Fin du gestionnaire
-
     Private Sub dgvAlertes_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles dgvAlertes.CellFormatting   ' Avant l'affichage de chaque cellule
         If e.RowIndex < 0 OrElse _policeGras Is Nothing Then   ' Ligne d'en-tête (indice -1) ou police pas encore créée
             Return                                    ' Rien à faire
         End If                                        ' Fin du contrôle
         Dim ligne As LigneAlerte = TryCast(dgvAlertes.Rows(e.RowIndex).DataBoundItem, LigneAlerte)   ' Retrouve l'objet affiché sur cette ligne (Nothing si impossible)
-        If ligne IsNot Nothing AndAlso Not ligne.Lue Then   ' La ligne existe et l'alerte n'est pas lue
-            e.CellStyle.Font = _policeGras   ' une alerte non lue s'affiche en gras
+        If ligne Is Nothing Then                      ' Pas d'objet lié à cette ligne
+            Return                                    ' Rien à faire
         End If                                        ' Fin du contrôle
+        If Not ligne.Lue Then                         ' L'alerte n'est pas lue
+            e.CellStyle.Font = _policeGras            ' Une alerte non lue s'affiche en gras
+        End If                                        ' Fin du contrôle
+        If dgvAlertes.Columns(e.ColumnIndex).Name = "colType" Then   ' La cellule appartient à la colonne « Type »
+            If ligne.TypeTexte = TexteHausse Then     ' Hausse
+                e.CellStyle.ForeColor = Color.FromArgb(122, 51, 0)    ' Texte brun-orangé
+            Else                                      ' Shrinkflation
+                e.CellStyle.ForeColor = Color.FromArgb(75, 42, 133)   ' Texte violet
+            End If                                    ' Fin du choix de couleur
+        End If                                        ' Fin du contrôle de colonne
+    End Sub                                           ' Fin du gestionnaire
+
+    Private Sub dgvAlertes_SelectionChanged(sender As Object, e As EventArgs) Handles dgvAlertes.SelectionChanged   ' Quand la sélection change dans la grille
+        If dgvAlertes.SelectedRows.Count = 0 Then     ' Aucune ligne sélectionnée
+            lblDetailTitre.Text = "Détail de l'alerte sélectionnée"   ' Titre par défaut
+            lblDetail.Text = "Sélectionnez une alerte pour afficher son détail."   ' Invite l'utilisateur à choisir
+            Return                                    ' On s'arrête là
+        End If                                        ' Fin du contrôle
+        Dim ligne As LigneAlerte = TryCast(dgvAlertes.SelectedRows(0).DataBoundItem, LigneAlerte)   ' Objet de la ligne sélectionnée
+        If ligne Is Nothing Then                      ' Pas d'objet lié
+            Return                                    ' Rien à afficher
+        End If                                        ' Fin du contrôle
+        lblDetailTitre.Text = $"Détail de l'alerte sélectionnée : {ligne.Produit}, {ligne.Magasin}, {ligne.DateTexte}"   ' Titre avec produit, magasin et date
+        lblDetail.Text = ligne.Detail                 ' Phrase explicative produite par la détection
     End Sub                                           ' Fin du gestionnaire
 
     Private Sub dgvAlertes_CellDoubleClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvAlertes.CellDoubleClick   ' Double-clic sur une cellule
@@ -213,16 +222,6 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
 
     Private Sub btnMarquerLue_Click(sender As Object, e As EventArgs) Handles btnMarquerLue.Click   ' Clic sur « Marquer comme lue »
         MarquerSelectionCommeLue()                    ' Marque la sélection comme lue
-    End Sub                                           ' Fin du gestionnaire
-
-    Private Sub btnToutLire_Click(sender As Object, e As EventArgs) Handles btnToutLire.Click   ' Clic sur « Tout marquer lu »
-        Try                                           ' Début du bloc surveillé
-            _depot.MarquerToutesCommeLues()           ' Met toutes les alertes à « lue » en base
-        Catch ex As InvalidOperationException         ' Erreur d'accès aux données
-            MessageBox.Show(ex.Message, "Alertes", MessageBoxButtons.OK, MessageBoxIcon.Error)   ' Affiche l'erreur
-            Return                                    ' On s'arrête là
-        End Try                                       ' Fin du bloc surveillé
-        Rafraichir()                                  ' Recharge la liste
     End Sub                                           ' Fin du gestionnaire
 
     Private Sub MarquerSelectionCommeLue()            ' Marque comme lues les lignes sélectionnées
@@ -246,4 +245,7 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
         Rafraichir()                                  ' Recharge la liste (les lignes lues passent en normal ou disparaissent selon le filtre)
     End Sub                                           ' Fin de MarquerSelectionCommeLue
 
+    Private Sub dgvAlertes_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvAlertes.CellContentClick
+
+    End Sub
 End Class                                             ' Fin de la classe frmAlertes

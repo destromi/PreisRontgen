@@ -1,10 +1,14 @@
 ' ============================================================================
 ' FICHIER : Data/AlerteRepositoryMySql.vb
-' RÔLE    : implémentation MySQL de IAlerteRepository : enregistre, recherche et
-'           met à jour les alertes dans la table alerte.
-' RÈGLES  : requêtes PARAMÉTRÉES (@nom) = protection contre l'injection SQL ;
-'           « Using » = la connexion est fermée automatiquement, même en cas d'erreur ;
-'           chaîne de connexion fournie de l'extérieur (jamais écrite en dur).
+' RÔLE    : implémentation MySQL de IAlerteRepository, ADAPTÉE AU SCRIPT SQL DU
+'           GROUPE (tables alerte, observation_prix, produit, magasin).
+' POINTS DE COMPATIBILITÉ avec le script :
+'           - alerte contient id_utilisateur, id_produit, id_observation, type,
+'             valeur, date_alerte (DATETIME), lue : on n'ajoute AUCUNE colonne ;
+'           - le magasin d'une alerte se déduit de l'observation (id_observation) ;
+'           - toutes les requêtes sont limitées à l'utilisateur connecté
+'             (isolation des foyers) ;
+'           - le texte du détail n'est pas stocké : il est reconstruit à la lecture.
 ' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
@@ -15,40 +19,43 @@ Imports PreisRontgen.Models    ' Pour utiliser Alerte, FiltreAlerte, TypeAlerte
 
 Namespace Data                 ' Espace de noms : PreisRontgen.Data
 
-    ''' <summary>
-    ''' Accès MySQL aux alertes (EF-07, EF-08, EF-09).
-    ''' Toutes les requêtes sont paramétrées. La chaîne de connexion est fournie par l'appelant
-    ''' (lue dans la configuration, jamais écrite en dur dans le code).
-    ''' </summary>
     Public Class AlerteRepositoryMySql           ' Début de la classe
         Implements IAlerteRepository             ' S'engage à fournir toutes les méthodes du contrat IAlerteRepository
 
         Private ReadOnly _chaineConnexion As String   ' Texte de connexion (serveur, base, utilisateur...) ; ReadOnly = fixé une fois pour toutes
+        Private ReadOnly _idUtilisateur As Integer    ' Utilisateur connecté : seules SES alertes sont lues et modifiées
 
-        Public Sub New(chaineConnexion As String)     ' Constructeur : reçoit la chaîne de connexion
+        Public Sub New(chaineConnexion As String, idUtilisateur As Integer)   ' Constructeur : chaîne de connexion + utilisateur connecté
             If String.IsNullOrWhiteSpace(chaineConnexion) Then   ' Texte absent ou vide
                 Throw New ArgumentException("La chaîne de connexion est obligatoire.", NameOf(chaineConnexion))   ' On refuse avec un message clair
             End If                                    ' Fin du contrôle
+            If idUtilisateur <= 0 Then                ' Identifiant d'utilisateur invalide
+                Throw New ArgumentOutOfRangeException(NameOf(idUtilisateur), "L'identifiant de l'utilisateur doit être positif.")   ' On refuse
+            End If                                    ' Fin du contrôle
             _chaineConnexion = chaineConnexion        ' Mémorise la chaîne pour les futures requêtes
+            _idUtilisateur = idUtilisateur            ' Mémorise l'utilisateur connecté
         End Sub                                       ' Fin du constructeur
 
         Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Enregistre une alerte
+            If alerte.IdObservation <= 0 Then         ' L'observation d'origine n'est pas enregistrée
+                Throw New InvalidOperationException("L'observation doit être enregistrée avant l'analyse (IdObservation manquant).")   ' Message clair pour T2
+            End If                                    ' Fin du contrôle
             Const sql As String =
-                "INSERT INTO alerte (id_produit, id_magasin, `type`, valeur, date_alerte, lue, detail) " &
-                "VALUES (@produit, @magasin, @type, @valeur, @date, @lue, @detail); " &
+                "INSERT INTO alerte (id_utilisateur, id_produit, id_observation, `type`, valeur, date_alerte, lue) " &
+                "VALUES (@utilisateur, @produit, @observation, @type, @valeur, @date, @lue); " &
                 "SELECT LAST_INSERT_ID();"            ' Requête : insère puis demande l'identifiant créé ; les @... sont des paramètres
             Try                                       ' Début du bloc surveillé : toute erreur MySQL sera interceptée plus bas
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Crée la connexion ; Using la fermera automatiquement
                     cn.Open()                         ' Ouvre la connexion à MySQL
                     Using cmd As New MySqlCommand(sql, cn)          ' Crée la commande SQL liée à cette connexion
-                        cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)    ' Donne l'identifiant du produit au paramètre @produit
-                        cmd.Parameters.AddWithValue("@magasin", alerte.IdMagasin)    ' Donne l'identifiant du magasin
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)      ' Utilisateur connecté
+                        cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)        ' Produit concerné
+                        cmd.Parameters.AddWithValue("@observation", alerte.IdObservation)   ' Observation à l'origine de l'alerte
                         cmd.Parameters.AddWithValue("@type", alerte.Type.ToString().ToUpperInvariant())   ' Type en texte majuscule : HAUSSE ou SHRINKFLATION
-                        cmd.Parameters.AddWithValue("@valeur", alerte.Valeur)        ' Variation en fraction
-                        cmd.Parameters.AddWithValue("@date", alerte.DateAlerte.Date) ' Date sans l'heure
-                        cmd.Parameters.AddWithValue("@lue", alerte.Lue)              ' État lue / non lue
-                        cmd.Parameters.AddWithValue("@detail", alerte.Detail)        ' Texte explicatif
-                        Return Convert.ToInt32(cmd.ExecuteScalar())                  ' Exécute et rend la première valeur du résultat : l'identifiant créé
+                        cmd.Parameters.AddWithValue("@valeur", alerte.Valeur)            ' Variation en fraction (0,082 = +8,2 %)
+                        cmd.Parameters.AddWithValue("@date", alerte.DateAlerte)          ' Date de l'alerte (colonne DATETIME)
+                        cmd.Parameters.AddWithValue("@lue", alerte.Lue)                  ' État lue / non lue
+                        Return Convert.ToInt32(cmd.ExecuteScalar())                      ' Exécute et rend l'identifiant créé
                     End Using                         ' Libère la commande
                 End Using                             ' Ferme la connexion
             Catch ex As MySqlException                ' Si MySQL signale une erreur (serveur arrêté, table absente...)
@@ -58,25 +65,28 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
 
         Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher   ' Recherche avec filtres (EF-09)
             Dim sql As New StringBuilder(
-                "SELECT a.id, a.id_produit, a.id_magasin, a.`type`, a.valeur, a.date_alerte, a.lue, a.detail, " &
-                "p.nom AS nom_produit, m.nom AS nom_magasin " &
+                "SELECT a.id, a.id_produit, o.id_magasin, a.`type`, a.valeur, a.date_alerte, a.lue, " &
+                "p.nom AS nom_produit, m.nom AS nom_magasin, o.prix_unitaire, o.quantite_base, a.id_observation " &
                 "FROM alerte a " &
                 "INNER JOIN produit p ON p.id = a.id_produit " &
-                "LEFT JOIN magasin m ON m.id = a.id_magasin " &
-                "WHERE 1 = 1")                        ' Début de la requête ; « WHERE 1 = 1 » est toujours vrai et simplifie l'ajout de « AND ... »
-            Dim parametres As New List(Of MySqlParameter)()   ' Liste des paramètres à donner à la requête
+                "INNER JOIN observation_prix o ON o.id = a.id_observation " &
+                "INNER JOIN magasin m ON m.id = o.id_magasin " &
+                "WHERE a.id_utilisateur = @utilisateur")   ' Le magasin vient de l'observation ; on ne lit que les alertes de l'utilisateur connecté
+            Dim parametres As New List(Of MySqlParameter) From {
+                New MySqlParameter("@utilisateur", _idUtilisateur)
+            }                                         ' Liste des paramètres à donner à la requête
 
             If filtre IsNot Nothing Then              ' Si un filtre est fourni, on ajoute les conditions demandées
                 If filtre.DateDebut.HasValue Then     ' Une date de début est choisie
-                    sql.Append(" AND a.date_alerte >= @debut")   ' Ajoute la condition « à partir de »
+                    sql.Append(" AND a.date_alerte >= @debut")   ' Ajoute la condition « à partir de » (minuit)
                     parametres.Add(New MySqlParameter("@debut", filtre.DateDebut.Value.Date))   ' Valeur du paramètre @debut
                 End If                                ' Fin date de début
                 If filtre.DateFin.HasValue Then       ' Une date de fin est choisie
-                    sql.Append(" AND a.date_alerte <= @fin")     ' Ajoute la condition « jusqu'à »
-                    parametres.Add(New MySqlParameter("@fin", filtre.DateFin.Value.Date))       ' Valeur du paramètre @fin
+                    sql.Append(" AND a.date_alerte < @finExclue")   ' Strictement avant le lendemain : inclut toute la journée de fin, heures comprises (date_alerte est un DATETIME)
+                    parametres.Add(New MySqlParameter("@finExclue", filtre.DateFin.Value.Date.AddDays(1)))   ' Lendemain de la date de fin
                 End If                                ' Fin date de fin
                 If filtre.IdMagasin.HasValue Then     ' Un magasin est choisi
-                    sql.Append(" AND a.id_magasin = @magasin")   ' Ajoute la condition sur le magasin
+                    sql.Append(" AND o.id_magasin = @magasin")   ' Condition sur le magasin de l'observation
                     parametres.Add(New MySqlParameter("@magasin", filtre.IdMagasin.Value))      ' Valeur du paramètre @magasin
                 End If                                ' Fin magasin
                 If filtre.Type.HasValue Then          ' Un type d'alerte est choisi
@@ -110,33 +120,46 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
             Return resultat                           ' Rend la liste des alertes
         End Function                                  ' Fin de Rechercher
 
-        ' Ordre des colonnes : voir la requête de Rechercher.
         Private Shared Function LireAlerte(lecteur As MySqlDataReader) As Alerte   ' Transforme la ligne courante en objet Alerte
             Dim typeLu As TypeAlerte              ' Variable qui recevra le type lu en base
             If Not [Enum].TryParse(lecteur.GetString(3), True, typeLu) Then   ' Convertit le texte en TypeAlerte (True = sans tenir compte des majuscules)
                 typeLu = TypeAlerte.Hausse        ' Texte inconnu : valeur par défaut
             End If                                ' Fin du contrôle
 
+            Dim valeur As Decimal = lecteur.GetDecimal(4)        ' Colonne 4 : variation (fraction)
+            Dim prixUnitaire As Decimal = lecteur.GetDecimal(9)  ' Colonne 9 : prix unitaire de l'observation d'origine
+            Dim quantiteBase As Decimal = lecteur.GetDecimal(10) ' Colonne 10 : quantité (unité de base) de l'observation d'origine
+
             Return New Alerte With {              ' Crée l'objet Alerte
                 .Id = lecteur.GetInt32(0),        ' Colonne 0 : identifiant
                 .IdProduit = lecteur.GetInt32(1), ' Colonne 1 : produit
-                .IdMagasin = If(lecteur.IsDBNull(2), 0, lecteur.GetInt32(2)),   ' Colonne 2 : magasin (0 si la base contient NULL)
+                .IdMagasin = lecteur.GetInt32(2), ' Colonne 2 : magasin (déduit de l'observation)
                 .Type = typeLu,                   ' Colonne 3 : type déjà converti
-                .Valeur = lecteur.GetDecimal(4),  ' Colonne 4 : variation
+                .Valeur = valeur,                 ' Variation
                 .DateAlerte = lecteur.GetDateTime(5),   ' Colonne 5 : date
                 .Lue = lecteur.GetBoolean(6),     ' Colonne 6 : lue ou non
-                .Detail = If(lecteur.IsDBNull(7), String.Empty, lecteur.GetString(7)),   ' Colonne 7 : texte explicatif (vide si NULL)
-                .NomProduit = lecteur.GetString(8),     ' Colonne 8 : nom du produit (jointure)
-                .NomMagasin = If(lecteur.IsDBNull(9), String.Empty, lecteur.GetString(9))   ' Colonne 9 : nom du magasin (vide si NULL)
+                .NomProduit = lecteur.GetString(7),     ' Colonne 7 : nom du produit (jointure)
+                .NomMagasin = lecteur.GetString(8),     ' Colonne 8 : nom du magasin (jointure)
+                .IdObservation = lecteur.GetInt32(11),  ' Colonne 11 : observation d'origine
+                .Detail = ConstruireDetail(typeLu, valeur, prixUnitaire, quantiteBase)   ' Phrase explicative reconstruite
             }                                     ' Fin de l'initialisation
         End Function                              ' Fin de LireAlerte
+
+        ''' <summary>Reconstruit le texte du détail (non stocké en base) à partir de l'observation d'origine.</summary>
+        Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, prixUnitaire As Decimal, quantiteBase As Decimal) As String   ' Texte affiché dans le panneau de détail
+            If type = TypeAlerte.Hausse Then      ' Cas d'une hausse
+                Return $"Le prix unitaire a augmenté de {valeur:P1} (nouveau prix unitaire : {prixUnitaire:N2} par unité de base)."   ' Phrase pour une hausse
+            End If                                ' Fin du cas hausse
+            Return $"Quantité réduite sans baisse de prix ; hausse réelle du prix unitaire : {valeur:P1} (quantité observée : {quantiteBase:0.###} en unité de base, prix unitaire : {prixUnitaire:N2})."   ' Phrase pour une shrinkflation
+        End Function                              ' Fin de ConstruireDetail
 
         Public Sub MarquerCommeLue(idAlerte As Integer) Implements IAlerteRepository.MarquerCommeLue   ' Marque une alerte comme lue
             Try                                   ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
                     cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE id = @id", cn)   ' Requête de mise à jour d'une seule alerte
+                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE id = @id AND id_utilisateur = @utilisateur", cn)   ' Met à jour une seule alerte, seulement si elle appartient à l'utilisateur
                         cmd.Parameters.AddWithValue("@id", idAlerte)   ' Identifiant de l'alerte
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
                         cmd.ExecuteNonQuery()     ' Exécute une requête qui ne renvoie pas de lignes
                     End Using                     ' Libère la commande
                 End Using                         ' Ferme la connexion
@@ -145,11 +168,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
             End Try                               ' Fin du bloc surveillé
         End Sub                                   ' Fin de MarquerCommeLue
 
-        Public Sub MarquerToutesCommeLues() Implements IAlerteRepository.MarquerToutesCommeLues   ' Marque toutes les alertes comme lues
+        Public Sub MarquerToutesCommeLues() Implements IAlerteRepository.MarquerToutesCommeLues   ' Marque toutes les alertes de l'utilisateur comme lues
             Try                                   ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
                     cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE lue = 0", cn)   ' Met à « lue » toutes celles qui ne le sont pas
+                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE lue = 0 AND id_utilisateur = @utilisateur", cn)   ' Met à « lue » celles de l'utilisateur qui ne le sont pas
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
                         cmd.ExecuteNonQuery()     ' Exécute la mise à jour
                     End Using                     ' Libère la commande
                 End Using                         ' Ferme la connexion
@@ -158,11 +182,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
             End Try                               ' Fin du bloc surveillé
         End Sub                                   ' Fin de MarquerToutesCommeLues
 
-        Public Function CompterNonLues() As Integer Implements IAlerteRepository.CompterNonLues   ' Compte les alertes non lues
+        Public Function CompterNonLues() As Integer Implements IAlerteRepository.CompterNonLues   ' Compte les alertes non lues de l'utilisateur
             Try                                   ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
                     cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE lue = 0", cn)   ' Requête de comptage
+                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE lue = 0 AND id_utilisateur = @utilisateur", cn)   ' Requête de comptage
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
                         Return Convert.ToInt32(cmd.ExecuteScalar())   ' Rend le nombre obtenu (première valeur du résultat)
                     End Using                     ' Libère la commande
                 End Using                         ' Ferme la connexion

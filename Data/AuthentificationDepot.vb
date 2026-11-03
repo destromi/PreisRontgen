@@ -48,6 +48,55 @@ Public NotInheritable Class AuthentificationDepot
         End Using
     End Function
 
+    Public Async Function SupprimerUtilisateurAsync(id As Long, administrateurConnecteId As Long) As Task
+        If id <= 0 Then Throw New ArgumentOutOfRangeException(NameOf(id), "Identifiant utilisateur invalide.")
+        If id = administrateurConnecteId Then Throw New InvalidOperationException("Le compte actuellement connecté ne peut pas être supprimé.")
+
+        Using connexion As MySqlConnection = Configuration.CreerConnexion()
+            Await connexion.OpenAsync()
+            Using transaction As MySqlTransaction = DirectCast(Await connexion.BeginTransactionAsync(), MySqlTransaction)
+                Dim role As String
+                Using commande As New MySqlCommand("SELECT role FROM utilisateur WHERE id=@id FOR UPDATE;", connexion, transaction)
+                    commande.Parameters.AddWithValue("@id", id)
+                    Dim valeur As Object = Await commande.ExecuteScalarAsync()
+                    If valeur Is Nothing OrElse valeur Is DBNull.Value Then Throw New InvalidOperationException("Le compte n'existe plus.")
+                    role = Convert.ToString(valeur, Globalization.CultureInfo.InvariantCulture)
+                End Using
+
+                Dim administrateurActifDifferent As Boolean = False
+                Using commande As New MySqlCommand("SELECT id FROM utilisateur WHERE role='ADMIN' AND actif=TRUE AND id<>@id ORDER BY id FOR UPDATE;", connexion, transaction)
+                    commande.Parameters.AddWithValue("@id", id)
+                    Using lecteur As MySqlDataReader = DirectCast(Await commande.ExecuteReaderAsync(), MySqlDataReader)
+                        administrateurActifDifferent = Await lecteur.ReadAsync()
+                    End Using
+                End Using
+                If role = "ADMIN" AndAlso Not administrateurActifDifferent Then
+                    Throw New InvalidOperationException("Le dernier compte administrateur actif ne peut pas être supprimé.")
+                End If
+
+                Const sqlReferences As String =
+                    "SELECT " &
+                    "(SELECT COUNT(*) FROM ticket WHERE id_utilisateur=@id), " &
+                    "(SELECT COUNT(*) FROM alerte WHERE id_utilisateur=@id), " &
+                    "(SELECT COUNT(*) FROM depense_recurrente WHERE id_utilisateur=@id);"
+                Using commande As New MySqlCommand(sqlReferences, connexion, transaction)
+                    commande.Parameters.AddWithValue("@id", id)
+                    Using lecteur As MySqlDataReader = DirectCast(Await commande.ExecuteReaderAsync(), MySqlDataReader)
+                        If Await lecteur.ReadAsync() AndAlso (lecteur.GetInt64(0) > 0 OrElse lecteur.GetInt64(1) > 0 OrElse lecteur.GetInt64(2) > 0) Then
+                            Throw New InvalidOperationException("Ce compte possède des tickets, des alertes ou des dépenses récurrentes. Désactivez-le pour conserver les données associées.")
+                        End If
+                    End Using
+                End Using
+
+                Using commande As New MySqlCommand("DELETE FROM utilisateur WHERE id=@id;", connexion, transaction)
+                    commande.Parameters.AddWithValue("@id", id)
+                    If Await commande.ExecuteNonQueryAsync() <> 1 Then Throw New InvalidOperationException("Le compte n'existe plus.")
+                End Using
+                Await transaction.CommitAsync()
+            End Using
+        End Using
+    End Function
+
     Public Async Function ConnecterAsync(login As String, motDePasse As String) As Task(Of UtilisateurSession)
         Using connexion As MySqlConnection = Configuration.CreerConnexion()
             Await connexion.OpenAsync()

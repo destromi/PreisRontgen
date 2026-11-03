@@ -230,7 +230,15 @@ Public NotInheritable Partial Class MainForm
         btnActualiser.Location = New Point(145, 146)
         AddHandler btnActualiser.Click, AddressOf ChargerUtilisateursAsync
         panneau.Controls.Add(btnActualiser)
-        panneau.Controls.Add(New Label With {.Text = "Le compte connecté ne peut pas modifier son propre rôle ou statut. Il faut conserver au moins un administrateur actif.", .Location = New Point(10, 210), .Size = New Size(340, 90), .ForeColor = Color.DimGray})
+        Dim btnSupprimerUtilisateur As Button = CreerBouton("Supprimer définitivement", False)
+        btnSupprimerUtilisateur.Name = "btnSupprimerUtilisateur"
+        btnSupprimerUtilisateur.Location = New Point(10, 190)
+        btnSupprimerUtilisateur.Size = New Size(190, 36)
+        btnSupprimerUtilisateur.ForeColor = Color.Firebrick
+        btnSupprimerUtilisateur.FlatAppearance.BorderColor = Color.Firebrick
+        AddHandler btnSupprimerUtilisateur.Click, AddressOf SupprimerUtilisateurAsync
+        panneau.Controls.Add(btnSupprimerUtilisateur)
+        panneau.Controls.Add(New Label With {.Text = "Votre compte et le dernier administrateur actif sont protégés. Un compte lié à des tickets, alertes ou dépenses doit être désactivé pour conserver son historique.", .Location = New Point(10, 240), .Size = New Size(340, 115), .ForeColor = Color.DimGray})
     End Sub
 
     Private Shared Sub AjouterControle(parent As Control, titre As String, champ As TextBox, x As Integer, y As Integer, largeur As Integer)
@@ -554,6 +562,29 @@ Public NotInheritable Partial Class MainForm
             Await ChargerUtilisateursAsyncTask()
         Catch ex As Exception
             AfficherErreur("Modification du compte impossible", ex)
+        End Try
+    End Sub
+
+    Private Async Sub SupprimerUtilisateurAsync(sender As Object, e As EventArgs)
+        Try
+            If dgvUtilisateurs.CurrentRow Is Nothing Then Throw New InvalidOperationException("Sélectionnez un compte utilisateur.")
+            Dim id As Long = Convert.ToInt64(dgvUtilisateurs.CurrentRow.Cells("id").Value)
+            Dim login As String = Convert.ToString(dgvUtilisateurs.CurrentRow.Cells("login").Value, CultureInfo.CurrentCulture)
+            If id = _utilisateur.Id Then Throw New InvalidOperationException("Vous ne pouvez pas supprimer le compte avec lequel vous êtes connecté.")
+
+            Dim confirmation As DialogResult = MessageBox.Show(Me,
+                "Supprimer définitivement le compte '" & login & "' ?" & Environment.NewLine & Environment.NewLine &
+                "Les comptes liés à des tickets, alertes ou dépenses ne peuvent pas être supprimés. Désactivez-les pour conserver leur historique. Le dernier administrateur actif est protégé.",
+                "Suppression définitive d'un compte", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
+            If confirmation <> DialogResult.Yes Then Return
+
+            Await New AuthentificationDepot().SupprimerUtilisateurAsync(id, _utilisateur.Id)
+            Await ChargerUtilisateursAsyncTask()
+            dgvUtilisateurs.ClearSelection()
+            cmbRoleUtilisateur.SelectedIndex = -1
+            chkActifUtilisateur.Checked = False
+        Catch ex As Exception
+            AfficherErreur("Suppression du compte impossible", ex)
         End Try
     End Sub
 

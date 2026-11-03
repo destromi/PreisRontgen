@@ -1,0 +1,4 @@
+date;magasin;produit;marque;categorie;unite_base;conditionnement;unite;prix;nombre
+2026-11-03;Magasin test OCR;Lait entier test OCR;Camlait OCR;Test OCR - Produits laitiers;L;1;L;1250;2
+2026-11-03;Magasin test OCR;Riz parfumé test OCR;Riz Nord OCR;Test OCR - Épicerie;kg;500;g;850;2
+2026-11-03;Magasin test OCR;Café moulu test OCR;Aroma OCR;Test OCR - Épicerie;kg;100;g;2500;1

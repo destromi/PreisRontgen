@@ -33,7 +33,7 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         ' --- Onglets (créés d'abord : le contrôle « Fill » est ajouté avant le bandeau) ---
         Dim onglets As New TabControl()               ' Le contrôle à onglets
         onglets.Dock = DockStyle.Fill                 ' Occupe tout l'espace sous le bandeau
-        Dim noms As String() = {"Accueil", "Saisie ticket", "Historique", "Alertes", "Analyses", "Référentiels", "CSV et dépenses"}   ' Les 7 onglets de la maquette
+        Dim noms As String() = {"Accueil", "Saisie ticket", "Historique", "Alertes", "Analyses", "Référentiels", "CSV et dépenses", "Améliorations"}   ' Les 7 onglets de la maquette + un onglet de démonstration des améliorations
         For Each nom As String In noms                ' Pour chaque nom d'onglet
             Dim page As New TabPage(nom)              ' Crée la page de l'onglet
             page.BackColor = fondClair                ' Fond gris très clair
@@ -44,6 +44,8 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
                 _ecranAlertes.Dock = DockStyle.Fill   ' Remplit la page de l'onglet
                 page.Controls.Add(_ecranAlertes)      ' Place l'écran dans la page
                 _ecranAlertes.Show()                  ' Affiche l'écran (déclenche son chargement)
+            ElseIf nom = "Améliorations" Then          ' Onglet de démonstration des nouveautés du module
+                page.Controls.Add(New EcranAmeliorations())   ' Place l'écran de démonstration dans la page
             Else                                      ' Les autres onglets sont des emplacements vides
                 Dim texte As New Label()              ' Message d'information
                 texte.Text = "Écran réalisé par un autre membre du groupe."   ' Explication

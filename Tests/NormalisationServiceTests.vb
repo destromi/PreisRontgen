@@ -150,27 +150,27 @@ Public Class NormalisationServiceTests   ' Classe qui regroupe les tests de la n
     <Fact>                                           ' Test simple
     Public Sub TryParseConditionnement_PaquetMultiple_QuantiteTotale()   ' Cas des packs de boissons
         Dim quantite As Decimal                      ' Reçoit la quantité totale
-        Dim unite As Unite                           ' Reçoit l'unité lue
-        Assert.True(NormalisationService.TryParseConditionnement("6 x 33 cl", quantite, unite))   ' Le texte est reconnu
+        Dim uniteLue As Unite                           ' Reçoit l'unité lue
+        Assert.True(NormalisationService.TryParseConditionnement("6 x 33 cl", quantite, uniteLue))   ' Le texte est reconnu
         Assert.Equal(198D, quantite)                 ' 6 fois 33
-        Assert.Equal(Unite.Centilitre, unite)        ' En centilitres
-        Assert.Equal(1.98D, NormalisationService.ConvertirEnUniteBase(quantite, unite))   ' Soit 1,98 L en unité de base
+        Assert.Equal(Unite.Centilitre, uniteLue)        ' En centilitres
+        Assert.Equal(1.98D, NormalisationService.ConvertirEnUniteBase(quantite, uniteLue))   ' Soit 1,98 L en unité de base
     End Sub                                          ' Fin du test
 
     ' CT-50 : autres écritures valides : « 12x1L », « 500 g », « 1,5 L », « 4 × 125 g »
     <Fact>                                           ' Test simple
     Public Sub TryParseConditionnement_EcrituresUsuelles()   ' Plusieurs formes acceptées
         Dim quantite As Decimal                      ' Reçoit la quantité totale
-        Dim unite As Unite                           ' Reçoit l'unité lue
-        Assert.True(NormalisationService.TryParseConditionnement("12x1L", quantite, unite))   ' Sans espaces
+        Dim uniteLue As Unite                           ' Reçoit l'unité lue
+        Assert.True(NormalisationService.TryParseConditionnement("12x1L", quantite, uniteLue))   ' Sans espaces
         Assert.Equal(12D, quantite)                  ' 12 fois 1
-        Assert.Equal(Unite.Litre, unite)             ' En litres
-        Assert.True(NormalisationService.TryParseConditionnement("500 g", quantite, unite))   ' Paquet simple
+        Assert.Equal(Unite.Litre, uniteLue)             ' En litres
+        Assert.True(NormalisationService.TryParseConditionnement("500 g", quantite, uniteLue))   ' Paquet simple
         Assert.Equal(500D, quantite)                 ' 500
-        Assert.Equal(Unite.Gramme, unite)            ' En grammes
-        Assert.True(NormalisationService.TryParseConditionnement("1,5 L", quantite, unite))   ' Virgule décimale
+        Assert.Equal(Unite.Gramme, uniteLue)            ' En grammes
+        Assert.True(NormalisationService.TryParseConditionnement("1,5 L", quantite, uniteLue))   ' Virgule décimale
         Assert.Equal(1.5D, quantite)                 ' 1,5
-        Assert.True(NormalisationService.TryParseConditionnement("4 × 125 g", quantite, unite))   ' Signe de multiplication
+        Assert.True(NormalisationService.TryParseConditionnement("4 × 125 g", quantite, uniteLue))   ' Signe de multiplication
         Assert.Equal(500D, quantite)                 ' 4 fois 125
     End Sub                                          ' Fin du test
 
@@ -184,8 +184,8 @@ Public Class NormalisationServiceTests   ' Classe qui regroupe les tests de la n
     <InlineData("0 g")>                              ' Quantité nulle
     Public Sub TryParseConditionnement_TexteInvalide_RetourneFaux(texte As String)   ' Reçoit le texte du jeu
         Dim quantite As Decimal                      ' Reçoit la quantité
-        Dim unite As Unite                           ' Reçoit l'unité
-        Assert.False(NormalisationService.TryParseConditionnement(texte, quantite, unite))   ' Le texte ne doit PAS être reconnu
+        Dim uniteLue As Unite                           ' Reçoit l'unité
+        Assert.False(NormalisationService.TryParseConditionnement(texte, quantite, uniteLue))   ' Le texte ne doit PAS être reconnu
         Assert.Equal(0D, quantite)                   ' Et la quantité reste à zéro
     End Sub                                          ' Fin du test
 

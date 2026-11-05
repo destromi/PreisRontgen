@@ -146,4 +146,65 @@ Public Class NormalisationServiceTests   ' Classe qui regroupe les tests de la n
         Assert.Equal(0.1235D, NormalisationService.Arrondir(0.12345D))  ' 0,12345 devient 0,1235 (le 5 s'arrondit vers le haut)
     End Sub                                          ' Fin du test
 
+    ' CT-49 : lecture d'un paquet multiple « 6 x 33 cl » : quantité totale 198 cl, soit 1,98 L
+    <Fact>                                           ' Test simple
+    Public Sub TryParseConditionnement_PaquetMultiple_QuantiteTotale()   ' Cas des packs de boissons
+        Dim quantite As Decimal                      ' Reçoit la quantité totale
+        Dim unite As Unite                           ' Reçoit l'unité lue
+        Assert.True(NormalisationService.TryParseConditionnement("6 x 33 cl", quantite, unite))   ' Le texte est reconnu
+        Assert.Equal(198D, quantite)                 ' 6 fois 33
+        Assert.Equal(Unite.Centilitre, unite)        ' En centilitres
+        Assert.Equal(1.98D, NormalisationService.ConvertirEnUniteBase(quantite, unite))   ' Soit 1,98 L en unité de base
+    End Sub                                          ' Fin du test
+
+    ' CT-50 : autres écritures valides : « 12x1L », « 500 g », « 1,5 L », « 4 × 125 g »
+    <Fact>                                           ' Test simple
+    Public Sub TryParseConditionnement_EcrituresUsuelles()   ' Plusieurs formes acceptées
+        Dim quantite As Decimal                      ' Reçoit la quantité totale
+        Dim unite As Unite                           ' Reçoit l'unité lue
+        Assert.True(NormalisationService.TryParseConditionnement("12x1L", quantite, unite))   ' Sans espaces
+        Assert.Equal(12D, quantite)                  ' 12 fois 1
+        Assert.Equal(Unite.Litre, unite)             ' En litres
+        Assert.True(NormalisationService.TryParseConditionnement("500 g", quantite, unite))   ' Paquet simple
+        Assert.Equal(500D, quantite)                 ' 500
+        Assert.Equal(Unite.Gramme, unite)            ' En grammes
+        Assert.True(NormalisationService.TryParseConditionnement("1,5 L", quantite, unite))   ' Virgule décimale
+        Assert.Equal(1.5D, quantite)                 ' 1,5
+        Assert.True(NormalisationService.TryParseConditionnement("4 × 125 g", quantite, unite))   ' Signe de multiplication
+        Assert.Equal(500D, quantite)                 ' 4 fois 125
+    End Sub                                          ' Fin du test
+
+    ' CT-51 : textes invalides : aucune quantité n'est rendue
+    <Theory>                                         ' Test répété pour chaque texte ci-dessous
+    <InlineData("")>                                 ' Vide
+    <InlineData("abc")>                              ' Pas un conditionnement
+    <InlineData("0 x 33 cl")>                        ' Zéro paquet
+    <InlineData("6 x")>                              ' Quantité manquante
+    <InlineData("6 x 33 tonnes")>                    ' Unité inconnue
+    <InlineData("0 g")>                              ' Quantité nulle
+    Public Sub TryParseConditionnement_TexteInvalide_RetourneFaux(texte As String)   ' Reçoit le texte du jeu
+        Dim quantite As Decimal                      ' Reçoit la quantité
+        Dim unite As Unite                           ' Reçoit l'unité
+        Assert.False(NormalisationService.TryParseConditionnement(texte, quantite, unite))   ' Le texte ne doit PAS être reconnu
+        Assert.Equal(0D, quantite)                   ' Et la quantité reste à zéro
+    End Sub                                          ' Fin du test
+
+    ' CT-52 : prix pour 100 g et pour 100 ml (à partir du prix au kilo ou au litre)
+    <Fact>                                           ' Test simple
+    Public Sub PrixPourCent_PoidsEtVolume()          ' Vérifie l'échelle « pour 100 »
+        Assert.Equal(0.48D, NormalisationService.PrixPourCent(4.8D, UniteBase.Kg))      ' 4,80 par kg = 0,48 pour 100 g
+        Assert.Equal(0.36D, NormalisationService.PrixPourCent(3.6D, UniteBase.Litre))   ' 3,60 par L = 0,36 pour 100 ml
+        Assert.Null(NormalisationService.PrixPourCent(0.5D, UniteBase.Piece))           ' Pas d'échelle « pour 100 » pour une pièce
+        Assert.Equal("100 g", NormalisationService.LibelleEchelleCent(UniteBase.Kg))    ' Libellé des poids
+        Assert.Equal("100 ml", NormalisationService.LibelleEchelleCent(UniteBase.Litre))   ' Libellé des volumes
+        Assert.Null(NormalisationService.LibelleEchelleCent(UniteBase.Piece))           ' Pas de libellé pour une pièce
+    End Sub                                          ' Fin du test
+
+    ' CT-53 : un prix unitaire négatif est refusé
+    <Fact>                                           ' Test simple
+    Public Sub PrixPourCent_PrixNegatif_Refuse()     ' Prix impossible
+        Assert.Throws(Of ArgumentOutOfRangeException)(
+            Function() NormalisationService.PrixPourCent(-1D, UniteBase.Kg))   ' Une exception est levée
+    End Sub                                          ' Fin du test
+
 End Class                                            ' Fin de la classe de tests

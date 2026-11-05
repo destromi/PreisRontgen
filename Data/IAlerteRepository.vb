@@ -35,6 +35,12 @@ Namespace Data                 ' Espace de noms de l'accès aux données : Preis
         ''' <summary>Liste des magasins (identifiant, nom) pour le filtre de la liste des alertes.</summary>
         Function ListerMagasins() As List(Of KeyValuePair(Of Integer, String))   ' Rend des couples (identifiant, nom) pour remplir la liste déroulante
 
+        ''' <summary>
+        ''' Vrai si une alerte de ce type existe déjà pour cette observation.
+        ''' Sert à ne pas créer deux fois la même alerte quand un ticket est analysé deux fois.
+        ''' </summary>
+        Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean   ' Contrôle anti-doublon avant l'enregistrement
+
     End Interface                                        ' Fin de IAlerteRepository
 
     ''' <summary>
@@ -50,5 +56,21 @@ Namespace Data                 ' Espace de noms de l'accès aux données : Preis
         Function ObtenirPrecedente(observation As Observation) As Observation   ' Rend l'observation précédente ou Nothing
 
     End Interface                            ' Fin de IObservationLecteur
+
+    ''' <summary>
+    ''' Lecture de l'historique récent d'un produit dans un magasin.
+    ''' Sert à la hausse cumulée, au contrôle de prix anormal et à l'analyse par lot.
+    ''' Interface séparée de IObservationLecteur : un lecteur qui ne l'implémente pas
+    ''' continue de fonctionner (la hausse cumulée est alors simplement désactivée).
+    ''' </summary>
+    Public Interface IHistoriqueLecteur      ' Contrat de lecture de l'historique
+
+        ''' <summary>
+        ''' Retourne les observations du même produit dans le même magasin, de la date limite (incluse)
+        ''' jusqu'à l'observation donnée (exclue : date puis identifiant), de la plus ancienne à la plus récente.
+        ''' </summary>
+        Function ListerDepuis(observation As Observation, dateLimite As Date) As List(Of Observation)   ' Rend l'historique de la période
+
+    End Interface                            ' Fin de IHistoriqueLecteur
 
 End Namespace                                ' Fin de l'espace de noms Data

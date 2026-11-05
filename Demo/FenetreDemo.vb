@@ -25,7 +25,7 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         Dim fondClair As Color = Color.FromArgb(244, 247, 245)    ' Gris très clair du fond
 
         Text = "Pricieux - Suivi des prix du foyer"   ' Titre de la fenêtre (comme la maquette)
-        ClientSize = New Size(1120, 680)              ' Taille intérieure : 1120 x 680 px
+        ClientSize = New Size(1160, 680)              ' Taille intérieure : 1160 x 680 px
         MinimumSize = New Size(1000, 500)             ' Taille minimale
         BackColor = fondClair                         ' Fond gris très clair
         StartPosition = FormStartPosition.CenterScreen   ' S'ouvre au centre de l'écran
@@ -83,14 +83,14 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         utilisateur.ForeColor = Color.White           ' Texte blanc
         utilisateur.AutoSize = True                   ' Taille adaptée au texte
         utilisateur.Anchor = AnchorStyles.Top Or AnchorStyles.Right   ' Reste accroché à droite
-        utilisateur.Location = New Point(660, 26)     ' Position
+        utilisateur.Location = New Point(700, 26)     ' Position
         bandeau.Controls.Add(utilisateur)             ' Ajoute au bandeau
 
         _lblAlertes.Text = "Alertes non lues : 0"    ' Valeur initiale (mise à jour par CompteurChange)
         _lblAlertes.ForeColor = Color.FromArgb(241, 217, 138)   ' Jaune doux, comme la maquette
         _lblAlertes.AutoSize = True                   ' Taille adaptée au texte
         _lblAlertes.Anchor = AnchorStyles.Top Or AnchorStyles.Right   ' Reste accroché à droite
-        _lblAlertes.Location = New Point(840, 26)     ' Position
+        _lblAlertes.Location = New Point(880, 26)     ' Position
         bandeau.Controls.Add(_lblAlertes)             ' Ajoute au bandeau
 
         Dim deconnexion As New Button()               ' Bouton « Se déconnecter »
@@ -101,7 +101,7 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         deconnexion.Font = New Font("Segoe UI", 8.0F, FontStyle.Bold)   ' Texte en gras
         deconnexion.Size = New Size(110, 30)          ' Taille
         deconnexion.Anchor = AnchorStyles.Top Or AnchorStyles.Right   ' Reste accroché à droite
-        deconnexion.Location = New Point(990, 20)     ' Position
+        deconnexion.Location = New Point(1030, 20)     ' Position
         AddHandler deconnexion.Click, AddressOf Deconnexion_Click   ' Relie le clic à la méthode ci-dessous
         bandeau.Controls.Add(deconnexion)             ' Ajoute au bandeau
 

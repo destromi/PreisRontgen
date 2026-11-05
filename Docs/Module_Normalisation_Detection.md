@@ -49,3 +49,16 @@ Le code a été adapté au script SQL fourni par T2 : **aucune colonne à ajoute
 - Hausse : variation du prix unitaire **strictement supérieure** au seuil (5 %), même produit, même magasin, observations consécutives.
 - Shrinkflation : baisse du conditionnement **au moins égale** au seuil (3 %) avec un prix de l'article supérieur ou égal ; la valeur de l'alerte est la hausse réelle du prix unitaire.
 - Sans observation antérieure : aucune alerte. Les deux alertes peuvent coexister sur une même observation.
+
+## Améliorations ajoutées (validées par le chef de projet)
+
+Aucune ne modifie la structure de la base de données.
+
+| Amélioration | Où | Comment l'utiliser |
+|---|---|---|
+| Paquets multiples (« 6 x 33 cl ») | `NormalisationService.TryParseConditionnement` | Rend la quantité totale (198) et l'unité (cl) ; ensuite `CreerObservation` fait la conversion (1,98 L). |
+| Prix pour 100 g / 100 ml | `NormalisationService.PrixPourCent`, `LibelleEchelleCent` | Pour l'affichage (ex. « 0,48 / 100 g ») ; Nothing pour une pièce. |
+| Alerte non dupliquée | `DetectionService.Analyser` + `IAlerteRepository.ExisteDeja` | Une observation déjà enregistrée (Id > 0) analysée deux fois ne recrée pas ses alertes. |
+| Hausse cumulée | `DetectionService.EvaluerHausseCumulee` | Hausse totale > 10 % sur 3 mois (paramétrable dans `ParametresDetection`) ; enregistrée comme type HAUSSE avec un texte « Hausse cumulée ». Nécessite un lecteur qui implémente `IHistoriqueLecteur` (c'est le cas de `ObservationLecteurMySql`) ; sinon elle est simplement désactivée. |
+| Analyse par lot | `DetectionService.AnalyserLot` | Pour l'import CSV : l'historique de chaque produit/magasin est lu une fois, puis tenu à jour en mémoire. Les observations du lot doivent déjà être enregistrées (Id > 0). |
+| Prix inhabituel | `DetectionService.VerifierPrixInhabituel` | À appeler par l'écran de saisie avant d'enregistrer ; rend un message (ou Nothing) quand le prix est 3 fois trop haut ou trop bas par rapport à la médiane de l'historique (au moins 3 relevés). L'écran de saisie décide de demander confirmation. |

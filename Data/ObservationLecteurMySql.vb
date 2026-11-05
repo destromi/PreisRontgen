@@ -18,6 +18,7 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
     ''' </summary>
     Public Class ObservationLecteurMySql         ' Début de la classe
         Implements IObservationLecteur           ' S'engage à fournir ObtenirPrecedente
+        Implements IHistoriqueLecteur            ' Et ListerDepuis (hausse cumulée, prix anormal, analyse par lot)
 
         Private ReadOnly _chaineConnexion As String   ' Texte de connexion à MySQL
         Private ReadOnly _idUtilisateur As Integer    ' Utilisateur connecté : on ne compare qu'avec SES observations (isolation des foyers)
@@ -71,6 +72,48 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
                 Throw New InvalidOperationException("Impossible de lire l'observation précédente : " & ex.Message, ex)   ' Message clair
             End Try                                               ' Fin du bloc surveillé
         End Function                                              ' Fin de ObtenirPrecedente
+
+        Public Function ListerDepuis(observation As Observation, dateLimite As Date) As List(Of Observation) Implements IHistoriqueLecteur.ListerDepuis   ' Historique de la période
+            Const sql As String =
+                "SELECT o.id, o.id_produit, o.id_magasin, o.date_obs, o.prix_unitaire, o.quantite_base, " &
+                "COALESCE(l.prix, o.prix_unitaire * o.quantite_base) AS prix_total " &
+                "FROM observation_prix o " &
+                "LEFT JOIN ligne_ticket l ON l.id = o.id_ligne_ticket " &
+                "WHERE o.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
+                "AND o.date_obs >= @limite " &
+                "AND (o.date_obs < @date OR (o.date_obs = @date AND o.id < @id)) " &
+                "ORDER BY o.date_obs ASC, o.id ASC"   ' Même utilisateur, produit et magasin ; de la date limite jusqu'à l'observation (exclue) ; du plus ancien au plus récent
+            Dim resultat As New List(Of Observation)()   ' Liste (vide) des observations trouvées
+            Try                                       ' Début du bloc surveillé
+                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion (fermée automatiquement)
+                    cn.Open()                         ' Ouvre
+                    Using cmd As New MySqlCommand(sql, cn)          ' Commande SQL
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)          ' Utilisateur connecté
+                        cmd.Parameters.AddWithValue("@produit", observation.IdProduit)       ' Produit cherché
+                        cmd.Parameters.AddWithValue("@magasin", observation.IdMagasin)       ' Magasin cherché
+                        cmd.Parameters.AddWithValue("@limite", dateLimite)                   ' Début de la période
+                        cmd.Parameters.AddWithValue("@date", observation.DateObs)            ' Date de l'observation de référence
+                        cmd.Parameters.AddWithValue("@id", observation.Id)                   ' Exclut l'observation elle-même
+                        Using lecteur As MySqlDataReader = cmd.ExecuteReader()               ' Exécute et obtient le lecteur
+                            While lecteur.Read()                                              ' Pour chaque ligne trouvée
+                                resultat.Add(New Observation With {                           ' Convertit la ligne en objet
+                                    .Id = lecteur.GetInt32(0),            ' Colonne 0 : identifiant
+                                    .IdProduit = lecteur.GetInt32(1),     ' Colonne 1 : produit
+                                    .IdMagasin = lecteur.GetInt32(2),     ' Colonne 2 : magasin
+                                    .DateObs = lecteur.GetDateTime(3),    ' Colonne 3 : date
+                                    .PrixUnitaire = lecteur.GetDecimal(4),   ' Colonne 4 : prix unitaire
+                                    .QuantiteBase = lecteur.GetDecimal(5),   ' Colonne 5 : quantité en unité de base
+                                    .PrixTotal = lecteur.GetDecimal(6)       ' Colonne 6 : prix de l'article
+                                })                                    ' Fin de l'initialisation
+                            End While                                 ' Fin de la boucle
+                        End Using                                 ' Libère le lecteur
+                    End Using                                     ' Libère la commande
+                End Using                                         ' Ferme la connexion
+            Catch ex As MySqlException                            ' Erreur MySQL
+                Throw New InvalidOperationException("Impossible de lire l'historique des observations : " & ex.Message, ex)   ' Message clair
+            End Try                                               ' Fin du bloc surveillé
+            Return resultat                                       ' Rend l'historique (peut être vide)
+        End Function                                              ' Fin de ListerDepuis
 
     End Class                                                     ' Fin de la classe ObservationLecteurMySql
 

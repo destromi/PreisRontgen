@@ -183,6 +183,170 @@ Public Class DetectionServiceTests   ' Classe qui regroupe les tests de la déte
         Assert.Empty(depot.Enregistrees)                        ' Aucune alerte enregistrée
     End Sub                                                     ' Fin du test
 
+    ' ------------------------------------------------ améliorations : outils de test
+
+    ' Fabrique une observation de 1 kg (donc prix unitaire = prix) avec un identifiant donné
+    Private Shared Function CreerId(id As Integer, prix As Decimal, jour As Date,
+                                    Optional idProd As Integer = IdProduit) As Observation   ' Observation « enregistrée » (Id > 0)
+        Dim obs As Observation = NormalisationService.CreerObservation(idProd, IdMagasin, jour, prix, 1000D, Unite.Gramme)   ' 1000 g au prix donné
+        obs.Id = id                                             ' Simule l'identifiant attribué par la base
+        Return obs                                              ' Rend l'observation
+    End Function                                                ' Fin de CreerId
+
+    ' Historique de trois relevés : 4,00 (juillet), 4,15 (août), 4,30 (septembre)
+    Private Shared Function HistoriqueEnHausseLente() As List(Of Observation)   ' Trois petites hausses de suite
+        Return New List(Of Observation) From {
+            CreerId(1, 4D, New Date(2026, 7, 1)),               ' 4,00 par kg en juillet
+            CreerId(2, 4.15D, New Date(2026, 8, 1)),            ' 4,15 en août (+3,75 %)
+            CreerId(3, 4.3D, New Date(2026, 9, 1))              ' 4,30 en septembre (+3,61 %)
+        }                                                       ' Aucune hausse isolée ne dépasse 5 %
+    End Function                                                ' Fin de HistoriqueEnHausseLente
+
+    ' ------------------------------------------------ hausse cumulée
+
+    ' CT-37 : trois petites hausses de suite (+11,25 % au total) : alerte de hausse cumulée
+    <Fact>                                                      ' Test simple
+    Public Sub HausseCumulee_PetitesHaussesRepetees_Alerte()    ' Cas typique
+        Dim nouvelle As Observation = CreerId(99, 4.45D, New Date(2026, 10, 1))   ' 4,45 : +3,5 % seulement sur la dernière
+        Assert.Null(DetectionService.EvaluerHausse(HistoriqueEnHausseLente()(2), nouvelle, 0.05D))   ' La hausse simple ne voit rien
+        Dim alerte As Alerte = DetectionService.EvaluerHausseCumulee(HistoriqueEnHausseLente(), nouvelle, 0.1D, 3)   ' La hausse cumulée voit +11,25 %
+        Assert.NotNull(alerte)                                  ' Une alerte doit exister
+        Assert.Equal(TypeAlerte.Hausse, alerte.Type)            ' Même type que la hausse simple
+        Assert.Equal(0.1125D, alerte.Valeur, 4)                 ' (4,45 - 4,00) / 4,00
+        Assert.Contains("cumulée", alerte.Detail)               ' Le texte explique qu'elle est cumulée
+    End Sub                                                     ' Fin du test
+
+    ' CT-38 : hausse totale sous le seuil : pas d'alerte
+    <Fact>                                                      ' Test simple
+    Public Sub HausseCumulee_SousLeSeuil_PasDAlerte()           ' Hausse totale de 7,5 %
+        Assert.Null(DetectionService.EvaluerHausseCumulee(HistoriqueEnHausseLente(), CreerId(99, 4.3D, New Date(2026, 10, 1)), 0.1D, 3))   ' 4,00 vers 4,30
+    End Sub                                                     ' Fin du test
+
+    ' CT-39 : un seul relevé dans la période : c'est la hausse simple, pas de hausse cumulée
+    <Fact>                                                      ' Test simple
+    Public Sub HausseCumulee_UnSeulReleve_PasDAlerte()          ' Pas assez de relevés
+        Dim historique As New List(Of Observation) From {CreerId(1, 4D, New Date(2026, 9, 1))}   ' Un seul relevé
+        Assert.Null(DetectionService.EvaluerHausseCumulee(historique, CreerId(99, 6D, New Date(2026, 10, 1)), 0.1D, 3))   ' +50 % mais un seul relevé
+    End Sub                                                     ' Fin du test
+
+    ' CT-40 : un relevé plus ancien que la période est ignoré
+    <Fact>                                                      ' Test simple
+    Public Sub HausseCumulee_ReleveHorsPeriode_Ignore()         ' La période est de 3 mois
+        Dim historique As New List(Of Observation) From {
+            CreerId(1, 2D, New Date(2026, 1, 1)),               ' Janvier : hors période (trop ancien)
+            CreerId(2, 4.3D, New Date(2026, 9, 1))              ' Septembre : seul relevé de la période
+        }                                                       ' Fin de la liste
+        Assert.Null(DetectionService.EvaluerHausseCumulee(historique, CreerId(99, 4.5D, New Date(2026, 10, 1)), 0.1D, 3))   ' Pas de comparaison avec janvier
+    End Sub                                                     ' Fin du test
+
+    ' CT-41 : le service complet enregistre l'alerte de hausse cumulée (lecteur avec historique)
+    <Fact>                                                      ' Test simple
+    Public Sub Analyser_HausseCumulee_EnregistreLAlerte()       ' Vérifie le branchement dans le service
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(New FauxHistorique(HistoriqueEnHausseLente()), depot, New ParametresDetection())   ' Lecteur qui connaît l'historique
+        Dim resultat As List(Of Alerte) = service.Analyser(CreerId(99, 4.45D, New Date(2026, 10, 1)))   ' Analyse la nouvelle observation
+        Assert.Single(resultat)                                 ' Une seule alerte
+        Assert.Contains("cumulée", resultat(0).Detail)          ' C'est la hausse cumulée
+        Assert.Single(depot.Enregistrees)                       ' Elle est enregistrée
+    End Sub                                                     ' Fin du test
+
+    ' ------------------------------------------------ alerte non dupliquée
+
+    ' CT-42 : la même observation analysée deux fois ne crée pas deux fois les mêmes alertes
+    <Fact>                                                      ' Test simple
+    Public Sub Analyser_DeuxFois_PasDeDoublon()                 ' Double clic sur Enregistrer, import refait...
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(New FauxLecteur(Reference()), depot, New ParametresDetection())   ' Lecteur simple
+        Dim nouvelle As Observation = Creer(2.4D, 450D, Jour2)  ' 500 g vers 450 g au même prix : hausse + shrinkflation
+        nouvelle.Id = 5                                         ' Observation déjà enregistrée
+        Dim nbEvenements As Integer = 0                         ' Compteur d'événements
+        AddHandler service.AlerteDetectee, Sub(sender As Object, e As AlerteDetecteeEventArgs) nbEvenements += 1   ' +1 par alerte annoncée
+
+        Assert.Equal(2, service.Analyser(nouvelle).Count)       ' Première analyse : 2 alertes
+        Assert.Empty(service.Analyser(nouvelle))                ' Seconde analyse : aucune nouvelle alerte
+        Assert.Equal(2, depot.Enregistrees.Count)               ' Toujours 2 alertes en tout
+        Assert.Equal(2, nbEvenements)                           ' Et 2 événements seulement
+    End Sub                                                     ' Fin du test
+
+    ' ------------------------------------------------ prix inhabituel
+
+    ' CT-43 : 41,00 au lieu de 4,10 : prix inhabituel ; 4,50 : normal ; 1,00 : trop bas
+    <Fact>                                                      ' Test simple
+    Public Sub PrixInhabituel_TropHautOuTropBas_Signale()       ' Cas de la faute de frappe
+        Dim historique As New List(Of Observation) From {CreerId(1, 4D, Jour1), CreerId(2, 4.2D, Jour1), CreerId(3, 4.1D, Jour1)}   ' Médiane : 4,10
+        Dim habituel As Decimal                                 ' Reçoit le prix habituel
+        Assert.True(DetectionService.EstPrixInhabituel(historique, 41D, 3D, habituel))   ' 10 fois trop haut
+        Assert.Equal(4.1D, habituel)                            ' Médiane des trois relevés
+        Assert.False(DetectionService.EstPrixInhabituel(historique, 4.5D, 3D, habituel))   ' Normal
+        Assert.True(DetectionService.EstPrixInhabituel(historique, 1D, 3D, habituel))      ' Plus de 3 fois trop bas
+    End Sub                                                     ' Fin du test
+
+    ' CT-44 : moins de trois relevés : on ne juge pas
+    <Fact>                                                      ' Test simple
+    Public Sub PrixInhabituel_PeuDeReleves_PasDeJugement()      ' Pas assez d'historique
+        Dim historique As New List(Of Observation) From {CreerId(1, 4D, Jour1), CreerId(2, 4.2D, Jour1)}   ' Deux relevés seulement
+        Dim habituel As Decimal                                 ' Reçoit le prix habituel
+        Assert.False(DetectionService.EstPrixInhabituel(historique, 41D, 3D, habituel))   ' Aucun avertissement
+    End Sub                                                     ' Fin du test
+
+    ' CT-45 : le service renvoie un message pour l'écran de saisie, ou Nothing
+    <Fact>                                                      ' Test simple
+    Public Sub VerifierPrixInhabituel_RendUnMessageOuNothing()  ' Utilisé par l'écran de saisie
+        Dim base As New List(Of Observation) From {CreerId(1, 4D, Jour1), CreerId(2, 4.2D, Jour1), CreerId(3, 4.1D, Jour1)}   ' Trois relevés
+        Dim service As New DetectionService(New FauxHistorique(base), New FauxDepotAlertes(), New ParametresDetection())   ' Lecteur avec historique
+        Dim message As String = service.VerifierPrixInhabituel(CreerId(0, 41D, Jour2))   ' Prix suspect
+        Assert.NotNull(message)                                 ' Un avertissement est rendu
+        Assert.Contains("Prix inhabituel", message)             ' Le message est clair
+        Assert.Null(service.VerifierPrixInhabituel(CreerId(0, 4.3D, Jour2)))   ' Prix normal : rien
+
+        Dim simple As New DetectionService(New FauxLecteur(Nothing), New FauxDepotAlertes(), New ParametresDetection())   ' Lecteur sans historique
+        Assert.Null(simple.VerifierPrixInhabituel(CreerId(0, 41D, Jour2)))   ' Pas de contrôle possible : Nothing
+    End Sub                                                     ' Fin du test
+
+    ' ------------------------------------------------ analyse par lot
+
+    ' CT-46 : un lot de deux observations ne lit l'historique qu'une fois, et détecte la hausse
+    <Fact>                                                      ' Test simple
+    Public Sub AnalyserLot_LitLHistoriqueUneSeuleFois()         ' Performance de l'import CSV
+        Dim lecteur As New FauxHistorique(New List(Of Observation) From {CreerId(1, 4D, New Date(2026, 8, 1))})   ' Un relevé déjà en base
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(lecteur, depot, New ParametresDetection())   ' Service
+        Dim lot As New List(Of Observation) From {
+            CreerId(12, 4.5D, New Date(2026, 10, 1)),           ' +12,5 % par rapport à septembre (donnée volontairement dans le désordre)
+            CreerId(11, 4D, New Date(2026, 9, 1))               ' Stable par rapport à août
+        }                                                       ' Fin du lot
+
+        Dim resultat As List(Of Alerte) = service.AnalyserLot(lot)   ' Analyse tout le lot
+
+        Assert.Single(resultat)                                 ' Une seule hausse détectée
+        Assert.Equal(TypeAlerte.Hausse, resultat(0).Type)       ' C'est une hausse
+        Assert.Equal(12, resultat(0).IdObservation)             ' Elle vient de l'observation du 1er octobre
+        Assert.Equal(1, lecteur.NombreLectures)                 ' Une seule lecture en base pour deux observations
+    End Sub                                                     ' Fin du test
+
+    ' CT-47 : sans historique en base, le lot compare quand même ses propres observations entre elles
+    <Fact>                                                      ' Test simple
+    Public Sub AnalyserLot_SansHistorique_ComparerLesLignesEntreElles()   ' Premier import d'un produit
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(New FauxHistorique(New List(Of Observation)()), depot, New ParametresDetection())   ' Base vide
+        Dim lot As New List(Of Observation) From {
+            CreerId(1, 4D, New Date(2026, 9, 1)),               ' Première observation : aucune alerte
+            CreerId(2, 4.5D, New Date(2026, 10, 1))             ' +12,5 % : hausse
+        }                                                       ' Fin du lot
+        Assert.Single(service.AnalyserLot(lot))                 ' Une alerte, sur la seconde ligne
+    End Sub                                                     ' Fin du test
+
+    ' CT-48 : produits différents dans un lot : chaque produit a son propre historique
+    <Fact>                                                      ' Test simple
+    Public Sub AnalyserLot_ProduitsDifferents_PasDeMelange()    ' Pas de comparaison entre produits
+        Dim service As New DetectionService(New FauxHistorique(New List(Of Observation)()), New FauxDepotAlertes(), New ParametresDetection())   ' Base vide
+        Dim lot As New List(Of Observation) From {
+            CreerId(1, 4D, New Date(2026, 9, 1), 1),            ' Produit 1 à 4,00
+            CreerId(2, 9D, New Date(2026, 10, 1), 2)            ' Produit 2 à 9,00 : ne doit PAS être comparé au produit 1
+        }                                                       ' Fin du lot
+        Assert.Empty(service.AnalyserLot(lot))                  ' Aucune alerte
+    End Sub                                                     ' Fin du test
+
     ' ------------------------------------------------------------ faux objets
 
     Private NotInheritable Class FauxLecteur                    ' Faux lecteur : renvoie toujours la même « observation précédente »
@@ -199,10 +363,37 @@ Public Class DetectionServiceTests   ' Classe qui regroupe les tests de la déte
         End Function                                            ' Fin de ObtenirPrecedente
     End Class                                                   ' Fin de FauxLecteur
 
+    Private NotInheritable Class FauxHistorique                 ' Faux lecteur qui connaît un historique et compte ses lectures
+        Implements IObservationLecteur, IHistoriqueLecteur      ' Respecte les deux contrats
+
+        Private ReadOnly _donnees As List(Of Observation)       ' Observations « en base »
+        Public NombreLectures As Integer                        ' Nombre de lectures demandées (pour tester la performance)
+
+        Public Sub New(donnees As IEnumerable(Of Observation))  ' Constructeur
+            _donnees = New List(Of Observation)(donnees)        ' Copie les observations
+        End Sub                                                 ' Fin du constructeur
+
+        Public Function ObtenirPrecedente(observation As Observation) As Observation Implements IObservationLecteur.ObtenirPrecedente   ' Dernière observation avant celle-ci
+            NombreLectures += 1                                 ' Compte la lecture
+            Dim candidats As IEnumerable(Of Observation) = _donnees.Where(Function(o) o.IdProduit = observation.IdProduit AndAlso o.IdMagasin = observation.IdMagasin AndAlso o.DateObs <= observation.DateObs AndAlso o.Id <> observation.Id)   ' Même produit, même magasin, antérieures
+            Return candidats.OrderBy(Function(o) o.DateObs).ThenBy(Function(o) o.Id).LastOrDefault()   ' La plus récente (Nothing s'il n'y en a pas)
+        End Function                                            ' Fin de ObtenirPrecedente
+
+        Public Function ListerDepuis(observation As Observation, dateLimite As Date) As List(Of Observation) Implements IHistoriqueLecteur.ListerDepuis   ' Historique de la période
+            NombreLectures += 1                                 ' Compte la lecture
+            Dim candidats As IEnumerable(Of Observation) = _donnees.Where(Function(o) o.IdProduit = observation.IdProduit AndAlso o.IdMagasin = observation.IdMagasin AndAlso o.DateObs >= dateLimite AndAlso (o.DateObs < observation.DateObs OrElse (o.DateObs = observation.DateObs AndAlso o.Id < observation.Id)))   ' De la date limite jusqu'à l'observation (exclue)
+            Return candidats.OrderBy(Function(o) o.DateObs).ThenBy(Function(o) o.Id).ToList()   ' Du plus ancien au plus récent
+        End Function                                            ' Fin de ListerDepuis
+    End Class                                                   ' Fin de FauxHistorique
+
     Private NotInheritable Class FauxDepotAlertes               ' Faux dépôt : garde les alertes en mémoire au lieu de la base
         Implements IAlerteRepository                            ' Respecte le contrat du vrai dépôt
 
         Public ReadOnly Enregistrees As New List(Of Alerte)()   ' Alertes « enregistrées » (visibles par les tests)
+
+        Public Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+            Return Enregistrees.Any(Function(a) a.IdObservation = idObservation AndAlso a.Type = type)   ' Vrai si une alerte identique est déjà enregistrée
+        End Function                                            ' Fin de ExisteDeja
 
         Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Simule l'enregistrement
             Enregistrees.Add(alerte)                            ' Garde l'alerte en mémoire

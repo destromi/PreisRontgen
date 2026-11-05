@@ -245,7 +245,4 @@ Public Class frmAlertes        ' Début de la classe du formulaire (Partial dans
         Rafraichir()                                  ' Recharge la liste (les lignes lues passent en normal ou disparaissent selon le filtre)
     End Sub                                           ' Fin de MarquerSelectionCommeLue
 
-    Private Sub dgvAlertes_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvAlertes.CellContentClick
-
-    End Sub
 End Class                                             ' Fin de la classe frmAlertes

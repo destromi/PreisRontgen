@@ -11,6 +11,8 @@
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 
+Imports System.Globalization              ' Pour lire les nombres décimaux sans dépendre de la langue de Windows
+Imports System.Text.RegularExpressions   ' Pour lire « 6 x 33 cl » avec une expression régulière
 Imports PreisRontgen.Models    ' Permet d'écrire Unite, UniteBase, Observation sans préfixe
 
 Namespace Services             ' Espace de noms des classes « métier » : PreisRontgen.Services
@@ -148,6 +150,80 @@ Namespace Services             ' Espace de noms des classes « métier » : Prei
             End Select                                                   ' Fin de l'aiguillage
             Return True                                                  ' Texte reconnu : succès
         End Function                                                     ' Fin de TryParseUnite
+
+        ''' <summary>
+        ''' Lit un conditionnement écrit sur un ticket : « 500 g », « 1,5 L », « 6 x 33 cl », « 12x1L ».
+        ''' Pour un paquet multiple, la quantité rendue est le TOTAL dans l'unité écrite
+        ''' (6 x 33 cl donne 198 cl, qui vaut 1,98 L une fois convertie en unité de base).
+        ''' Retourne False si le texte n'est pas reconnu (le contenu des paramètres est alors sans valeur).
+        ''' </summary>
+        Public Shared Function TryParseConditionnement(texte As String,
+                                                       ByRef quantiteTotale As Decimal,
+                                                       ByRef uniteSaisie As Unite) As Boolean   ' Rend la quantité et l'unité par les paramètres ByRef
+            quantiteTotale = 0D                         ' Valeur neutre en cas d'échec
+            If String.IsNullOrWhiteSpace(texte) Then    ' Texte absent ou vide
+                Return False                            ' Rien à lire : échec
+            End If                                      ' Fin du contrôle
+
+            ' Forme attendue : [nombre de paquets x] quantité unité   (le « x » peut aussi s'écrire × ou *)
+            Dim modele As Match = Regex.Match(texte.Trim(),
+                "^(?:(\d+)\s*[xX×*]\s*)?(\d+(?:[.,]\d+)?)\s*([^\d\s].*)$")   ' Groupe 1 : nombre de paquets (facultatif) ; groupe 2 : quantité ; groupe 3 : unité
+            If Not modele.Success Then                  ' Le texte ne ressemble pas à un conditionnement
+                Return False                            ' Échec
+            End If                                      ' Fin du contrôle
+
+            Dim quantite As Decimal                     ' Quantité d'un paquet
+            If Not Decimal.TryParse(modele.Groups(2).Value.Replace(","c, "."c),
+                                    NumberStyles.Number,
+                                    CultureInfo.InvariantCulture, quantite) OrElse quantite <= 0D Then   ' Nombre illisible, nul ou négatif
+                Return False                            ' Échec
+            End If                                      ' Fin du contrôle
+
+            Dim nombrePaquets As Integer = 1            ' Un seul paquet par défaut (« 500 g »)
+            If modele.Groups(1).Success Then            ' Un multiplicateur est écrit (« 6 x ... »)
+                If Not Integer.TryParse(modele.Groups(1).Value, nombrePaquets) OrElse nombrePaquets <= 0 Then   ' Multiplicateur illisible ou nul
+                    Return False                        ' Échec (« 0 x 33 cl » n'a pas de sens)
+                End If                                  ' Fin du contrôle
+            End If                                      ' Fin du test du multiplicateur
+
+            Dim uniteLue As Unite                       ' Unité lue
+            If Not TryParseUnite(modele.Groups(3).Value, uniteLue) Then   ' Réutilise la lecture d'unités existante
+                Return False                            ' Unité inconnue : échec
+            End If                                      ' Fin du contrôle
+
+            quantiteTotale = quantite * nombrePaquets   ' Quantité totale : 6 x 33 = 198
+            uniteSaisie = uniteLue                      ' Unité lue
+            Return True                                 ' Succès
+        End Function                                    ' Fin de TryParseConditionnement
+
+        ''' <summary>
+        ''' Prix « pour 100 g » ou « pour 100 ml », plus parlant que le prix au kilo ou au litre
+        ''' pour les petits conditionnements. Retourne Nothing pour une unité comptée à la pièce
+        ''' (« pour 100 pièces » n'aurait pas de sens).
+        ''' </summary>
+        Public Shared Function PrixPourCent(prixUnitaire As Decimal, uniteBase As UniteBase) As Decimal?   ' Decimal? : peut rendre « pas de valeur »
+            If prixUnitaire < 0D Then                   ' Un prix négatif est impossible
+                Throw New ArgumentOutOfRangeException(NameOf(prixUnitaire), "Le prix unitaire ne peut pas être négatif.")   ' Refus
+            End If                                      ' Fin du contrôle
+            Select Case uniteBase                       ' Aiguillage selon la famille d'unité
+                Case UniteBase.Kg, UniteBase.Litre      ' 100 g = 0,1 kg et 100 ml = 0,1 L
+                    Return prixUnitaire / 10D           ' Le prix de 0,1 kg ou 0,1 L est le dixième du prix au kg ou au L
+                Case Else                               ' Pièce : pas d'échelle « pour 100 »
+                    Return Nothing                      ' Pas de valeur
+            End Select                                  ' Fin de l'aiguillage
+        End Function                                    ' Fin de PrixPourCent
+
+        ''' <summary>Texte de l'échelle correspondante : « 100 g » ou « 100 ml » (Nothing pour une pièce).</summary>
+        Public Shared Function LibelleEchelleCent(uniteBase As UniteBase) As String   ' Sert à écrire « 0,48 € / 100 g » dans les écrans
+            Select Case uniteBase                       ' Aiguillage selon la famille d'unité
+                Case UniteBase.Kg                       ' Poids
+                    Return "100 g"                      ' Échelle des poids
+                Case UniteBase.Litre                    ' Volume
+                    Return "100 ml"                     ' Échelle des volumes
+                Case Else                               ' Pièce
+                    Return Nothing                      ' Pas d'échelle
+            End Select                                  ' Fin de l'aiguillage
+        End Function                                    ' Fin de LibelleEchelleCent
 
         ''' <summary>Arrondit un prix ou une variation à 4 décimales, pour l'affichage ou le stockage.</summary>
         Public Shared Function Arrondir(valeur As Decimal) As Decimal    ' Rend la valeur arrondie

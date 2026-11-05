@@ -215,6 +215,22 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
             Return resultat                       ' Rend la liste des magasins
         End Function                              ' Fin de ListerMagasins
 
+        Public Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+            Try                                   ' Début du bloc surveillé
+                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
+                    cn.Open()                     ' Ouvre
+                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE id_utilisateur = @utilisateur AND id_observation = @observation AND `type` = @type", cn)   ' Compte les alertes identiques de l'utilisateur
+                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)         ' Utilisateur connecté
+                        cmd.Parameters.AddWithValue("@observation", idObservation)          ' Observation concernée
+                        cmd.Parameters.AddWithValue("@type", type.ToString().ToUpperInvariant())   ' HAUSSE ou SHRINKFLATION
+                        Return Convert.ToInt32(cmd.ExecuteScalar()) > 0                     ' Vrai s'il en existe déjà au moins une
+                    End Using                     ' Libère la commande
+                End Using                         ' Ferme la connexion
+            Catch ex As MySqlException           ' Erreur MySQL
+                Throw New InvalidOperationException("Impossible de vérifier l'existence de l'alerte : " & ex.Message, ex)   ' Message clair
+            End Try                               ' Fin du bloc surveillé
+        End Function                              ' Fin de ExisteDeja
+
     End Class                                     ' Fin de la classe AlerteRepositoryMySql
 
 End Namespace                                     ' Fin de l'espace de noms Data

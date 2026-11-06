@@ -7,6 +7,7 @@ Public Class MainForm
     Private TB As New TableauBordMySql
     Private nombreAlerte As Integer
     Private referentiel As Referentiels
+    Private alerte As frmAlertes
     Private Sub BtnAccueil_Click(sender As Object, e As EventArgs) Handles BtnAccueil.Click
         'BtnAccueil.BackColor = Color.White
         'BtnAccueil.ForeColor = Color.ForestGreen
@@ -85,5 +86,19 @@ Public Class MainForm
     Private Sub timer_tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         nombreAlerte = TB.AlerteNonLue(Session.user.Id)
         LabelAlerte.Text = "Alertes non lues : " & nombreAlerte
+    End Sub
+
+    Private Sub BtnAlertes_Click(sender As Object, e As EventArgs) Handles BtnAlertes.Click
+        If alerte Is Nothing Then
+            alerte = New frmAlertes
+            alerte.TopLevel = False
+            alerte.FormBorderStyle = FormBorderStyle.None
+            alerte.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(alerte)
+            alerte.Show()
+            alerte.BringToFront()
+        Else
+            alerte.BringToFront()
+        End If
     End Sub
 End Class

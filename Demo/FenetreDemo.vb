@@ -34,7 +34,7 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         Dim onglets As New TabControl()               ' Le contrôle à onglets
         onglets.Dock = DockStyle.Fill                 ' Occupe tout l'espace sous le bandeau
         Dim depotAnalyse As New DepotAnalyseDemo()   ' Faux dépôt d'analyse partagé par les écrans Historique et Analyses
-        Dim noms As String() = {"Accueil", "Saisie ticket", "Historique", "Alertes", "Analyses", "Référentiels", "CSV et dépenses", "Améliorations"}   ' Les 7 onglets de la maquette + un onglet de démonstration des améliorations
+        Dim noms As String() = {"Accueil", "Saisie ticket", "Historique", "Alertes", "Analyses", "Référentiels", "CSV et dépenses"}   ' Les 7 onglets de la maquette
         For Each nom As String In noms                ' Pour chaque nom d'onglet
             Dim page As New TabPage(nom)              ' Crée la page de l'onglet
             page.BackColor = fondClair                ' Fond gris très clair
@@ -65,8 +65,6 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
                 sousOnglets.TabPages.Add(pageCsv)     ' Ajoute le sous-onglet CSV
                 sousOnglets.TabPages.Add(pageDepenses)   ' Ajoute le sous-onglet Dépenses
                 page.Controls.Add(sousOnglets)        ' Place les sous-onglets dans la page
-            ElseIf nom = "Améliorations" Then          ' Onglet de démonstration des nouveautés du module
-                page.Controls.Add(New EcranAmeliorations())   ' Place l'écran de démonstration dans la page
             Else                                      ' Les autres onglets sont des emplacements vides
                 Dim texte As New Label()              ' Message d'information
                 texte.Text = "Écran réalisé par un autre membre du groupe."   ' Explication

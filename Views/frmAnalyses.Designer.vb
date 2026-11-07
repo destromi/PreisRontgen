@@ -23,504 +23,435 @@ Partial Class frmAnalyses  ' Partial : la classe est coupée en deux fichiers (a
 
     <System.Diagnostics.DebuggerStepThrough()>  ' Le débogueur ne s'arrête pas ici
     Private Sub InitializeComponent()  ' Crée et règle tous les contrôles ; appelée par le constructeur
-        pnlTitre = New System.Windows.Forms.Panel()  ' Crée pnlTitre
-        lblTitre = New System.Windows.Forms.Label()  ' Crée lblTitre
-        pnlIndice = New System.Windows.Forms.Panel()  ' Crée pnlIndice
-        lblIndiceTitre = New System.Windows.Forms.Label()  ' Crée lblIndiceTitre
-        lblDepart = New System.Windows.Forms.Label()  ' Crée lblDepart
-        dtpDepart = New System.Windows.Forms.DateTimePicker()  ' Crée dtpDepart
-        lblArrivee = New System.Windows.Forms.Label()  ' Crée lblArrivee
-        dtpArrivee = New System.Windows.Forms.DateTimePicker()  ' Crée dtpArrivee
-        btnCalculer = New System.Windows.Forms.Button()  ' Crée btnCalculer
-        lblIndiceValeur = New System.Windows.Forms.Label()  ' Crée lblIndiceValeur
-        lblIndiceTexte = New System.Windows.Forms.Label()  ' Crée lblIndiceTexte
-        lblIndiceNote = New System.Windows.Forms.Label()  ' Crée lblIndiceNote
-        pnlBas = New System.Windows.Forms.Panel()  ' Crée pnlBas
-        lblAvertissement = New System.Windows.Forms.Label()  ' Crée lblAvertissement
-        pnlComparaison = New System.Windows.Forms.Panel()  ' Crée pnlComparaison
-        tlpGrilles = New System.Windows.Forms.TableLayoutPanel()  ' Crée tlpGrilles
-        pnlCompFiltres = New System.Windows.Forms.Panel()  ' Crée pnlCompFiltres
-        lblProduit = New System.Windows.Forms.Label()  ' Crée lblProduit
-        cmbProduit = New System.Windows.Forms.ComboBox()  ' Crée cmbProduit
-        lblCategorie = New System.Windows.Forms.Label()  ' Crée lblCategorie
-        cmbCategorie = New System.Windows.Forms.ComboBox()  ' Crée cmbCategorie
-        btnComparer = New System.Windows.Forms.Button()  ' Crée btnComparer
-        btnEquivalents = New System.Windows.Forms.Button()  ' Crée btnEquivalents
-        lblTitreMagasins = New System.Windows.Forms.Label()  ' Crée lblTitreMagasins
-        lblTitreEquivalents = New System.Windows.Forms.Label()  ' Crée lblTitreEquivalents
-        dgvMagasins = New System.Windows.Forms.DataGridView()  ' Crée dgvMagasins
-        colMProduit = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMProduit
-        colMMagasin = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMMagasin
-        colMPrix = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMPrix
-        colMDate = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMDate
-        colMEcart = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMEcart
-        dgvEquivalents = New System.Windows.Forms.DataGridView()  ' Crée dgvEquivalents
-        colEProduit = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colEProduit
-        colEMagasin = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colEMagasin
-        colEPrix = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colEPrix
-        colEEconomie = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colEEconomie
-        lblMessage = New System.Windows.Forms.Label()  ' Crée lblMessage
-        pnlTitre.SuspendLayout()  ' Suspend la mise en page de pnlTitre pendant le réglage
-        pnlIndice.SuspendLayout()  ' Suspend la mise en page de pnlIndice pendant le réglage
-        pnlBas.SuspendLayout()  ' Suspend la mise en page de pnlBas pendant le réglage
-        pnlComparaison.SuspendLayout()  ' Suspend la mise en page de pnlComparaison pendant le réglage
-        tlpGrilles.SuspendLayout()  ' Suspend la mise en page de tlpGrilles pendant le réglage
-        pnlCompFiltres.SuspendLayout()  ' Suspend la mise en page de pnlCompFiltres pendant le réglage
-        CType(dgvMagasins, System.ComponentModel.ISupportInitialize).BeginInit()  ' Début de l'initialisation de la grille
-        CType(dgvEquivalents, System.ComponentModel.ISupportInitialize).BeginInit()  ' Début de l'initialisation de la grille
-        SuspendLayout()  ' Suspend la mise en page du formulaire
-        '
-        'pnlTitre
-        '
-        pnlTitre.Controls.Add(lblTitre)  ' Place lblTitre dans pnlTitre
-        pnlTitre.BackColor = System.Drawing.Color.FromArgb(244, 247, 245)
-        pnlTitre.Dock = System.Windows.Forms.DockStyle.Top
-        pnlTitre.Size = New System.Drawing.Size(100, 44)
-        pnlTitre.Name = "pnlTitre"  ' Nom interne
-        pnlTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'lblTitre
-        '
+        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        pnlTitre = New Panel()
+        lblTitre = New Label()
+        pnlIndice = New Panel()
+        lblIndiceTitre = New Label()
+        lblDepart = New Label()
+        dtpDepart = New DateTimePicker()
+        lblArrivee = New Label()
+        dtpArrivee = New DateTimePicker()
+        btnCalculer = New Button()
+        lblIndiceValeur = New Label()
+        lblIndiceTexte = New Label()
+        lblIndiceNote = New Label()
+        pnlBas = New Panel()
+        lblAvertissement = New Label()
+        pnlComparaison = New Panel()
+        tlpGrilles = New TableLayoutPanel()
+        lblTitreMagasins = New Label()
+        lblTitreEquivalents = New Label()
+        dgvMagasins = New DataGridView()
+        dgvEquivalents = New DataGridView()
+        pnlCompFiltres = New Panel()
+        lblProduit = New Label()
+        cmbProduit = New ComboBox()
+        lblCategorie = New Label()
+        cmbCategorie = New ComboBox()
+        btnComparer = New Button()
+        btnEquivalents = New Button()
+        lblMessage = New Label()
+        pnlTitre.SuspendLayout()
+        pnlIndice.SuspendLayout()
+        pnlBas.SuspendLayout()
+        pnlComparaison.SuspendLayout()
+        tlpGrilles.SuspendLayout()
+        CType(dgvMagasins, ComponentModel.ISupportInitialize).BeginInit()
+        CType(dgvEquivalents, ComponentModel.ISupportInitialize).BeginInit()
+        pnlCompFiltres.SuspendLayout()
+        SuspendLayout()
+        ' 
+        ' pnlTitre
+        ' 
+        pnlTitre.BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        pnlTitre.Controls.Add(lblTitre)
+        pnlTitre.Dock = DockStyle.Top
+        pnlTitre.Location = New Point(0, 0)
+        pnlTitre.Margin = New Padding(3, 4, 3, 4)
+        pnlTitre.Name = "pnlTitre"
+        pnlTitre.Size = New Size(1257, 59)
+        pnlTitre.TabIndex = 0
+        ' 
+        ' lblTitre
+        ' 
         lblTitre.AutoSize = True
-        lblTitre.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblTitre.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblTitre.Location = New System.Drawing.Point(14, 10)
+        lblTitre.Font = New Font("Segoe UI", 18F, FontStyle.Bold)
+        lblTitre.ForeColor = Color.ForestGreen
+        lblTitre.Location = New Point(16, 13)
+        lblTitre.Name = "lblTitre"
+        lblTitre.Size = New Size(377, 41)
+        lblTitre.TabIndex = 0
         lblTitre.Text = "Analyses et comparaisons"
-        lblTitre.Name = "lblTitre"  ' Nom interne
-        lblTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'pnlIndice
-        '
-        pnlIndice.Controls.Add(lblIndiceTitre)  ' Place lblIndiceTitre dans pnlIndice
-        pnlIndice.Controls.Add(lblDepart)  ' Place lblDepart dans pnlIndice
-        pnlIndice.Controls.Add(dtpDepart)  ' Place dtpDepart dans pnlIndice
-        pnlIndice.Controls.Add(lblArrivee)  ' Place lblArrivee dans pnlIndice
-        pnlIndice.Controls.Add(dtpArrivee)  ' Place dtpArrivee dans pnlIndice
-        pnlIndice.Controls.Add(btnCalculer)  ' Place btnCalculer dans pnlIndice
-        pnlIndice.Controls.Add(lblIndiceValeur)  ' Place lblIndiceValeur dans pnlIndice
-        pnlIndice.Controls.Add(lblIndiceTexte)  ' Place lblIndiceTexte dans pnlIndice
-        pnlIndice.Controls.Add(lblIndiceNote)  ' Place lblIndiceNote dans pnlIndice
-        pnlIndice.BackColor = System.Drawing.Color.White
-        pnlIndice.Dock = System.Windows.Forms.DockStyle.Top
-        pnlIndice.Size = New System.Drawing.Size(100, 170)
-        pnlIndice.Name = "pnlIndice"  ' Nom interne
-        pnlIndice.TabIndex = 1  ' Ordre de tabulation
-        '
-        'lblIndiceTitre
-        '
+        ' 
+        ' pnlIndice
+        ' 
+        pnlIndice.BackColor = Color.White
+        pnlIndice.Controls.Add(lblIndiceTitre)
+        pnlIndice.Controls.Add(lblDepart)
+        pnlIndice.Controls.Add(dtpDepart)
+        pnlIndice.Controls.Add(lblArrivee)
+        pnlIndice.Controls.Add(dtpArrivee)
+        pnlIndice.Controls.Add(btnCalculer)
+        pnlIndice.Controls.Add(lblIndiceValeur)
+        pnlIndice.Controls.Add(lblIndiceTexte)
+        pnlIndice.Controls.Add(lblIndiceNote)
+        pnlIndice.Dock = DockStyle.Top
+        pnlIndice.Location = New Point(0, 59)
+        pnlIndice.Margin = New Padding(3, 4, 3, 4)
+        pnlIndice.Name = "pnlIndice"
+        pnlIndice.Size = New Size(1257, 227)
+        pnlIndice.TabIndex = 1
+        ' 
+        ' lblIndiceTitre
+        ' 
         lblIndiceTitre.AutoSize = True
-        lblIndiceTitre.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblIndiceTitre.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblIndiceTitre.Location = New System.Drawing.Point(18, 10)
-        lblIndiceTitre.Text = "Indice de prix personnel (base 100)"
-        lblIndiceTitre.Name = "lblIndiceTitre"  ' Nom interne
-        lblIndiceTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'lblDepart
-        '
+        lblIndiceTitre.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        lblIndiceTitre.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblIndiceTitre.Location = New Point(21, 13)
+        lblIndiceTitre.Name = "lblIndiceTitre"
+        lblIndiceTitre.Size = New Size(208, 23)
+        lblIndiceTitre.TabIndex = 0
+        lblIndiceTitre.Text = "Indice de prix personnel "
+        ' 
+        ' lblDepart
+        ' 
         lblDepart.AutoSize = True
-        lblDepart.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblDepart.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblDepart.Location = New System.Drawing.Point(18, 44)
+        lblDepart.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblDepart.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblDepart.Location = New Point(21, 59)
+        lblDepart.Name = "lblDepart"
+        lblDepart.Size = New Size(110, 19)
+        lblDepart.TabIndex = 1
         lblDepart.Text = "Date de départ"
-        lblDepart.Name = "lblDepart"  ' Nom interne
-        lblDepart.TabIndex = 1  ' Ordre de tabulation
-        '
-        'dtpDepart
-        '
-        dtpDepart.Format = System.Windows.Forms.DateTimePickerFormat.Short
-        dtpDepart.Location = New System.Drawing.Point(18, 64)
-        dtpDepart.Size = New System.Drawing.Size(120, 23)
-        dtpDepart.Name = "dtpDepart"  ' Nom interne
-        dtpDepart.TabIndex = 2  ' Ordre de tabulation
-        '
-        'lblArrivee
-        '
+        ' 
+        ' dtpDepart
+        ' 
+        dtpDepart.Format = DateTimePickerFormat.Short
+        dtpDepart.Location = New Point(21, 85)
+        dtpDepart.Margin = New Padding(3, 4, 3, 4)
+        dtpDepart.Name = "dtpDepart"
+        dtpDepart.Size = New Size(137, 27)
+        dtpDepart.TabIndex = 2
+        ' 
+        ' lblArrivee
+        ' 
         lblArrivee.AutoSize = True
-        lblArrivee.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblArrivee.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblArrivee.Location = New System.Drawing.Point(158, 44)
+        lblArrivee.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblArrivee.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblArrivee.Location = New Point(181, 59)
+        lblArrivee.Name = "lblArrivee"
+        lblArrivee.Size = New Size(105, 19)
+        lblArrivee.TabIndex = 3
         lblArrivee.Text = "Date d'arrivée"
-        lblArrivee.Name = "lblArrivee"  ' Nom interne
-        lblArrivee.TabIndex = 3  ' Ordre de tabulation
-        '
-        'dtpArrivee
-        '
-        dtpArrivee.Format = System.Windows.Forms.DateTimePickerFormat.Short
-        dtpArrivee.Location = New System.Drawing.Point(158, 64)
-        dtpArrivee.Size = New System.Drawing.Size(120, 23)
-        dtpArrivee.Name = "dtpArrivee"  ' Nom interne
-        dtpArrivee.TabIndex = 4  ' Ordre de tabulation
-        '
-        'btnCalculer
-        '
-        btnCalculer.BackColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnCalculer.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnCalculer.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnCalculer.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnCalculer.ForeColor = System.Drawing.Color.White
-        btnCalculer.Location = New System.Drawing.Point(298, 62)
-        btnCalculer.Size = New System.Drawing.Size(110, 30)
+        ' 
+        ' dtpArrivee
+        ' 
+        dtpArrivee.Format = DateTimePickerFormat.Short
+        dtpArrivee.Location = New Point(181, 85)
+        dtpArrivee.Margin = New Padding(3, 4, 3, 4)
+        dtpArrivee.Name = "dtpArrivee"
+        dtpArrivee.Size = New Size(137, 27)
+        dtpArrivee.TabIndex = 4
+        ' 
+        ' btnCalculer
+        ' 
+        btnCalculer.BackColor = Color.ForestGreen
+        btnCalculer.FlatAppearance.BorderColor = Color.LimeGreen
+        btnCalculer.FlatStyle = FlatStyle.Flat
+        btnCalculer.Font = New Font("Segoe UI", 8.5F, FontStyle.Bold)
+        btnCalculer.ForeColor = Color.White
+        btnCalculer.Location = New Point(341, 83)
+        btnCalculer.Margin = New Padding(3, 4, 3, 4)
+        btnCalculer.Name = "btnCalculer"
+        btnCalculer.Size = New Size(126, 40)
+        btnCalculer.TabIndex = 5
         btnCalculer.Text = "Calculer"
         btnCalculer.UseVisualStyleBackColor = False
-        btnCalculer.Name = "btnCalculer"  ' Nom interne
-        btnCalculer.TabIndex = 5  ' Ordre de tabulation
-        '
-        'lblIndiceValeur
-        '
+        ' 
+        ' lblIndiceValeur
+        ' 
         lblIndiceValeur.AutoSize = True
-        lblIndiceValeur.Font = New System.Drawing.Font("Segoe UI", 26.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblIndiceValeur.ForeColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        lblIndiceValeur.Location = New System.Drawing.Point(440, 34)
+        lblIndiceValeur.Font = New Font("Segoe UI", 26F, FontStyle.Bold)
+        lblIndiceValeur.ForeColor = Color.ForestGreen
+        lblIndiceValeur.Location = New Point(503, 45)
+        lblIndiceValeur.Name = "lblIndiceValeur"
+        lblIndiceValeur.Size = New Size(69, 60)
+        lblIndiceValeur.TabIndex = 6
         lblIndiceValeur.Text = "—"
-        lblIndiceValeur.Name = "lblIndiceValeur"  ' Nom interne
-        lblIndiceValeur.TabIndex = 6  ' Ordre de tabulation
-        '
-        'lblIndiceTexte
-        '
-        lblIndiceTexte.AutoSize = False
-        lblIndiceTexte.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-        lblIndiceTexte.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblIndiceTexte.Location = New System.Drawing.Point(440, 92)
-        lblIndiceTexte.Size = New System.Drawing.Size(600, 40)
-        lblIndiceTexte.Text = ""
-        lblIndiceTexte.Name = "lblIndiceTexte"  ' Nom interne
-        lblIndiceTexte.TabIndex = 7  ' Ordre de tabulation
-        '
-        'lblIndiceNote
-        '
-        lblIndiceNote.AutoSize = False
-        lblIndiceNote.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-        lblIndiceNote.ForeColor = System.Drawing.Color.FromArgb(90, 106, 98)
-        lblIndiceNote.Location = New System.Drawing.Point(18, 138)
-        lblIndiceNote.Size = New System.Drawing.Size(1000, 20)
-        lblIndiceNote.Text = ""
-        lblIndiceNote.Name = "lblIndiceNote"  ' Nom interne
-        lblIndiceNote.TabIndex = 8  ' Ordre de tabulation
-        '
-        'pnlBas
-        '
-        pnlBas.Controls.Add(lblAvertissement)  ' Place lblAvertissement dans pnlBas
-        pnlBas.BackColor = System.Drawing.Color.FromArgb(244, 247, 245)
-        pnlBas.Dock = System.Windows.Forms.DockStyle.Bottom
-        pnlBas.Size = New System.Drawing.Size(100, 34)
-        pnlBas.Name = "pnlBas"  ' Nom interne
-        pnlBas.TabIndex = 2  ' Ordre de tabulation
-        '
-        'lblAvertissement
-        '
-        lblAvertissement.AutoSize = False
-        lblAvertissement.Dock = System.Windows.Forms.DockStyle.Fill
-        lblAvertissement.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-        lblAvertissement.ForeColor = System.Drawing.Color.FromArgb(90, 106, 98)
-        lblAvertissement.Padding = New System.Windows.Forms.Padding(14, 0, 0, 0)
-        lblAvertissement.Text = ""
-        lblAvertissement.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        lblAvertissement.Name = "lblAvertissement"  ' Nom interne
-        lblAvertissement.TabIndex = 0  ' Ordre de tabulation
-        '
-        'pnlComparaison
-        '
-        pnlComparaison.Controls.Add(tlpGrilles)  ' Place tlpGrilles dans pnlComparaison
-        pnlComparaison.Controls.Add(pnlCompFiltres)  ' Place pnlCompFiltres dans pnlComparaison
-        pnlComparaison.BackColor = System.Drawing.Color.FromArgb(244, 247, 245)
-        pnlComparaison.Dock = System.Windows.Forms.DockStyle.Fill
-        pnlComparaison.Name = "pnlComparaison"  ' Nom interne
-        pnlComparaison.TabIndex = 3  ' Ordre de tabulation
-        '
-        'tlpGrilles
-        '
-        tlpGrilles.Controls.Add(lblTitreMagasins, 0, 0)  ' Place lblTitreMagasins dans la cellule (0, 0)
-        tlpGrilles.Controls.Add(lblTitreEquivalents, 1, 0)  ' Place lblTitreEquivalents dans la cellule (1, 0)
-        tlpGrilles.Controls.Add(dgvMagasins, 0, 1)  ' Place dgvMagasins dans la cellule (0, 1)
-        tlpGrilles.Controls.Add(dgvEquivalents, 1, 1)  ' Place dgvEquivalents dans la cellule (1, 1)
+        ' 
+        ' lblIndiceTexte
+        ' 
+        lblIndiceTexte.Font = New Font("Segoe UI", 9F)
+        lblIndiceTexte.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblIndiceTexte.Location = New Point(503, 123)
+        lblIndiceTexte.Name = "lblIndiceTexte"
+        lblIndiceTexte.Size = New Size(686, 53)
+        lblIndiceTexte.TabIndex = 7
+        ' 
+        ' lblIndiceNote
+        ' 
+        lblIndiceNote.Font = New Font("Segoe UI", 8F)
+        lblIndiceNote.ForeColor = Color.FromArgb(CByte(90), CByte(106), CByte(98))
+        lblIndiceNote.Location = New Point(21, 184)
+        lblIndiceNote.Name = "lblIndiceNote"
+        lblIndiceNote.Size = New Size(1143, 27)
+        lblIndiceNote.TabIndex = 8
+        ' 
+        ' pnlBas
+        ' 
+        pnlBas.BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        pnlBas.Controls.Add(lblAvertissement)
+        pnlBas.Dock = DockStyle.Bottom
+        pnlBas.Location = New Point(0, 808)
+        pnlBas.Margin = New Padding(3, 4, 3, 4)
+        pnlBas.Name = "pnlBas"
+        pnlBas.Size = New Size(1257, 45)
+        pnlBas.TabIndex = 2
+        ' 
+        ' lblAvertissement
+        ' 
+        lblAvertissement.Dock = DockStyle.Fill
+        lblAvertissement.Font = New Font("Segoe UI", 8F)
+        lblAvertissement.ForeColor = Color.FromArgb(CByte(90), CByte(106), CByte(98))
+        lblAvertissement.Location = New Point(0, 0)
+        lblAvertissement.Name = "lblAvertissement"
+        lblAvertissement.Padding = New Padding(16, 0, 0, 0)
+        lblAvertissement.Size = New Size(1257, 45)
+        lblAvertissement.TabIndex = 0
+        lblAvertissement.TextAlign = ContentAlignment.MiddleLeft
+        ' 
+        ' pnlComparaison
+        ' 
+        pnlComparaison.BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        pnlComparaison.Controls.Add(tlpGrilles)
+        pnlComparaison.Controls.Add(pnlCompFiltres)
+        pnlComparaison.Dock = DockStyle.Fill
+        pnlComparaison.Location = New Point(0, 286)
+        pnlComparaison.Margin = New Padding(3, 4, 3, 4)
+        pnlComparaison.Name = "pnlComparaison"
+        pnlComparaison.Size = New Size(1257, 522)
+        pnlComparaison.TabIndex = 3
+        ' 
+        ' tlpGrilles
+        ' 
         tlpGrilles.ColumnCount = 2
-        tlpGrilles.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        tlpGrilles.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
-        tlpGrilles.Dock = System.Windows.Forms.DockStyle.Fill
+        tlpGrilles.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50F))
+        tlpGrilles.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 50F))
+        tlpGrilles.Controls.Add(lblTitreMagasins, 0, 0)
+        tlpGrilles.Controls.Add(lblTitreEquivalents, 1, 0)
+        tlpGrilles.Controls.Add(dgvMagasins, 0, 1)
+        tlpGrilles.Controls.Add(dgvEquivalents, 1, 1)
+        tlpGrilles.Dock = DockStyle.Fill
+        tlpGrilles.Location = New Point(0, 99)
+        tlpGrilles.Margin = New Padding(3, 4, 3, 4)
+        tlpGrilles.Name = "tlpGrilles"
         tlpGrilles.RowCount = 2
-        tlpGrilles.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26.0!))
-        tlpGrilles.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        tlpGrilles.Name = "tlpGrilles"  ' Nom interne
-        tlpGrilles.TabIndex = 0  ' Ordre de tabulation
-        '
-        'pnlCompFiltres
-        '
-        pnlCompFiltres.Controls.Add(lblProduit)  ' Place lblProduit dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(cmbProduit)  ' Place cmbProduit dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(lblCategorie)  ' Place lblCategorie dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(cmbCategorie)  ' Place cmbCategorie dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(btnComparer)  ' Place btnComparer dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(btnEquivalents)  ' Place btnEquivalents dans pnlCompFiltres
-        pnlCompFiltres.Controls.Add(lblMessage)  ' Place lblMessage dans pnlCompFiltres
-        pnlCompFiltres.BackColor = System.Drawing.Color.White
-        pnlCompFiltres.Dock = System.Windows.Forms.DockStyle.Top
-        pnlCompFiltres.Size = New System.Drawing.Size(100, 74)
-        pnlCompFiltres.Name = "pnlCompFiltres"  ' Nom interne
-        pnlCompFiltres.TabIndex = 1  ' Ordre de tabulation
-        '
-        'lblProduit
-        '
+        tlpGrilles.RowStyles.Add(New RowStyle(SizeType.Absolute, 35F))
+        tlpGrilles.RowStyles.Add(New RowStyle(SizeType.Percent, 100F))
+        tlpGrilles.Size = New Size(1257, 423)
+        tlpGrilles.TabIndex = 0
+        ' 
+        ' lblTitreMagasins
+        ' 
+        lblTitreMagasins.AutoSize = True
+        lblTitreMagasins.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
+        lblTitreMagasins.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblTitreMagasins.Location = New Point(16, 8)
+        lblTitreMagasins.Margin = New Padding(16, 8, 3, 0)
+        lblTitreMagasins.Name = "lblTitreMagasins"
+        lblTitreMagasins.Size = New Size(187, 20)
+        lblTitreMagasins.TabIndex = 0
+        lblTitreMagasins.Text = "Classement des magasins"
+        ' 
+        ' lblTitreEquivalents
+        ' 
+        lblTitreEquivalents.AutoSize = True
+        lblTitreEquivalents.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
+        lblTitreEquivalents.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblTitreEquivalents.Location = New Point(644, 8)
+        lblTitreEquivalents.Margin = New Padding(16, 8, 3, 0)
+        lblTitreEquivalents.Name = "lblTitreEquivalents"
+        lblTitreEquivalents.Size = New Size(240, 20)
+        lblTitreEquivalents.TabIndex = 1
+        lblTitreEquivalents.Text = "Produits équivalents moins chers"
+        ' 
+        ' dgvMagasins
+        ' 
+        dgvMagasins.AllowUserToAddRows = False
+        dgvMagasins.AllowUserToDeleteRows = False
+        dgvMagasins.AllowUserToResizeRows = False
+        dgvMagasins.BackgroundColor = Color.White
+        dgvMagasins.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single
+        dgvMagasins.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
+        dgvMagasins.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        dgvMagasins.Dock = DockStyle.Fill
+        dgvMagasins.EnableHeadersVisualStyles = False
+        dgvMagasins.GridColor = Color.FromArgb(CByte(195), CByte(208), CByte(200))
+        dgvMagasins.Location = New Point(3, 39)
+        dgvMagasins.Margin = New Padding(3, 4, 3, 4)
+        dgvMagasins.MultiSelect = False
+        dgvMagasins.Name = "dgvMagasins"
+        dgvMagasins.ReadOnly = True
+        dgvMagasins.RowHeadersVisible = False
+        dgvMagasins.RowHeadersWidth = 51
+        dgvMagasins.RowTemplate.Height = 28
+        dgvMagasins.SelectionMode = DataGridViewSelectionMode.FullRowSelect
+        dgvMagasins.Size = New Size(622, 380)
+        dgvMagasins.TabIndex = 2
+        ' 
+        ' dgvEquivalents
+        ' 
+        dgvEquivalents.AllowUserToAddRows = False
+        dgvEquivalents.AllowUserToDeleteRows = False
+        dgvEquivalents.AllowUserToResizeRows = False
+        dgvEquivalents.BackgroundColor = Color.White
+        dgvEquivalents.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single
+        dgvEquivalents.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle2
+        dgvEquivalents.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        dgvEquivalents.Dock = DockStyle.Fill
+        dgvEquivalents.EnableHeadersVisualStyles = False
+        dgvEquivalents.GridColor = Color.FromArgb(CByte(195), CByte(208), CByte(200))
+        dgvEquivalents.Location = New Point(631, 39)
+        dgvEquivalents.Margin = New Padding(3, 4, 3, 4)
+        dgvEquivalents.MultiSelect = False
+        dgvEquivalents.Name = "dgvEquivalents"
+        dgvEquivalents.ReadOnly = True
+        dgvEquivalents.RowHeadersVisible = False
+        dgvEquivalents.RowHeadersWidth = 51
+        dgvEquivalents.RowTemplate.Height = 28
+        dgvEquivalents.SelectionMode = DataGridViewSelectionMode.FullRowSelect
+        dgvEquivalents.Size = New Size(623, 380)
+        dgvEquivalents.TabIndex = 3
+        ' 
+        ' pnlCompFiltres
+        ' 
+        pnlCompFiltres.BackColor = Color.White
+        pnlCompFiltres.Controls.Add(lblProduit)
+        pnlCompFiltres.Controls.Add(cmbProduit)
+        pnlCompFiltres.Controls.Add(lblCategorie)
+        pnlCompFiltres.Controls.Add(cmbCategorie)
+        pnlCompFiltres.Controls.Add(btnComparer)
+        pnlCompFiltres.Controls.Add(btnEquivalents)
+        pnlCompFiltres.Controls.Add(lblMessage)
+        pnlCompFiltres.Dock = DockStyle.Top
+        pnlCompFiltres.Location = New Point(0, 0)
+        pnlCompFiltres.Margin = New Padding(3, 4, 3, 4)
+        pnlCompFiltres.Name = "pnlCompFiltres"
+        pnlCompFiltres.Size = New Size(1257, 99)
+        pnlCompFiltres.TabIndex = 1
+        ' 
+        ' lblProduit
+        ' 
         lblProduit.AutoSize = True
-        lblProduit.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblProduit.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblProduit.Location = New System.Drawing.Point(18, 10)
+        lblProduit.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblProduit.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblProduit.Location = New Point(21, 13)
+        lblProduit.Name = "lblProduit"
+        lblProduit.Size = New Size(59, 19)
+        lblProduit.TabIndex = 0
         lblProduit.Text = "Produit"
-        lblProduit.Name = "lblProduit"  ' Nom interne
-        lblProduit.TabIndex = 0  ' Ordre de tabulation
-        '
-        'cmbProduit
-        '
-        cmbProduit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        ' 
+        ' cmbProduit
+        ' 
+        cmbProduit.DropDownStyle = ComboBoxStyle.DropDownList
         cmbProduit.FormattingEnabled = True
-        cmbProduit.Location = New System.Drawing.Point(18, 30)
-        cmbProduit.Size = New System.Drawing.Size(250, 23)
-        cmbProduit.Name = "cmbProduit"  ' Nom interne
-        cmbProduit.TabIndex = 1  ' Ordre de tabulation
-        '
-        'lblCategorie
-        '
+        cmbProduit.Location = New Point(21, 40)
+        cmbProduit.Margin = New Padding(3, 4, 3, 4)
+        cmbProduit.Name = "cmbProduit"
+        cmbProduit.Size = New Size(285, 28)
+        cmbProduit.TabIndex = 1
+        ' 
+        ' lblCategorie
+        ' 
         lblCategorie.AutoSize = True
-        lblCategorie.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblCategorie.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblCategorie.Location = New System.Drawing.Point(288, 10)
+        lblCategorie.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblCategorie.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblCategorie.Location = New Point(329, 13)
+        lblCategorie.Name = "lblCategorie"
+        lblCategorie.Size = New Size(94, 19)
+        lblCategorie.TabIndex = 2
         lblCategorie.Text = "ou catégorie"
-        lblCategorie.Name = "lblCategorie"  ' Nom interne
-        lblCategorie.TabIndex = 2  ' Ordre de tabulation
-        '
-        'cmbCategorie
-        '
-        cmbCategorie.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        ' 
+        ' cmbCategorie
+        ' 
+        cmbCategorie.DropDownStyle = ComboBoxStyle.DropDownList
         cmbCategorie.FormattingEnabled = True
-        cmbCategorie.Location = New System.Drawing.Point(288, 30)
-        cmbCategorie.Size = New System.Drawing.Size(200, 23)
-        cmbCategorie.Name = "cmbCategorie"  ' Nom interne
-        cmbCategorie.TabIndex = 3  ' Ordre de tabulation
-        '
-        'btnComparer
-        '
-        btnComparer.BackColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnComparer.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnComparer.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnComparer.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnComparer.ForeColor = System.Drawing.Color.White
-        btnComparer.Location = New System.Drawing.Point(508, 28)
-        btnComparer.Size = New System.Drawing.Size(150, 30)
+        cmbCategorie.Location = New Point(329, 40)
+        cmbCategorie.Margin = New Padding(3, 4, 3, 4)
+        cmbCategorie.Name = "cmbCategorie"
+        cmbCategorie.Size = New Size(228, 28)
+        cmbCategorie.TabIndex = 3
+        ' 
+        ' btnComparer
+        ' 
+        btnComparer.BackColor = Color.ForestGreen
+        btnComparer.FlatAppearance.BorderColor = Color.ForestGreen
+        btnComparer.FlatStyle = FlatStyle.Flat
+        btnComparer.Font = New Font("Segoe UI", 8.5F, FontStyle.Bold)
+        btnComparer.ForeColor = Color.White
+        btnComparer.Location = New Point(581, 37)
+        btnComparer.Margin = New Padding(3, 4, 3, 4)
+        btnComparer.Name = "btnComparer"
+        btnComparer.Size = New Size(171, 40)
+        btnComparer.TabIndex = 4
         btnComparer.Text = "Comparer magasins"
         btnComparer.UseVisualStyleBackColor = False
-        btnComparer.Name = "btnComparer"  ' Nom interne
-        btnComparer.TabIndex = 4  ' Ordre de tabulation
-        '
-        'btnEquivalents
-        '
-        btnEquivalents.BackColor = System.Drawing.Color.White
-        btnEquivalents.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnEquivalents.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEquivalents.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnEquivalents.ForeColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEquivalents.Location = New System.Drawing.Point(668, 28)
-        btnEquivalents.Size = New System.Drawing.Size(200, 30)
+        ' 
+        ' btnEquivalents
+        ' 
+        btnEquivalents.BackColor = Color.White
+        btnEquivalents.FlatAppearance.BorderColor = Color.ForestGreen
+        btnEquivalents.FlatStyle = FlatStyle.Flat
+        btnEquivalents.Font = New Font("Segoe UI", 8.5F, FontStyle.Bold)
+        btnEquivalents.ForeColor = Color.ForestGreen
+        btnEquivalents.Location = New Point(763, 37)
+        btnEquivalents.Margin = New Padding(3, 4, 3, 4)
+        btnEquivalents.Name = "btnEquivalents"
+        btnEquivalents.Size = New Size(229, 40)
+        btnEquivalents.TabIndex = 5
         btnEquivalents.Text = "Voir équivalents moins chers"
         btnEquivalents.UseVisualStyleBackColor = False
-        btnEquivalents.Name = "btnEquivalents"  ' Nom interne
-        btnEquivalents.TabIndex = 5  ' Ordre de tabulation
-        '
-        'lblTitreMagasins
-        '
-        lblTitreMagasins.AutoSize = True
-        lblTitreMagasins.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblTitreMagasins.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblTitreMagasins.Text = "Classement des magasins"
-        lblTitreMagasins.Margin = New System.Windows.Forms.Padding(14, 6, 3, 0)
-        lblTitreMagasins.Name = "lblTitreMagasins"  ' Nom interne
-        lblTitreMagasins.TabIndex = 0  ' Ordre de tabulation
-        '
-        'lblTitreEquivalents
-        '
-        lblTitreEquivalents.AutoSize = True
-        lblTitreEquivalents.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblTitreEquivalents.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblTitreEquivalents.Text = "Produits équivalents moins chers"
-        lblTitreEquivalents.Margin = New System.Windows.Forms.Padding(14, 6, 3, 0)
-        lblTitreEquivalents.Name = "lblTitreEquivalents"  ' Nom interne
-        lblTitreEquivalents.TabIndex = 1  ' Ordre de tabulation
-        '
-        'dgvMagasins
-        '
-        dgvMagasins.AllowUserToAddRows = False  ' Lecture seule : pas d'ajout par l'utilisateur
-        dgvMagasins.AllowUserToDeleteRows = False  ' Pas de suppression
-        dgvMagasins.AllowUserToResizeRows = False  ' Hauteur des lignes fixe
-        dgvMagasins.AutoGenerateColumns = False  ' Colonnes définies à la main ci-dessous
-        dgvMagasins.BackgroundColor = System.Drawing.Color.White  ' Fond blanc
-        dgvMagasins.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle  ' Fine bordure
-        dgvMagasins.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Single  ' Quadrillage complet
-        dgvMagasins.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single  ' En-têtes avec bordure simple
-        dgvMagasins.ColumnHeadersDefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.BackColor = System.Drawing.Color.FromArgb(227, 237, 230), .ForeColor = System.Drawing.Color.FromArgb(23, 38, 31), .Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point), .SelectionBackColor = System.Drawing.Color.FromArgb(227, 237, 230), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' En-tête vert très clair
-        dgvMagasins.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize  ' Hauteur d'en-tête automatique
-        dgvMagasins.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {colMProduit, colMMagasin, colMPrix, colMDate, colMEcart})  ' Ajoute les colonnes dans l'ordre de la maquette
-        dgvMagasins.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.SelectionBackColor = System.Drawing.Color.FromArgb(221, 235, 226), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' Ligne sélectionnée : vert clair
-        dgvMagasins.Dock = System.Windows.Forms.DockStyle.Fill  ' Occupe tout l'espace restant
-        dgvMagasins.EnableHeadersVisualStyles = False  ' Obligatoire pour appliquer la couleur d'en-tête
-        dgvMagasins.GridColor = System.Drawing.Color.FromArgb(195, 208, 200)  ' Couleur du quadrillage
-        dgvMagasins.Location = New System.Drawing.Point(0, 0)  ' Position (recalculée par Dock)
-        dgvMagasins.MultiSelect = False  ' Une seule ligne sélectionnée
-        dgvMagasins.ReadOnly = True  ' Lecture seule
-        dgvMagasins.RowHeadersVisible = False  ' Cache la colonne grise de gauche
-        dgvMagasins.RowTemplate.Height = 28  ' Hauteur des lignes : 28 px
-        dgvMagasins.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect  ' Un clic sélectionne la ligne
-        dgvMagasins.Size = New System.Drawing.Size(300, 200)  ' Taille (recalculée par Dock)
-        dgvMagasins.TabIndex = 2  ' Ordre de tabulation
-        '
-        'colMProduit
-        '
-        colMProduit.DataPropertyName = "Produit"  ' Propriété de la ligne affichée
-        colMProduit.FillWeight = 30.0!  ' Largeur relative
-        colMProduit.HeaderText = "Produit"  ' Titre de la colonne
-        colMProduit.Name = "colMProduit"  ' Nom interne
-        colMProduit.ReadOnly = True  ' Lecture seule
-        colMProduit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colMMagasin
-        '
-        colMMagasin.DataPropertyName = "Magasin"  ' Propriété de la ligne affichée
-        colMMagasin.FillWeight = 22.0!  ' Largeur relative
-        colMMagasin.HeaderText = "Magasin"  ' Titre de la colonne
-        colMMagasin.Name = "colMMagasin"  ' Nom interne
-        colMMagasin.ReadOnly = True  ' Lecture seule
-        colMMagasin.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colMPrix
-        '
-        colMPrix.DataPropertyName = "PrixTexte"  ' Propriété de la ligne affichée
-        colMPrix.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight}  ' Nombres alignés à droite
-        colMPrix.FillWeight = 20.0!  ' Largeur relative
-        colMPrix.HeaderText = "Prix unitaire"  ' Titre de la colonne
-        colMPrix.Name = "colMPrix"  ' Nom interne
-        colMPrix.ReadOnly = True  ' Lecture seule
-        colMPrix.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colMDate
-        '
-        colMDate.DataPropertyName = "DateTexte"  ' Propriété de la ligne affichée
-        colMDate.FillWeight = 16.0!  ' Largeur relative
-        colMDate.HeaderText = "Dernière obs."  ' Titre de la colonne
-        colMDate.Name = "colMDate"  ' Nom interne
-        colMDate.ReadOnly = True  ' Lecture seule
-        colMDate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colMEcart
-        '
-        colMEcart.DataPropertyName = "EcartTexte"  ' Propriété de la ligne affichée
-        colMEcart.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight}  ' Nombres alignés à droite
-        colMEcart.FillWeight = 14.0!  ' Largeur relative
-        colMEcart.HeaderText = "Écart"  ' Titre de la colonne
-        colMEcart.Name = "colMEcart"  ' Nom interne
-        colMEcart.ReadOnly = True  ' Lecture seule
-        colMEcart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'dgvEquivalents
-        '
-        dgvEquivalents.AllowUserToAddRows = False  ' Lecture seule : pas d'ajout par l'utilisateur
-        dgvEquivalents.AllowUserToDeleteRows = False  ' Pas de suppression
-        dgvEquivalents.AllowUserToResizeRows = False  ' Hauteur des lignes fixe
-        dgvEquivalents.AutoGenerateColumns = False  ' Colonnes définies à la main ci-dessous
-        dgvEquivalents.BackgroundColor = System.Drawing.Color.White  ' Fond blanc
-        dgvEquivalents.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle  ' Fine bordure
-        dgvEquivalents.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Single  ' Quadrillage complet
-        dgvEquivalents.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single  ' En-têtes avec bordure simple
-        dgvEquivalents.ColumnHeadersDefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.BackColor = System.Drawing.Color.FromArgb(227, 237, 230), .ForeColor = System.Drawing.Color.FromArgb(23, 38, 31), .Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point), .SelectionBackColor = System.Drawing.Color.FromArgb(227, 237, 230), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' En-tête vert très clair
-        dgvEquivalents.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize  ' Hauteur d'en-tête automatique
-        dgvEquivalents.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {colEProduit, colEMagasin, colEPrix, colEEconomie})  ' Ajoute les colonnes dans l'ordre de la maquette
-        dgvEquivalents.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.SelectionBackColor = System.Drawing.Color.FromArgb(221, 235, 226), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' Ligne sélectionnée : vert clair
-        dgvEquivalents.Dock = System.Windows.Forms.DockStyle.Fill  ' Occupe tout l'espace restant
-        dgvEquivalents.EnableHeadersVisualStyles = False  ' Obligatoire pour appliquer la couleur d'en-tête
-        dgvEquivalents.GridColor = System.Drawing.Color.FromArgb(195, 208, 200)  ' Couleur du quadrillage
-        dgvEquivalents.Location = New System.Drawing.Point(0, 0)  ' Position (recalculée par Dock)
-        dgvEquivalents.MultiSelect = False  ' Une seule ligne sélectionnée
-        dgvEquivalents.ReadOnly = True  ' Lecture seule
-        dgvEquivalents.RowHeadersVisible = False  ' Cache la colonne grise de gauche
-        dgvEquivalents.RowTemplate.Height = 28  ' Hauteur des lignes : 28 px
-        dgvEquivalents.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect  ' Un clic sélectionne la ligne
-        dgvEquivalents.Size = New System.Drawing.Size(300, 200)  ' Taille (recalculée par Dock)
-        dgvEquivalents.TabIndex = 3  ' Ordre de tabulation
-        '
-        'colEProduit
-        '
-        colEProduit.DataPropertyName = "Produit"  ' Propriété de la ligne affichée
-        colEProduit.FillWeight = 38.0!  ' Largeur relative
-        colEProduit.HeaderText = "Produit"  ' Titre de la colonne
-        colEProduit.Name = "colEProduit"  ' Nom interne
-        colEProduit.ReadOnly = True  ' Lecture seule
-        colEProduit.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colEMagasin
-        '
-        colEMagasin.DataPropertyName = "Magasin"  ' Propriété de la ligne affichée
-        colEMagasin.FillWeight = 24.0!  ' Largeur relative
-        colEMagasin.HeaderText = "Magasin"  ' Titre de la colonne
-        colEMagasin.Name = "colEMagasin"  ' Nom interne
-        colEMagasin.ReadOnly = True  ' Lecture seule
-        colEMagasin.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colEPrix
-        '
-        colEPrix.DataPropertyName = "PrixTexte"  ' Propriété de la ligne affichée
-        colEPrix.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight}  ' Nombres alignés à droite
-        colEPrix.FillWeight = 22.0!  ' Largeur relative
-        colEPrix.HeaderText = "Prix unitaire"  ' Titre de la colonne
-        colEPrix.Name = "colEPrix"  ' Nom interne
-        colEPrix.ReadOnly = True  ' Lecture seule
-        colEPrix.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colEEconomie
-        '
-        colEEconomie.DataPropertyName = "EconomieTexte"  ' Propriété de la ligne affichée
-        colEEconomie.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight}  ' Nombres alignés à droite
-        colEEconomie.FillWeight = 16.0!  ' Largeur relative
-        colEEconomie.HeaderText = "Économie"  ' Titre de la colonne
-        colEEconomie.Name = "colEEconomie"  ' Nom interne
-        colEEconomie.ReadOnly = True  ' Lecture seule
-        colEEconomie.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'lblMessage
-        '
+        ' 
+        ' lblMessage
+        ' 
         lblMessage.AutoSize = True
-        lblMessage.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-        lblMessage.ForeColor = System.Drawing.Color.FromArgb(90, 106, 98)
-        lblMessage.Location = New System.Drawing.Point(18, 56)
-        lblMessage.Text = ""
-        lblMessage.Name = "lblMessage"  ' Nom interne
-        lblMessage.TabIndex = 6  ' Ordre de tabulation
-        '
-        'frmAnalyses
-        '
-        AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)  ' Dimensions de référence (DPI)
-        AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font  ' S'adapte à la police de l'écran
-        BackColor = System.Drawing.Color.FromArgb(244, 247, 245)  ' Fond gris très clair
-        ClientSize = New System.Drawing.Size(1100, 640)  ' Taille intérieure
-        Controls.Add(pnlComparaison)  ' Ajoute pnlComparaison (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlBas)  ' Ajoute pnlBas (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlIndice)  ' Ajoute pnlIndice (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlTitre)  ' Ajoute pnlTitre (le contrôle Fill d'abord, puis les bords)
-        MinimumSize = New System.Drawing.Size(1116, 520)  ' Taille minimale
-        Name = "frmAnalyses"  ' Nom interne
-        StartPosition = System.Windows.Forms.FormStartPosition.CenterParent  ' Centrée sur la fenêtre parente
-        Text = "Analyses et comparaisons"  ' Titre de la fenêtre
-        pnlTitre.ResumeLayout(False)  ' Reprend la mise en page de pnlTitre
-        pnlTitre.PerformLayout()  ' Applique la mise en page
-        pnlIndice.ResumeLayout(False)  ' Reprend la mise en page de pnlIndice
-        pnlIndice.PerformLayout()  ' Applique la mise en page
-        pnlBas.ResumeLayout(False)  ' Reprend la mise en page de pnlBas
-        pnlBas.PerformLayout()  ' Applique la mise en page
-        pnlComparaison.ResumeLayout(False)  ' Reprend la mise en page de pnlComparaison
-        pnlComparaison.PerformLayout()  ' Applique la mise en page
-        tlpGrilles.ResumeLayout(False)  ' Reprend la mise en page de tlpGrilles
-        tlpGrilles.PerformLayout()  ' Applique la mise en page
-        pnlCompFiltres.ResumeLayout(False)  ' Reprend la mise en page de pnlCompFiltres
-        pnlCompFiltres.PerformLayout()  ' Applique la mise en page
-        CType(dgvMagasins, System.ComponentModel.ISupportInitialize).EndInit()  ' Fin de l'initialisation de la grille
-        CType(dgvEquivalents, System.ComponentModel.ISupportInitialize).EndInit()  ' Fin de l'initialisation de la grille
-        ResumeLayout(False)  ' Reprend la mise en page du formulaire
+        lblMessage.Font = New Font("Segoe UI", 8F)
+        lblMessage.ForeColor = Color.FromArgb(CByte(90), CByte(106), CByte(98))
+        lblMessage.Location = New Point(21, 75)
+        lblMessage.Name = "lblMessage"
+        lblMessage.Size = New Size(0, 19)
+        lblMessage.TabIndex = 6
+        ' 
+        ' frmAnalyses
+        ' 
+        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleMode = AutoScaleMode.Font
+        BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        ClientSize = New Size(1257, 853)
+        Controls.Add(pnlComparaison)
+        Controls.Add(pnlBas)
+        Controls.Add(pnlIndice)
+        Controls.Add(pnlTitre)
+        Margin = New Padding(3, 4, 3, 4)
+        MinimumSize = New Size(1273, 678)
+        Name = "frmAnalyses"
+        StartPosition = FormStartPosition.CenterParent
+        Text = "Analyses et comparaisons"
+        pnlTitre.ResumeLayout(False)
+        pnlTitre.PerformLayout()
+        pnlIndice.ResumeLayout(False)
+        pnlIndice.PerformLayout()
+        pnlBas.ResumeLayout(False)
+        pnlComparaison.ResumeLayout(False)
+        tlpGrilles.ResumeLayout(False)
+        tlpGrilles.PerformLayout()
+        CType(dgvMagasins, ComponentModel.ISupportInitialize).EndInit()
+        CType(dgvEquivalents, ComponentModel.ISupportInitialize).EndInit()
+        pnlCompFiltres.ResumeLayout(False)
+        pnlCompFiltres.PerformLayout()
+        ResumeLayout(False)
     End Sub  ' Fin de InitializeComponent
 
     Friend WithEvents pnlTitre As System.Windows.Forms.Panel  ' Bandeau du titre

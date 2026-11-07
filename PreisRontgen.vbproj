@@ -26,7 +26,9 @@
     <PackageReference Include="NPOI" Version="2.8.1" />
     <PackageReference Include="NUnit" Version="5.0.0" />
     <PackageReference Include="xunit.assert" Version="2.9.2" />
-    <PackageReference Include="xunit.extensibility.core" Version="2.9.2" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.14" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup>

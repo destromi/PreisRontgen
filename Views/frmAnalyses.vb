@@ -108,7 +108,8 @@ Public Class frmAnalyses                           ' Début de la classe (Partia
         End If                                       ' Fin de la validation
 
         Try                                          ' Début du bloc surveillé
-            Dim r As ResultatIndice = _indice.Calculer(dtpDepart.Value.Date, dtpArrivee.Value.Date)   ' Calcule l'indice
+            SessionIndice.resultat = _indice.Calculer(dtpDepart.Value.Date, dtpArrivee.Value.Date)   ' Calcule l'indice
+            Dim r As ResultatIndice = SessionIndice.resultat
             If r.Indice.HasValue Then                ' Calcul réussi
                 Dim valeur As Decimal = r.Indice.Value   ' Indice (base 100)
                 lblIndiceValeur.Text = valeur.ToString("0.00")   ' Affiche la valeur

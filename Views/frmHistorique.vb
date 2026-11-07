@@ -143,7 +143,7 @@ Public Class frmHistorique                         ' Début de la classe (Partia
         Rafraichir()                               ' Recharge l'écran
     End Sub                                        ' Fin du gestionnaire
 
-    Private Sub pnlGraphique_Paint(sender As Object, e As PaintEventArgs) Handles pnlGraphique.Paint   ' Windows demande de dessiner le graphique
+    Private Sub pnlGraphique_Paint(sender As Object, e As PaintEventArgs)   ' Windows demande de dessiner le graphique
         Dessiner(e.Graphics, pnlGraphique.ClientRectangle)   ' Dessine dans la zone du panneau
     End Sub                                        ' Fin du gestionnaire
 

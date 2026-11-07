@@ -9,6 +9,8 @@ Public Class MainForm
     Private referentiel As Referentiels
     Private alerte As frmAlertes
     Private ticket As FrmTickets
+    Private historique As frmHistorique
+    Private analyse As frmAnalyses
     Private Sub BtnAccueil_Click(sender As Object, e As EventArgs) Handles BtnAccueil.Click
         'BtnAccueil.BackColor = Color.White
         'BtnAccueil.ForeColor = Color.ForestGreen
@@ -116,6 +118,36 @@ Public Class MainForm
             ticket.BringToFront()
         Else
             ticket.BringToFront()
+        End If
+    End Sub
+
+    Private Sub BtnHistorique_Click(sender As Object, e As EventArgs) Handles BtnHistorique.Click
+        BtnColor("BtnHistorique")
+        If historique Is Nothing Then
+            historique = New frmHistorique
+            historique.TopLevel = False
+            historique.FormBorderStyle = FormBorderStyle.None
+            historique.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(historique)
+            historique.Show()
+            historique.BringToFront()
+        Else
+            historique.BringToFront()
+        End If
+    End Sub
+
+    Private Sub BtnAnalyses_Click(sender As Object, e As EventArgs) Handles BtnAnalyses.Click
+        BtnColor("BtnAnalyses")
+        If analyse Is Nothing Then
+            analyse = New frmAnalyses
+            analyse.TopLevel = False
+            analyse.FormBorderStyle = FormBorderStyle.None
+            analyse.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(analyse)
+            analyse.Show()
+            analyse.BringToFront()
+        Else
+            analyse.BringToFront()
         End If
     End Sub
 End Class

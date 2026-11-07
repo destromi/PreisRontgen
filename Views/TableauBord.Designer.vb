@@ -22,9 +22,9 @@ Partial Class TableauBord
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle6 As DataGridViewCellStyle = New DataGridViewCellStyle()
         DataGridView1 = New DataGridView()
         ColCateg = New DataGridViewTextBoxColumn()
         ColMont1 = New DataGridViewTextBoxColumn()
@@ -37,8 +37,8 @@ Partial Class TableauBord
         LabelAlertesTotal = New Label()
         LabelAlertes = New Label()
         Panel2 = New Panel()
-        Label4 = New Label()
         LabelIndice = New Label()
+        LabelIndiceTitre = New Label()
         DataGridView2 = New DataGridView()
         ColDep = New DataGridViewTextBoxColumn()
         ColMont2 = New DataGridViewTextBoxColumn()
@@ -80,8 +80,8 @@ Partial Class TableauBord
         ' 
         ' ColMont1
         ' 
-        DataGridViewCellStyle1.Format = "#,##0 ""FCFA"""
-        ColMont1.DefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle4.Format = "#,##0 ""FCFA"""
+        ColMont1.DefaultCellStyle = DataGridViewCellStyle4
         ColMont1.HeaderText = "Montant"
         ColMont1.MinimumWidth = 6
         ColMont1.Name = "ColMont1"
@@ -188,8 +188,8 @@ Partial Class TableauBord
         ' 
         Panel2.BackColor = Color.White
         Panel2.BorderStyle = BorderStyle.FixedSingle
-        Panel2.Controls.Add(Label4)
         Panel2.Controls.Add(LabelIndice)
+        Panel2.Controls.Add(LabelIndiceTitre)
         Panel2.Dock = DockStyle.Fill
         Panel2.Font = New Font("Bookman Old Style", 9F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
         Panel2.Location = New Point(890, 0)
@@ -198,28 +198,28 @@ Partial Class TableauBord
         Panel2.Size = New Size(421, 150)
         Panel2.TabIndex = 2
         ' 
-        ' Label4
-        ' 
-        Label4.AutoSize = True
-        Label4.Font = New Font("Segoe UI", 22.2F, FontStyle.Bold)
-        Label4.ForeColor = Color.ForestGreen
-        Label4.Location = New Point(3, 59)
-        Label4.Name = "Label4"
-        Label4.Size = New Size(116, 50)
-        Label4.TabIndex = 1
-        Label4.Text = "103,5"
-        ' 
         ' LabelIndice
         ' 
         LabelIndice.AutoSize = True
-        LabelIndice.BackColor = Color.White
-        LabelIndice.Font = New Font("Segoe UI", 9F)
-        LabelIndice.ForeColor = Color.DimGray
-        LabelIndice.Location = New Point(3, 13)
+        LabelIndice.Font = New Font("Segoe UI", 22.2F, FontStyle.Bold)
+        LabelIndice.ForeColor = Color.ForestGreen
+        LabelIndice.Location = New Point(3, 59)
         LabelIndice.Name = "LabelIndice"
-        LabelIndice.Size = New Size(118, 20)
-        LabelIndice.TabIndex = 0
-        LabelIndice.Text = "Indice personnel"
+        LabelIndice.Size = New Size(116, 50)
+        LabelIndice.TabIndex = 1
+        LabelIndice.Text = "103,5"
+        ' 
+        ' LabelIndiceTitre
+        ' 
+        LabelIndiceTitre.AutoSize = True
+        LabelIndiceTitre.BackColor = Color.White
+        LabelIndiceTitre.Font = New Font("Segoe UI", 9F)
+        LabelIndiceTitre.ForeColor = Color.DimGray
+        LabelIndiceTitre.Location = New Point(3, 13)
+        LabelIndiceTitre.Name = "LabelIndiceTitre"
+        LabelIndiceTitre.Size = New Size(118, 20)
+        LabelIndiceTitre.TabIndex = 0
+        LabelIndiceTitre.Text = "Indice personnel"
         ' 
         ' DataGridView2
         ' 
@@ -245,16 +245,16 @@ Partial Class TableauBord
         ' 
         ' ColMont2
         ' 
-        DataGridViewCellStyle2.Format = "#,##0 ""FCFA"""
-        ColMont2.DefaultCellStyle = DataGridViewCellStyle2
+        DataGridViewCellStyle5.Format = "#,##0 ""FCFA"""
+        ColMont2.DefaultCellStyle = DataGridViewCellStyle5
         ColMont2.HeaderText = "Montant"
         ColMont2.MinimumWidth = 6
         ColMont2.Name = "ColMont2"
         ' 
         ' ColEchean
         ' 
-        DataGridViewCellStyle3.Format = """dd/MM/yyyy"""
-        ColEchean.DefaultCellStyle = DataGridViewCellStyle3
+        DataGridViewCellStyle6.Format = """dd/MM/yyyy"""
+        ColEchean.DefaultCellStyle = DataGridViewCellStyle6
         ColEchean.HeaderText = "Echéance"
         ColEchean.MinimumWidth = 6
         ColEchean.Name = "ColEchean"
@@ -354,8 +354,8 @@ Partial Class TableauBord
     Friend WithEvents LabelAlertesTotal As Label
     Friend WithEvents LabelAlertes As Label
     Friend WithEvents Panel2 As Panel
-    Friend WithEvents Label4 As Label
     Friend WithEvents LabelIndice As Label
+    Friend WithEvents LabelIndiceTitre As Label
     Friend WithEvents DataGridView1 As DataGridView
     Friend WithEvents DataGridView2 As DataGridView
     Friend WithEvents Label2 As Label

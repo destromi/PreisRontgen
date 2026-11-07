@@ -14,21 +14,15 @@ Public Class TableauBord
         DataGridView2.DataSource = TB.EcheanceTotal(Session.user.Id, Date.Now)
         LabelDepenseTotal.Text = depense & " FCFA"
         LabelAlertesTotal.Text = nombrealerte
-        LabelIndice.Text = 0
+        LabelIndice.Text = SessionIndice.resultat.Indice.Value.ToString("0.00")
     End Sub
 
-    Private Sub DataGridView2_CellContentClick(sender As Object, e As DataGridViewCellEventArgs)
-
-    End Sub
-
-    Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs)
-
-    End Sub
 
     Private Sub BtnActualiser_Click(sender As Object, e As EventArgs) Handles BtnActualiser.Click
         depense = TB.DepenseTotal(Session.user.Id)
         nombrealerte = TB.AlerteNonLue(Session.user.Id)
         DataGridView1.DataSource = TB.DepenseCategorie(Session.user.Id, Date.Now)
         DataGridView2.DataSource = TB.EcheanceTotal(Session.user.Id, Date.Now)
+        LabelIndice.Text = SessionIndice.resultat.Indice.Value.ToString("0.00")
     End Sub
 End Class

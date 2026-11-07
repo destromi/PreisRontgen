@@ -26,12 +26,18 @@ Namespace Models      ' Espace de noms : PreisRontgen.Models
         Public Property IdProduit As Integer   ' Produit concerné par l'alerte
 
         ''' <summary>
-        ''' Observation de prix à l'origine de l'alerte (colonne id_observation de la table alerte).
-        ''' L'observation doit déjà être enregistrée (Id &gt; 0) avant l'analyse.
+        ''' Observation de prix à l'origine de l'alerte. Information de travail : elle n'est pas stockée
+        ''' dans la table alerte du schéma final (qui garde id_magasin, prix_precedent et prix_actuel).
         ''' </summary>
-        Public Property IdObservation As Integer   ' Clé étrangère vers observation_prix ; le magasin de l'alerte se déduit de cette observation
+        Public Property IdObservation As Integer   ' Utile en mémoire (tests, démonstration) ; non enregistrée en base
 
-        Public Property IdMagasin As Integer   ' Magasin concerné par l'alerte
+        Public Property IdMagasin As Integer   ' Magasin concerné par l'alerte (colonne id_magasin)
+
+        ''' <summary>Prix unitaire de l'observation précédente (colonne prix_precedent).</summary>
+        Public Property PrixPrecedent As Decimal   ' Prix par kg, L ou pièce avant la variation
+
+        ''' <summary>Prix unitaire de la nouvelle observation (colonne prix_actuel).</summary>
+        Public Property PrixActuel As Decimal      ' Prix par kg, L ou pièce après la variation
 
         Public Property Type As TypeAlerte     ' Hausse ou Shrinkflation
 

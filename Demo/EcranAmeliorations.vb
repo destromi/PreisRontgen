@@ -185,7 +185,8 @@ Public Class EcranAmeliorations                ' Début de la classe
             CreerObs(2, 1040D, aujourdhui.AddDays(-50)),    ' Il y a 50 jours : 1 040 (+4,0 %)
             CreerObs(3, 1075D, aujourdhui.AddDays(-20))     ' Il y a 20 jours : 1 075 (+3,4 %)
         })                                     ' Trois petites hausses de suite
-        Dim service As New DetectionService(lecteur, New DepotDemo(), New ParametresDetection())   ' Vrai service, faux stockage
+        Dim parametres As New ParametresDetection With {.HausseCumuleeActive = True}   ' Amélioration facultative : activée pour la démonstration (désactivée par défaut)
+        Dim service As New DetectionService(lecteur, New DepotDemo(), parametres)   ' Vrai service, faux stockage
         Dim nouvelle As Observation = CreerObs(99, 1115D, aujourdhui)   ' Aujourd'hui : 1 115 (+3,7 % seulement par rapport au dernier)
 
         Dim alertes As List(Of Alerte) = service.Analyser(nouvelle)   ' Lance l'analyse

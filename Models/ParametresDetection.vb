@@ -28,6 +28,12 @@ Namespace Models      ' Espace de noms : PreisRontgen.Models
         ''' <summary>Baisse minimale du conditionnement (au moins égale) pour déclencher une alerte de shrinkflation.</summary>
         Public Property SeuilShrinkflation As Decimal = SeuilShrinkflationParDefaut   ' Seuil actuel, initialisé à 3 % mais modifiable
 
+        ''' <summary>
+        ''' Active la hausse cumulée (amélioration facultative, absente du cahier des charges).
+        ''' Désactivée par défaut : seule la règle du cahier (deux observations consécutives, seuil 5 %) s'applique.
+        ''' </summary>
+        Public Property HausseCumuleeActive As Boolean = False   ' False par défaut : on respecte strictement le cahier des charges
+
         ''' <summary>Hausse totale du prix unitaire, sur la période, à dépasser pour une alerte de hausse cumulée.</summary>
         Public Property SeuilHausseCumulee As Decimal = SeuilHausseCumuleeParDefaut   ' Seuil de la hausse cumulée (10 % par défaut)
 

@@ -107,8 +107,11 @@ Public Class DepotDemo                          ' Début de la classe
         }                                       ' Trois magasins d'exemple
     End Function                                ' Fin de ListerMagasins
 
-    Public Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
-        Return _alertes.Any(Function(a) a.IdObservation = idObservation AndAlso a.Type = type)   ' Vrai si une alerte identique est déjà là
+    Public Function ExisteDeja(alerte As Alerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+        Return _alertes.Any(Function(a) a.IdProduit = alerte.IdProduit AndAlso a.IdMagasin = alerte.IdMagasin AndAlso a.Type = alerte.Type AndAlso
+                                        a.DateAlerte.Date = alerte.DateAlerte.Date AndAlso
+                                        Math.Abs(a.PrixPrecedent - alerte.PrixPrecedent) < 0.00001D AndAlso
+                                        Math.Abs(a.PrixActuel - alerte.PrixActuel) < 0.00001D)   ' Vrai si la même alerte (produit, magasin, type, jour, prix) est déjà là
     End Function                                ' Fin de ExisteDeja
 
 End Class                                       ' Fin de DepotDemo

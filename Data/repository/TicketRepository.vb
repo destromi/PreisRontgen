@@ -1,7 +1,7 @@
 ﻿Option Strict On
 Option Explicit On
 
-Imports MySql.Data.MySqlClient
+Imports MySqlConnector
 
 Public Class TicketRepository
 

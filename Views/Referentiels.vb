@@ -1,5 +1,6 @@
 ﻿Public Class Referentiels
     Private referentiel As New ReferentielMySql
+    Private prod As FrmProduits
     Private Sub BtnEnregistrer_Click(sender As Object, e As EventArgs) Handles BtnEnregistrer.Click
         referentiel.saveMagasins(TextBoxMagasin.Text)
         'TextBoxMagasin.Clear()
@@ -22,5 +23,15 @@
     Private Sub Referentiels_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ListBoxMagasins.DataSource = referentiel.GetMagasin
         ListBoxCateg.DataSource = referentiel.GetCategorie
+    End Sub
+
+
+    Private Sub TabProduits_Selected(sender As Object, e As EventArgs) Handles TabControls1.SelectedIndexChanged
+        prod = New FrmProduits
+        prod.TopLevel = False
+        prod.FormBorderStyle = FormBorderStyle.None
+        prod.Dock = DockStyle.Fill
+        TabProduits.Controls.Add(prod)
+        prod.Show()
     End Sub
 End Class

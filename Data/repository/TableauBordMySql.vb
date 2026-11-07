@@ -71,12 +71,14 @@ Public Class TableauBordMySql
 
     Public Function EcheanceTotal(id As Integer, MyDate As Date) As DataTable Implements ITableauBord.EcheanceTotal
         Dim echeance As New DataTable
+        Dim fin As New Date(MyDate.Year, MyDate.AddMonths(1).Month, 1)
+        'Dim fin As Date = debut.AddMonths(1)
         Using connection As MySqlConnection = GetConnection
-            sql = "select libelle as Depense, montant, echeance from depense_recurrente where	id_utilisateur = @id and echeance > @MyDate;"
+            sql = "select libelle as Depense, montant, echeance from depense_recurrente where id_utilisateur = @id and echeance >= @MyDate and echeance < @fin;"
             Using echeanceCmd As New MySqlCommand(sql, connection)
                 echeanceCmd.Parameters.AddWithValue("@id", id)
                 echeanceCmd.Parameters.AddWithValue("@MyDate", MyDate)
-
+                echeanceCmd.Parameters.AddWithValue("@fin", fin)
                 Using echeanceAdapter As New MySqlDataAdapter(echeanceCmd)
                     echeanceAdapter.Fill(echeance)
                 End Using

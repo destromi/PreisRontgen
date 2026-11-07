@@ -3,7 +3,7 @@ Option Strict On
 Option Explicit On
 
 Imports System.Data
-Imports MySql.Data.MySqlClient
+Imports MySqlConnector
 
 Public Class ProduitRepository
 

@@ -8,6 +8,7 @@ Public Class MainForm
     Private nombreAlerte As Integer
     Private referentiel As Referentiels
     Private alerte As frmAlertes
+    Private ticket As FrmTickets
     Private Sub BtnAccueil_Click(sender As Object, e As EventArgs) Handles BtnAccueil.Click
         'BtnAccueil.BackColor = Color.White
         'BtnAccueil.ForeColor = Color.ForestGreen
@@ -89,6 +90,7 @@ Public Class MainForm
     End Sub
 
     Private Sub BtnAlertes_Click(sender As Object, e As EventArgs) Handles BtnAlertes.Click
+        BtnColor("BtnAlertes")
         If alerte Is Nothing Then
             alerte = New frmAlertes
             alerte.TopLevel = False
@@ -99,6 +101,21 @@ Public Class MainForm
             alerte.BringToFront()
         Else
             alerte.BringToFront()
+        End If
+    End Sub
+
+    Private Sub BtnSaisieTicket_Click(sender As Object, e As EventArgs) Handles BtnSaisieTicket.Click
+        BtnColor("BtnSaisieTicket")
+        If ticket Is Nothing Then
+            ticket = New FrmTickets
+            ticket.TopLevel = False
+            ticket.FormBorderStyle = FormBorderStyle.None
+            ticket.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(ticket)
+            ticket.Show()
+            ticket.BringToFront()
+        Else
+            ticket.BringToFront()
         End If
     End Sub
 End Class

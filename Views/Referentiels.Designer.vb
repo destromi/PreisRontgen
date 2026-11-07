@@ -41,6 +41,7 @@ Partial Class Referentiels
         BtnNewCateg = New Button()
         TextBoxCateg = New TextBox()
         BtnEnregistrerCateg = New Button()
+        TabProduits = New TabPage()
         TabControls1.SuspendLayout()
         TabMagasins.SuspendLayout()
         CType(SplitContainer1, ComponentModel.ISupportInitialize).BeginInit()
@@ -71,6 +72,7 @@ Partial Class Referentiels
         TabControls1.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         TabControls1.Controls.Add(TabMagasins)
         TabControls1.Controls.Add(TabCategories)
+        TabControls1.Controls.Add(TabProduits)
         TabControls1.Location = New Point(27, 77)
         TabControls1.Name = "TabControls1"
         TabControls1.SelectedIndex = 0
@@ -302,6 +304,16 @@ Partial Class Referentiels
         BtnEnregistrerCateg.Text = "Enregistrer"
         BtnEnregistrerCateg.UseVisualStyleBackColor = False
         ' 
+        ' TabProduits
+        ' 
+        TabProduits.Location = New Point(4, 29)
+        TabProduits.Name = "TabProduits"
+        TabProduits.Padding = New Padding(3)
+        TabProduits.Size = New Size(1384, 581)
+        TabProduits.TabIndex = 2
+        TabProduits.Text = "Produits"
+        TabProduits.UseVisualStyleBackColor = True
+        ' 
         ' Referentiels
         ' 
         AutoScaleDimensions = New SizeF(8F, 20F)
@@ -347,4 +359,5 @@ Partial Class Referentiels
     Friend WithEvents BtnNewCateg As Button
     Friend WithEvents TextBoxCateg As TextBox
     Friend WithEvents BtnEnregistrerCateg As Button
+    Friend WithEvents TabProduits As TabPage
 End Class

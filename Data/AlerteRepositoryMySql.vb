@@ -1,14 +1,14 @@
 ' ============================================================================
 ' FICHIER : Data/AlerteRepositoryMySql.vb
-' RÔLE    : implémentation MySQL de IAlerteRepository, ADAPTÉE AU SCRIPT SQL DU
-'           GROUPE (tables alerte, observation_prix, produit, magasin).
-' POINTS DE COMPATIBILITÉ avec le script :
-'           - alerte contient id_utilisateur, id_produit, id_observation, type,
-'             valeur, date_alerte (DATETIME), lue : on n'ajoute AUCUNE colonne ;
-'           - le magasin d'une alerte se déduit de l'observation (id_observation) ;
+' RÔLE    : implémentation MySQL de IAlerteRepository, adaptée au SCHÉMA FINAL du
+'           groupe (database/schema.sql du chef de projet : base pricieux_app).
+' POINTS DE COMPATIBILITÉ avec ce schéma :
+'           - alerte contient id_utilisateur, id_produit, id_magasin, type, valeur,
+'             prix_precedent, prix_actuel, date_alerte, lue : aucune colonne ajoutée ;
 '           - toutes les requêtes sont limitées à l'utilisateur connecté
 '             (isolation des foyers) ;
-'           - le texte du détail n'est pas stocké : il est reconstruit à la lecture.
+'           - le texte du détail n'est pas stocké : il est reconstruit à la lecture
+'             à partir des prix précédent et actuel.
 ' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
@@ -37,12 +37,9 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
         End Sub                                       ' Fin du constructeur
 
         Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Enregistre une alerte
-            If alerte.IdObservation <= 0 Then         ' L'observation d'origine n'est pas enregistrée
-                Throw New InvalidOperationException("L'observation doit être enregistrée avant l'analyse (IdObservation manquant).")   ' Message clair pour T2
-            End If                                    ' Fin du contrôle
             Const sql As String =
-                "INSERT INTO alerte (id_utilisateur, id_produit, id_observation, `type`, valeur, date_alerte, lue) " &
-                "VALUES (@utilisateur, @produit, @observation, @type, @valeur, @date, @lue); " &
+                "INSERT INTO alerte (id_utilisateur, id_produit, id_magasin, `type`, valeur, prix_precedent, prix_actuel, date_alerte, lue) " &
+                "VALUES (@utilisateur, @produit, @magasin, @type, @valeur, @precedent, @actuel, @date, @lue); " &
                 "SELECT LAST_INSERT_ID();"            ' Requête : insère puis demande l'identifiant créé ; les @... sont des paramètres
             Try                                       ' Début du bloc surveillé : toute erreur MySQL sera interceptée plus bas
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Crée la connexion ; Using la fermera automatiquement
@@ -50,10 +47,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
                     Using cmd As New MySqlCommand(sql, cn)          ' Crée la commande SQL liée à cette connexion
                         cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)      ' Utilisateur connecté
                         cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)        ' Produit concerné
-                        cmd.Parameters.AddWithValue("@observation", alerte.IdObservation)   ' Observation à l'origine de l'alerte
+                        cmd.Parameters.AddWithValue("@magasin", alerte.IdMagasin)        ' Magasin concerné
                         cmd.Parameters.AddWithValue("@type", alerte.Type.ToString().ToUpperInvariant())   ' Type en texte majuscule : HAUSSE ou SHRINKFLATION
-                        cmd.Parameters.AddWithValue("@valeur", alerte.Valeur)            ' Variation en fraction (0,082 = +8,2 %)
-                        cmd.Parameters.AddWithValue("@date", alerte.DateAlerte)          ' Date de l'alerte (colonne DATETIME)
+                        cmd.Parameters.AddWithValue("@valeur", Math.Round(alerte.Valeur, 4))             ' Variation en fraction (0,082 = +8,2 %), colonne DECIMAL(12,4)
+                        cmd.Parameters.AddWithValue("@precedent", Math.Round(alerte.PrixPrecedent, 6))   ' Prix unitaire précédent, colonne DECIMAL(14,6)
+                        cmd.Parameters.AddWithValue("@actuel", Math.Round(alerte.PrixActuel, 6))         ' Prix unitaire actuel, colonne DECIMAL(14,6)
+                        cmd.Parameters.AddWithValue("@date", alerte.DateAlerte)          ' Date de l'alerte
                         cmd.Parameters.AddWithValue("@lue", alerte.Lue)                  ' État lue / non lue
                         Return Convert.ToInt32(cmd.ExecuteScalar())                      ' Exécute et rend l'identifiant créé
                     End Using                         ' Libère la commande
@@ -65,13 +64,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
 
         Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher   ' Recherche avec filtres (EF-09)
             Dim sql As New StringBuilder(
-                "SELECT a.id, a.id_produit, o.id_magasin, a.`type`, a.valeur, a.date_alerte, a.lue, " &
-                "p.nom AS nom_produit, m.nom AS nom_magasin, o.prix_unitaire, o.quantite_base, a.id_observation " &
+                "SELECT a.id, a.id_produit, a.id_magasin, a.`type`, a.valeur, a.date_alerte, a.lue, " &
+                "p.nom AS nom_produit, m.nom AS nom_magasin, a.prix_precedent, a.prix_actuel " &
                 "FROM alerte a " &
                 "INNER JOIN produit p ON p.id = a.id_produit " &
-                "INNER JOIN observation_prix o ON o.id = a.id_observation " &
-                "INNER JOIN magasin m ON m.id = o.id_magasin " &
-                "WHERE a.id_utilisateur = @utilisateur")   ' Le magasin vient de l'observation ; on ne lit que les alertes de l'utilisateur connecté
+                "INNER JOIN magasin m ON m.id = a.id_magasin " &
+                "WHERE a.id_utilisateur = @utilisateur")   ' Le magasin est dans l'alerte ; on ne lit que les alertes de l'utilisateur connecté
             Dim parametres As New List(Of MySqlParameter) From {
                 New MySqlParameter("@utilisateur", _idUtilisateur)
             }                                         ' Liste des paramètres à donner à la requête
@@ -82,11 +80,11 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
                     parametres.Add(New MySqlParameter("@debut", filtre.DateDebut.Value.Date))   ' Valeur du paramètre @debut
                 End If                                ' Fin date de début
                 If filtre.DateFin.HasValue Then       ' Une date de fin est choisie
-                    sql.Append(" AND a.date_alerte < @finExclue")   ' Strictement avant le lendemain : inclut toute la journée de fin, heures comprises (date_alerte est un DATETIME)
+                    sql.Append(" AND a.date_alerte < @finExclue")   ' Strictement avant le lendemain : inclut toute la journée de fin, heures comprises
                     parametres.Add(New MySqlParameter("@finExclue", filtre.DateFin.Value.Date.AddDays(1)))   ' Lendemain de la date de fin
                 End If                                ' Fin date de fin
                 If filtre.IdMagasin.HasValue Then     ' Un magasin est choisi
-                    sql.Append(" AND o.id_magasin = @magasin")   ' Condition sur le magasin de l'observation
+                    sql.Append(" AND a.id_magasin = @magasin")   ' Condition sur le magasin de l'alerte
                     parametres.Add(New MySqlParameter("@magasin", filtre.IdMagasin.Value))      ' Valeur du paramètre @magasin
                 End If                                ' Fin magasin
                 If filtre.Type.HasValue Then          ' Un type d'alerte est choisi
@@ -126,31 +124,32 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
                 typeLu = TypeAlerte.Hausse        ' Texte inconnu : valeur par défaut
             End If                                ' Fin du contrôle
 
-            Dim valeur As Decimal = lecteur.GetDecimal(4)        ' Colonne 4 : variation (fraction)
-            Dim prixUnitaire As Decimal = lecteur.GetDecimal(9)  ' Colonne 9 : prix unitaire de l'observation d'origine
-            Dim quantiteBase As Decimal = lecteur.GetDecimal(10) ' Colonne 10 : quantité (unité de base) de l'observation d'origine
+            Dim valeur As Decimal = lecteur.GetDecimal(4)      ' Colonne 4 : variation (fraction)
+            Dim precedent As Decimal = lecteur.GetDecimal(9)   ' Colonne 9 : prix unitaire précédent
+            Dim actuel As Decimal = lecteur.GetDecimal(10)     ' Colonne 10 : prix unitaire actuel
 
             Return New Alerte With {              ' Crée l'objet Alerte
                 .Id = lecteur.GetInt32(0),        ' Colonne 0 : identifiant
                 .IdProduit = lecteur.GetInt32(1), ' Colonne 1 : produit
-                .IdMagasin = lecteur.GetInt32(2), ' Colonne 2 : magasin (déduit de l'observation)
+                .IdMagasin = lecteur.GetInt32(2), ' Colonne 2 : magasin
                 .Type = typeLu,                   ' Colonne 3 : type déjà converti
                 .Valeur = valeur,                 ' Variation
                 .DateAlerte = lecteur.GetDateTime(5),   ' Colonne 5 : date
                 .Lue = lecteur.GetBoolean(6),     ' Colonne 6 : lue ou non
                 .NomProduit = lecteur.GetString(7),     ' Colonne 7 : nom du produit (jointure)
                 .NomMagasin = lecteur.GetString(8),     ' Colonne 8 : nom du magasin (jointure)
-                .IdObservation = lecteur.GetInt32(11),  ' Colonne 11 : observation d'origine
-                .Detail = ConstruireDetail(typeLu, valeur, prixUnitaire, quantiteBase)   ' Phrase explicative reconstruite
+                .PrixPrecedent = precedent,       ' Prix unitaire précédent
+                .PrixActuel = actuel,             ' Prix unitaire actuel
+                .Detail = ConstruireDetail(typeLu, valeur, precedent, actuel)   ' Phrase explicative reconstruite
             }                                     ' Fin de l'initialisation
         End Function                              ' Fin de LireAlerte
 
-        ''' <summary>Reconstruit le texte du détail (non stocké en base) à partir de l'observation d'origine.</summary>
-        Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, prixUnitaire As Decimal, quantiteBase As Decimal) As String   ' Texte affiché dans le panneau de détail
+        ''' <summary>Reconstruit le texte du détail (non stocké en base) à partir des prix précédent et actuel.</summary>
+        Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, precedent As Decimal, actuel As Decimal) As String   ' Texte affiché dans le panneau de détail
             If type = TypeAlerte.Hausse Then      ' Cas d'une hausse
-                Return $"Le prix unitaire a augmenté de {valeur:P1} (nouveau prix unitaire : {prixUnitaire:N2} par unité de base)."   ' Phrase pour une hausse
+                Return $"Prix unitaire : {precedent:N2} vers {actuel:N2} ({valeur:P1}), au-dessus du seuil de hausse."   ' Phrase pour une hausse
             End If                                ' Fin du cas hausse
-            Return $"Quantité réduite sans baisse de prix ; hausse réelle du prix unitaire : {valeur:P1} (quantité observée : {quantiteBase:0.###} en unité de base, prix unitaire : {prixUnitaire:N2})."   ' Phrase pour une shrinkflation
+            Return $"Quantité réduite sans baisse de prix ; prix unitaire réel : {precedent:N2} vers {actuel:N2} (hausse réelle de {valeur:P1})."   ' Phrase pour une shrinkflation
         End Function                              ' Fin de ConstruireDetail
 
         Public Sub MarquerCommeLue(idAlerte As Integer) Implements IAlerteRepository.MarquerCommeLue   ' Marque une alerte comme lue
@@ -215,14 +214,23 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
             Return resultat                       ' Rend la liste des magasins
         End Function                              ' Fin de ListerMagasins
 
-        Public Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+        Public Function ExisteDeja(alerte As Alerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+            Const sql As String =
+                "SELECT COUNT(*) FROM alerte " &
+                "WHERE id_utilisateur = @utilisateur AND id_produit = @produit AND id_magasin = @magasin AND `type` = @type " &
+                "AND DATE(date_alerte) = @jour " &
+                "AND ABS(prix_precedent - @precedent) < 0.00001 AND ABS(prix_actuel - @actuel) < 0.00001"   ' Même alerte : produit, magasin, type, jour et prix (petit écart toléré pour les arrondis)
             Try                                   ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
                     cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE id_utilisateur = @utilisateur AND id_observation = @observation AND `type` = @type", cn)   ' Compte les alertes identiques de l'utilisateur
+                    Using cmd As New MySqlCommand(sql, cn)          ' Commande SQL
                         cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)         ' Utilisateur connecté
-                        cmd.Parameters.AddWithValue("@observation", idObservation)          ' Observation concernée
-                        cmd.Parameters.AddWithValue("@type", type.ToString().ToUpperInvariant())   ' HAUSSE ou SHRINKFLATION
+                        cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)           ' Produit concerné
+                        cmd.Parameters.AddWithValue("@magasin", alerte.IdMagasin)           ' Magasin concerné
+                        cmd.Parameters.AddWithValue("@type", alerte.Type.ToString().ToUpperInvariant())   ' HAUSSE ou SHRINKFLATION
+                        cmd.Parameters.AddWithValue("@jour", alerte.DateAlerte.Date)        ' Jour de l'alerte
+                        cmd.Parameters.AddWithValue("@precedent", alerte.PrixPrecedent)     ' Prix précédent
+                        cmd.Parameters.AddWithValue("@actuel", alerte.PrixActuel)           ' Prix actuel
                         Return Convert.ToInt32(cmd.ExecuteScalar()) > 0                     ' Vrai s'il en existe déjà au moins une
                     End Using                     ' Libère la commande
                 End Using                         ' Ferme la connexion

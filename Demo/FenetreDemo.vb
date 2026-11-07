@@ -33,6 +33,7 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
         ' --- Onglets (créés d'abord : le contrôle « Fill » est ajouté avant le bandeau) ---
         Dim onglets As New TabControl()               ' Le contrôle à onglets
         onglets.Dock = DockStyle.Fill                 ' Occupe tout l'espace sous le bandeau
+        Dim depotAnalyse As New DepotAnalyseDemo()   ' Faux dépôt d'analyse partagé par les écrans Historique et Analyses
         Dim noms As String() = {"Accueil", "Saisie ticket", "Historique", "Alertes", "Analyses", "Référentiels", "CSV et dépenses", "Améliorations"}   ' Les 7 onglets de la maquette + un onglet de démonstration des améliorations
         For Each nom As String In noms                ' Pour chaque nom d'onglet
             Dim page As New TabPage(nom)              ' Crée la page de l'onglet
@@ -44,6 +45,26 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
                 _ecranAlertes.Dock = DockStyle.Fill   ' Remplit la page de l'onglet
                 page.Controls.Add(_ecranAlertes)      ' Place l'écran dans la page
                 _ecranAlertes.Show()                  ' Affiche l'écran (déclenche son chargement)
+            ElseIf nom = "Historique" Then            ' EF-06 : historique et graphique (rôle T4)
+                Heberger(page, New PreisRontgen.frmHistorique(depotAnalyse))   ' Place l'écran dans l'onglet
+            ElseIf nom = "Analyses" Then              ' EF-10, EF-11, EF-12 : indice, comparaison, équivalents (rôle T4)
+                Heberger(page, New PreisRontgen.frmAnalyses(depotAnalyse))     ' Place l'écran dans l'onglet
+            ElseIf nom = "CSV et dépenses" Then       ' Onglet à deux sous-onglets
+                Dim sousOnglets As New TabControl()   ' Sous-onglets
+                sousOnglets.Dock = DockStyle.Fill     ' Occupe toute la page
+                Dim pageCsv As New TabPage("Import et export CSV")   ' Réservé à l'import / export (autre membre du groupe)
+                pageCsv.BackColor = fondClair         ' Fond gris très clair
+                Dim texteCsv As New Label()           ' Message d'information
+                texteCsv.Text = "Écran réalisé par un autre membre du groupe."   ' Explication
+                texteCsv.AutoSize = True              ' Taille adaptée au texte
+                texteCsv.Location = New Point(20, 20) ' Position dans la page
+                pageCsv.Controls.Add(texteCsv)        ' Place le message
+                Dim pageDepenses As New TabPage("Dépenses récurrentes")   ' EF-14 (rôle T4)
+                pageDepenses.BackColor = fondClair    ' Fond gris très clair
+                Heberger(pageDepenses, New PreisRontgen.frmDepenses(New DepotDepenseDemo()))   ' Place l'écran des dépenses
+                sousOnglets.TabPages.Add(pageCsv)     ' Ajoute le sous-onglet CSV
+                sousOnglets.TabPages.Add(pageDepenses)   ' Ajoute le sous-onglet Dépenses
+                page.Controls.Add(sousOnglets)        ' Place les sous-onglets dans la page
             ElseIf nom = "Améliorations" Then          ' Onglet de démonstration des nouveautés du module
                 page.Controls.Add(New EcranAmeliorations())   ' Place l'écran de démonstration dans la page
             Else                                      ' Les autres onglets sont des emplacements vides
@@ -109,6 +130,15 @@ Public Class FenetreDemo                       ' Début de la classe de la fenê
 
         Controls.Add(bandeau)                         ' Ajoute le bandeau à la fenêtre (tout en haut)
     End Sub                                           ' Fin du constructeur
+
+    ''' <summary>Place un formulaire dans une page d'onglet (sans bordure, il remplit toute la page).</summary>
+    Private Shared Sub Heberger(page As TabPage, ecran As Form)   ' Outil commun aux onglets
+        ecran.TopLevel = False                        ' Autorise à placer le formulaire dans un conteneur
+        ecran.FormBorderStyle = FormBorderStyle.None  ' Sans bordure ni barre de titre
+        ecran.Dock = DockStyle.Fill                   ' Remplit la page
+        page.Controls.Add(ecran)                      ' Place l'écran dans la page
+        ecran.Show()                                  ' Affiche l'écran (déclenche son chargement)
+    End Sub                                           ' Fin de Heberger
 
     Private Sub Deconnexion_Click(sender As Object, e As EventArgs)   ' Clic sur « Se déconnecter »
         Close()                                       ' Dans la démonstration, ferme simplement la fenêtre

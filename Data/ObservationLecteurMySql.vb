@@ -1,6 +1,6 @@
 ' ============================================================================
 ' FICHIER : Data/ObservationLecteurMySql.vb
-' RÔLE    : implémentation MySQL de IObservationLecteur. Retrouve, dans la table
+' RÔLE    : (schéma final du chef : observation_prix + ticket) implémentation MySQL de IObservationLecteur. Retrouve, dans la table
 '           observation_prix, la dernière observation du même produit dans le même
 '           magasin. La détection la compare ensuite à la nouvelle observation.
 ' ============================================================================
@@ -37,12 +37,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
         Public Function ObtenirPrecedente(observation As Observation) As Observation Implements IObservationLecteur.ObtenirPrecedente   ' Cherche l'observation précédente
             Const sql As String =
                 "SELECT o.id, o.id_produit, o.id_magasin, o.date_obs, o.prix_unitaire, o.quantite_base, " &
-                "COALESCE(l.prix, o.prix_unitaire * o.quantite_base) AS prix_total " &
+                "o.prix_conditionnement AS prix_total " &
                 "FROM observation_prix o " &
-                "LEFT JOIN ligne_ticket l ON l.id = o.id_ligne_ticket " &
-                "WHERE o.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
-                "AND (o.date_obs < @date OR (o.date_obs = @date AND o.id < @id)) " &
-                "ORDER BY o.date_obs DESC, o.id DESC LIMIT 1"   ' Même utilisateur, produit et magasin ; strictement avant l'observation (date puis identifiant) ; prix de l'article = prix de la ligne de ticket, sinon prix unitaire x quantité (observation importée)
+                "INNER JOIN ticket t ON t.id = o.id_ticket " &
+                "WHERE t.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
+                "AND (o.date_obs < @date OR (o.date_obs = @date AND (@id = 0 OR o.id < @id))) " &
+                "ORDER BY o.date_obs DESC, o.id DESC LIMIT 1"   ' Même utilisateur, produit et magasin ; strictement avant l'observation (date puis identifiant) ; prix de l'article = prix_conditionnement ; l'utilisateur se déduit du ticket ; si l'observation n'est pas encore enregistrée (Id = 0), les observations du même jour comptent
             Try                                       ' Début du bloc surveillé
                 Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion (fermée automatiquement)
                     cn.Open()                         ' Ouvre
@@ -76,12 +76,12 @@ Namespace Data                 ' Espace de noms : PreisRontgen.Data
         Public Function ListerDepuis(observation As Observation, dateLimite As Date) As List(Of Observation) Implements IHistoriqueLecteur.ListerDepuis   ' Historique de la période
             Const sql As String =
                 "SELECT o.id, o.id_produit, o.id_magasin, o.date_obs, o.prix_unitaire, o.quantite_base, " &
-                "COALESCE(l.prix, o.prix_unitaire * o.quantite_base) AS prix_total " &
+                "o.prix_conditionnement AS prix_total " &
                 "FROM observation_prix o " &
-                "LEFT JOIN ligne_ticket l ON l.id = o.id_ligne_ticket " &
-                "WHERE o.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
+                "INNER JOIN ticket t ON t.id = o.id_ticket " &
+                "WHERE t.id_utilisateur = @utilisateur AND o.id_produit = @produit AND o.id_magasin = @magasin " &
                 "AND o.date_obs >= @limite " &
-                "AND (o.date_obs < @date OR (o.date_obs = @date AND o.id < @id)) " &
+                "AND (o.date_obs < @date OR (o.date_obs = @date AND (@id = 0 OR o.id < @id))) " &
                 "ORDER BY o.date_obs ASC, o.id ASC"   ' Même utilisateur, produit et magasin ; de la date limite jusqu'à l'observation (exclue) ; du plus ancien au plus récent
             Dim resultat As New List(Of Observation)()   ' Liste (vide) des observations trouvées
             Try                                       ' Début du bloc surveillé

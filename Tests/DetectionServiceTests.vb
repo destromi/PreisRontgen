@@ -245,11 +245,36 @@ Public Class DetectionServiceTests   ' Classe qui regroupe les tests de la déte
     <Fact>                                                      ' Test simple
     Public Sub Analyser_HausseCumulee_EnregistreLAlerte()       ' Vérifie le branchement dans le service
         Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
-        Dim service As New DetectionService(New FauxHistorique(HistoriqueEnHausseLente()), depot, New ParametresDetection())   ' Lecteur qui connaît l'historique
+        Dim parametres As New ParametresDetection With {.HausseCumuleeActive = True}   ' La hausse cumulée est activée explicitement
+        Dim service As New DetectionService(New FauxHistorique(HistoriqueEnHausseLente()), depot, parametres)   ' Lecteur qui connaît l'historique
         Dim resultat As List(Of Alerte) = service.Analyser(CreerId(99, 4.45D, New Date(2026, 10, 1)))   ' Analyse la nouvelle observation
         Assert.Single(resultat)                                 ' Une seule alerte
         Assert.Contains("cumulée", resultat(0).Detail)          ' C'est la hausse cumulée
+        Assert.Equal(4D, resultat(0).PrixPrecedent)             ' Prix au début de la période
+        Assert.Equal(4.45D, resultat(0).PrixActuel)             ' Prix actuel
         Assert.Single(depot.Enregistrees)                       ' Elle est enregistrée
+    End Sub                                                     ' Fin du test
+
+    ' CT-54 : par défaut, la hausse cumulée est désactivée : seule la règle du cahier des charges s'applique
+    <Fact>                                                      ' Test simple
+    Public Sub Analyser_HausseCumulee_DesactiveeParDefaut()     ' Respect strict du cahier des charges
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(New FauxHistorique(HistoriqueEnHausseLente()), depot, New ParametresDetection())   ' Paramètres par défaut
+        Assert.False(New ParametresDetection().HausseCumuleeActive)   ' Désactivée au départ
+        Assert.Empty(service.Analyser(CreerId(99, 4.45D, New Date(2026, 10, 1))))   ' +3,5 % seulement par rapport au dernier relevé : pas d'alerte
+        Assert.Empty(depot.Enregistrees)                        ' Rien n'est enregistré
+    End Sub                                                     ' Fin du test
+
+    ' CT-55 : les prix précédent et actuel sont renseignés (colonnes prix_precedent et prix_actuel du schéma final)
+    <Fact>                                                      ' Test simple
+    Public Sub Analyser_Hausse_RenseigneLesPrixPrecedentEtActuel()   ' Vérifie les colonnes ajoutées par le schéma final
+        Dim depot As New FauxDepotAlertes()                     ' Faux dépôt
+        Dim service As New DetectionService(New FauxLecteur(Reference()), depot, New ParametresDetection())   ' Référence : 500 g à 2,40
+        Dim resultat As List(Of Alerte) = service.Analyser(Creer(2.4D, 450D, Jour2))   ' 450 g au même prix : hausse + shrinkflation
+        Assert.Equal(2, resultat.Count)                         ' Deux alertes
+        Assert.All(resultat, Sub(a) Assert.Equal(4.8D, a.PrixPrecedent))   ' Prix précédent : 4,80 par kg
+        Assert.All(resultat, Sub(a) Assert.True(a.PrixActuel > a.PrixPrecedent))   ' Le prix unitaire a augmenté
+        Assert.All(resultat, Sub(a) Assert.Equal(IdMagasin, a.IdMagasin))          ' Magasin renseigné
     End Sub                                                     ' Fin du test
 
     ' ------------------------------------------------ alerte non dupliquée
@@ -393,8 +418,11 @@ Public Class DetectionServiceTests   ' Classe qui regroupe les tests de la déte
 
         Public ReadOnly Enregistrees As New List(Of Alerte)()   ' Alertes « enregistrées » (visibles par les tests)
 
-        Public Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
-            Return Enregistrees.Any(Function(a) a.IdObservation = idObservation AndAlso a.Type = type)   ' Vrai si une alerte identique est déjà enregistrée
+        Public Function ExisteDeja(alerte As Alerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
+            Return Enregistrees.Any(Function(a) a.IdProduit = alerte.IdProduit AndAlso a.IdMagasin = alerte.IdMagasin AndAlso a.Type = alerte.Type AndAlso
+                                                a.DateAlerte.Date = alerte.DateAlerte.Date AndAlso
+                                                Math.Abs(a.PrixPrecedent - alerte.PrixPrecedent) < 0.00001D AndAlso
+                                                Math.Abs(a.PrixActuel - alerte.PrixActuel) < 0.00001D)   ' Vrai si la même alerte est déjà enregistrée
         End Function                                            ' Fin de ExisteDeja
 
         Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Simule l'enregistrement

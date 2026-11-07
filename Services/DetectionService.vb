@@ -139,7 +139,7 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
             Dim resultat As New List(Of Alerte)()    ' Liste (vide au départ) des alertes créées par cette analyse
 
             Dim hausse As Alerte = EvaluerHausse(precedente, nouvelle, _parametres.SeuilHausse)   ' Règle EF-07 : hausse entre deux observations consécutives
-            If hausse Is Nothing AndAlso historique IsNot Nothing Then   ' Pas de hausse simple : on cherche une hausse cumulée
+            If hausse Is Nothing AndAlso historique IsNot Nothing AndAlso _parametres.HausseCumuleeActive Then   ' Hausse cumulée : seulement si elle est activée (hors cahier des charges)
                 hausse = EvaluerHausseCumulee(historique, nouvelle, _parametres.SeuilHausseCumulee, _parametres.FenetreCumuleeMois)   ' Plusieurs petites hausses de suite
             End If                                   ' Fin du test
             If hausse IsNot Nothing Then             ' Une alerte de hausse existe
@@ -172,7 +172,7 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
         End Function                                    ' Fin de DebutFenetre
 
         Private Sub EnregistrerSiNouvelle(alerte As Alerte, observation As Observation, resultat As List(Of Alerte))   ' Évite les doublons
-            If observation.Id > 0 AndAlso _alertes.ExisteDeja(observation.Id, alerte.Type) Then   ' Même observation, même type : déjà enregistrée
+            If _alertes.ExisteDeja(alerte) Then      ' Même produit, magasin, type, jour et prix : déjà enregistrée
                 Return                               ' On ne fait rien (pas de doublon, pas d'événement)
             End If                                   ' Fin du test
             Enregistrer(alerte, resultat)            ' Sinon : enregistre, ajoute au résultat et prévient
@@ -215,7 +215,9 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
             Return New Alerte With {      ' Crée l'alerte (pas encore enregistrée) et remplit ses champs
                 .IdProduit = nouvelle.IdProduit,      ' Produit concerné
                 .IdMagasin = nouvelle.IdMagasin,      ' Magasin concerné
-                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (doit déjà être enregistrée)
+                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (information de travail)
+                .PrixPrecedent = ancienne.PrixUnitaire,   ' Prix unitaire avant la hausse (colonne prix_precedent)
+                .PrixActuel = nouvelle.PrixUnitaire,      ' Prix unitaire après la hausse (colonne prix_actuel)
                 .Type = TypeAlerte.Hausse,            ' Type : hausse de prix
                 .Valeur = variation.Value,            ' Valeur de la hausse en fraction (0,0525 = +5,25 %)
                 .DateAlerte = nouvelle.DateObs,       ' Date du ticket qui a révélé la hausse
@@ -255,7 +257,9 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
             Return New Alerte With {      ' Crée l'alerte de shrinkflation
                 .IdProduit = nouvelle.IdProduit,      ' Produit concerné
                 .IdMagasin = nouvelle.IdMagasin,      ' Magasin concerné
-                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (doit déjà être enregistrée)
+                .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte (information de travail)
+                .PrixPrecedent = ancienne.PrixUnitaire,   ' Prix unitaire avant la réduction de quantité
+                .PrixActuel = nouvelle.PrixUnitaire,      ' Prix unitaire après la réduction de quantité
                 .Type = TypeAlerte.Shrinkflation,     ' Type : shrinkflation
                 .Valeur = hausseReelle.Value,         ' Valeur = hausse réelle du prix unitaire (exigence EF-08)
                 .DateAlerte = nouvelle.DateObs,       ' Date du ticket
@@ -287,6 +291,8 @@ Namespace Services             ' Espace de noms : PreisRontgen.Services
                 .IdProduit = nouvelle.IdProduit,      ' Produit concerné
                 .IdMagasin = nouvelle.IdMagasin,      ' Magasin concerné
                 .IdObservation = nouvelle.Id,         ' Observation à l'origine de l'alerte
+                .PrixPrecedent = depart.PrixUnitaire,     ' Prix unitaire au début de la période
+                .PrixActuel = nouvelle.PrixUnitaire,      ' Prix unitaire actuel
                 .Type = TypeAlerte.Hausse,            ' Même type que la hausse simple (pas de nouveau type en base)
                 .Valeur = variation.Value,            ' Hausse totale sur la période
                 .DateAlerte = nouvelle.DateObs,       ' Date du ticket

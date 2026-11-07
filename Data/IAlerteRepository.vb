@@ -36,10 +36,11 @@ Namespace Data                 ' Espace de noms de l'accès aux données : Preis
         Function ListerMagasins() As List(Of KeyValuePair(Of Integer, String))   ' Rend des couples (identifiant, nom) pour remplir la liste déroulante
 
         ''' <summary>
-        ''' Vrai si une alerte de ce type existe déjà pour cette observation.
-        ''' Sert à ne pas créer deux fois la même alerte quand un ticket est analysé deux fois.
+        ''' Vrai si la même alerte existe déjà (même produit, même magasin, même type, même jour,
+        ''' mêmes prix précédent et actuel). Sert à ne pas créer deux fois la même alerte
+        ''' quand un ticket est analysé deux fois.
         ''' </summary>
-        Function ExisteDeja(idObservation As Integer, type As TypeAlerte) As Boolean   ' Contrôle anti-doublon avant l'enregistrement
+        Function ExisteDeja(alerte As Alerte) As Boolean   ' Contrôle anti-doublon avant l'enregistrement
 
     End Interface                                        ' Fin de IAlerteRepository
 

@@ -1,6 +1,7 @@
 ﻿Option Explicit On
 Option Strict On
 Imports MySqlConnector
+Imports PreisRontgen.Data
 
 Public Class MainForm
     Private tabBord As TableauBord
@@ -11,6 +12,9 @@ Public Class MainForm
     Private ticket As FrmTickets
     Private historique As frmHistorique
     Private analyse As frmAnalyses
+    Private CSV As CSV_Depense
+    Private demo As FenetreDemo
+    Private depot As IAlerteRepository
     Private Sub BtnAccueil_Click(sender As Object, e As EventArgs) Handles BtnAccueil.Click
         'BtnAccueil.BackColor = Color.White
         'BtnAccueil.ForeColor = Color.ForestGreen
@@ -148,6 +152,36 @@ Public Class MainForm
             analyse.BringToFront()
         Else
             analyse.BringToFront()
+        End If
+    End Sub
+
+    Private Sub BtnCSV_Click(sender As Object, e As EventArgs) Handles BtnCSV.Click
+        BtnColor("BtnCSV")
+        If CSV Is Nothing Then
+            CSV = New CSV_Depense
+            CSV.TopLevel = False
+            CSV.FormBorderStyle = FormBorderStyle.None
+            CSV.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(CSV)
+            CSV.Show()
+            CSV.BringToFront()
+        Else
+            CSV.BringToFront()
+        End If
+    End Sub
+
+    Private Sub BtnPlus_Click(sender As Object, e As EventArgs) Handles BtnPlus.Click
+        BtnColor("BtnPlus")
+        If demo Is Nothing Then
+            demo = New FenetreDemo(depot)
+            demo.TopLevel = False
+            demo.FormBorderStyle = FormBorderStyle.None
+            demo.Dock = DockStyle.Fill
+            PanelAffichage.Controls.Add(demo)
+            demo.Show()
+            demo.BringToFront()
+        Else
+            demo.BringToFront()
         End If
     End Sub
 End Class

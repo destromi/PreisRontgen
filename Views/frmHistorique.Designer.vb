@@ -36,11 +36,17 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         btnActualiser = New Button()
         pnlBas = New Panel()
         lblResume = New Label()
+        pnlGraphique = New PanneauGraphique()
         dgvHistorique = New DataGridView()
+        SplitContainer1 = New SplitContainer()
         pnlTitre.SuspendLayout()
         pnlFiltres.SuspendLayout()
         pnlBas.SuspendLayout()
         CType(dgvHistorique, ComponentModel.ISupportInitialize).BeginInit()
+        CType(SplitContainer1, ComponentModel.ISupportInitialize).BeginInit()
+        SplitContainer1.Panel1.SuspendLayout()
+        SplitContainer1.Panel2.SuspendLayout()
+        SplitContainer1.SuspendLayout()
         SuspendLayout()
         ' 
         ' pnlTitre
@@ -57,7 +63,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         ' lblTitre
         ' 
         lblTitre.AutoSize = True
-        lblTitre.Font = New Font("Segoe UI", 18F, FontStyle.Bold)
+        lblTitre.Font = New Font("Segoe UI", 18.0F, FontStyle.Bold)
         lblTitre.ForeColor = Color.ForestGreen
         lblTitre.Location = New Point(16, 13)
         lblTitre.Name = "lblTitre"
@@ -85,7 +91,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         ' lblProduit
         ' 
         lblProduit.AutoSize = True
-        lblProduit.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblProduit.Font = New Font("Segoe UI", 8.0F, FontStyle.Bold)
         lblProduit.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
         lblProduit.Location = New Point(21, 13)
         lblProduit.Name = "lblProduit"
@@ -106,7 +112,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         ' lblMagasin
         ' 
         lblMagasin.AutoSize = True
-        lblMagasin.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblMagasin.Font = New Font("Segoe UI", 8.0F, FontStyle.Bold)
         lblMagasin.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
         lblMagasin.Location = New Point(329, 13)
         lblMagasin.Name = "lblMagasin"
@@ -127,7 +133,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         ' lblAfficher
         ' 
         lblAfficher.AutoSize = True
-        lblAfficher.Font = New Font("Segoe UI", 8F, FontStyle.Bold)
+        lblAfficher.Font = New Font("Segoe UI", 8.0F, FontStyle.Bold)
         lblAfficher.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
         lblAfficher.Location = New Point(546, 13)
         lblAfficher.Name = "lblAfficher"
@@ -174,7 +180,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         ' lblResume
         ' 
         lblResume.Dock = DockStyle.Fill
-        lblResume.Font = New Font("Segoe UI", 9F)
+        lblResume.Font = New Font("Segoe UI", 9.0F)
         lblResume.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
         lblResume.Location = New Point(0, 0)
         lblResume.Name = "lblResume"
@@ -182,6 +188,16 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         lblResume.Size = New Size(1257, 53)
         lblResume.TabIndex = 0
         lblResume.TextAlign = ContentAlignment.MiddleLeft
+        ' 
+        ' pnlGraphique
+        ' 
+        pnlGraphique.BackColor = Color.White
+        pnlGraphique.Dock = DockStyle.Fill
+        pnlGraphique.Location = New Point(0, 0)
+        pnlGraphique.Margin = New Padding(3, 4, 3, 4)
+        pnlGraphique.Name = "pnlGraphique"
+        pnlGraphique.Size = New Size(618, 576)
+        pnlGraphique.TabIndex = 3
         ' 
         ' dgvHistorique
         ' 
@@ -195,7 +211,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         dgvHistorique.Dock = DockStyle.Fill
         dgvHistorique.EnableHeadersVisualStyles = False
         dgvHistorique.GridColor = Color.FromArgb(CByte(195), CByte(208), CByte(200))
-        dgvHistorique.Location = New Point(0, 158)
+        dgvHistorique.Location = New Point(0, 0)
         dgvHistorique.Margin = New Padding(3, 4, 3, 4)
         dgvHistorique.MultiSelect = False
         dgvHistorique.Name = "dgvHistorique"
@@ -204,16 +220,33 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         dgvHistorique.RowHeadersWidth = 51
         dgvHistorique.RowTemplate.Height = 28
         dgvHistorique.SelectionMode = DataGridViewSelectionMode.FullRowSelect
-        dgvHistorique.Size = New Size(1257, 576)
+        dgvHistorique.Size = New Size(635, 576)
         dgvHistorique.TabIndex = 4
+        ' 
+        ' SplitContainer1
+        ' 
+        SplitContainer1.Dock = DockStyle.Fill
+        SplitContainer1.Location = New Point(0, 158)
+        SplitContainer1.Name = "SplitContainer1"
+        ' 
+        ' SplitContainer1.Panel1
+        ' 
+        SplitContainer1.Panel1.Controls.Add(dgvHistorique)
+        ' 
+        ' SplitContainer1.Panel2
+        ' 
+        SplitContainer1.Panel2.Controls.Add(pnlGraphique)
+        SplitContainer1.Size = New Size(1257, 576)
+        SplitContainer1.SplitterDistance = 635
+        SplitContainer1.TabIndex = 7
         ' 
         ' frmHistorique
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
         ClientSize = New Size(1257, 787)
-        Controls.Add(dgvHistorique)
+        Controls.Add(SplitContainer1)
         Controls.Add(pnlBas)
         Controls.Add(pnlFiltres)
         Controls.Add(pnlTitre)
@@ -228,6 +261,10 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         pnlFiltres.PerformLayout()
         pnlBas.ResumeLayout(False)
         CType(dgvHistorique, ComponentModel.ISupportInitialize).EndInit()
+        SplitContainer1.Panel1.ResumeLayout(False)
+        SplitContainer1.Panel2.ResumeLayout(False)
+        CType(SplitContainer1, ComponentModel.ISupportInitialize).EndInit()
+        SplitContainer1.ResumeLayout(False)
         ResumeLayout(False)
     End Sub  ' Fin de InitializeComponent
 
@@ -249,4 +286,5 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
     Friend WithEvents colMagasin As System.Windows.Forms.DataGridViewTextBoxColumn  ' Colonne « Magasin »
     Friend WithEvents colConditionnement As System.Windows.Forms.DataGridViewTextBoxColumn  ' Colonne « Conditionnement »
     Friend WithEvents colPrix As System.Windows.Forms.DataGridViewTextBoxColumn  ' Colonne « Prix unitaire »
+    Friend WithEvents SplitContainer1 As SplitContainer
 End Class

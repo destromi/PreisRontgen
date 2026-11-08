@@ -1,244 +1,339 @@
-' ============================================================================
-' FICHIER : Data/AlerteRepositoryMySql.vb
-' RÔLE    : implémentation MySQL de IAlerteRepository, adaptée au SCHÉMA FINAL du
-'           groupe (database/schema.sql du chef de projet : base pricieux_app).
-' POINTS DE COMPATIBILITÉ avec ce schéma :
-'           - alerte contient id_utilisateur, id_produit, id_magasin, type, valeur,
-'             prix_precedent, prix_actuel, date_alerte, lue : aucune colonne ajoutée ;
-'           - toutes les requêtes sont limitées à l'utilisateur connecté
-'             (isolation des foyers) ;
-'           - le texte du détail n'est pas stocké : il est reconstruit à la lecture
-'             à partir des prix précédent et actuel.
-' ============================================================================
-Option Strict On      ' Conversions implicites dangereuses interdites
-Option Explicit On    ' Variables obligatoirement déclarées
+Option Strict On
+Option Explicit On
 
-Imports System.Text            ' Pour StringBuilder (construction efficace d'un texte long)
-Imports MySqlConnector         ' Bibliothèque NuGet qui permet de parler à MySQL
-Imports PreisRontgen.Models    ' Pour utiliser Alerte, FiltreAlerte, TypeAlerte
+Imports System.Globalization
+Imports System.Text
+Imports MySqlConnector
+Imports PreisRontgen.Models
 
-Namespace Data                 ' Espace de noms : PreisRontgen.Data
+Namespace Data
 
-    Public Class AlerteRepositoryMySql           ' Début de la classe
-        Implements IAlerteRepository             ' S'engage à fournir toutes les méthodes du contrat IAlerteRepository
+    ''' <summary>
+    ''' Dépôt d'alertes qui lit et écrit dans MySQL (à passer à frmAlertes à la place de DepotDemo).
+    ''' Approche B : la table alerte reste inchangée. Le magasin, les prix et le texte explicatif
+    ''' sont reconstruits à la lecture à partir de l'observation de prix liée à l'alerte.
+    ''' Toutes les requêtes portent sur l'utilisateur connecté (Session.user).
+    ''' </summary>
+    Public Class AlerteRepositoryMySql
+        Implements IAlerteRepository
 
-        Private ReadOnly _chaineConnexion As String   ' Texte de connexion (serveur, base, utilisateur...) ; ReadOnly = fixé une fois pour toutes
-        Private ReadOnly _idUtilisateur As Integer    ' Utilisateur connecté : seules SES alertes sont lues et modifiées
+        Private Shared ReadOnly Fr As NumberFormatInfo = CreerFormat()
 
-        Public Sub New(chaineConnexion As String, idUtilisateur As Integer)   ' Constructeur : chaîne de connexion + utilisateur connecté
-            If String.IsNullOrWhiteSpace(chaineConnexion) Then   ' Texte absent ou vide
-                Throw New ArgumentException("La chaîne de connexion est obligatoire.", NameOf(chaineConnexion))   ' On refuse avec un message clair
-            End If                                    ' Fin du contrôle
-            If idUtilisateur <= 0 Then                ' Identifiant d'utilisateur invalide
-                Throw New ArgumentOutOfRangeException(NameOf(idUtilisateur), "L'identifiant de l'utilisateur doit être positif.")   ' On refuse
-            End If                                    ' Fin du contrôle
-            _chaineConnexion = chaineConnexion        ' Mémorise la chaîne pour les futures requêtes
-            _idUtilisateur = idUtilisateur            ' Mémorise l'utilisateur connecté
-        End Sub                                       ' Fin du constructeur
+        Private Shared Function CreerFormat() As NumberFormatInfo
+            Dim nf As NumberFormatInfo = CType(CultureInfo.GetCultureInfo("fr-FR").NumberFormat.Clone(), NumberFormatInfo)
+            nf.NumberGroupSeparator = " "      ' espace simple entre les milliers
+            Return nf
+        End Function
 
-        Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter   ' Enregistre une alerte
-            Const sql As String =
-                "INSERT INTO alerte (id_utilisateur, id_produit, id_magasin, `type`, valeur, prix_precedent, prix_actuel, date_alerte, lue) " &
-                "VALUES (@utilisateur, @produit, @magasin, @type, @valeur, @precedent, @actuel, @date, @lue); " &
-                "SELECT LAST_INSERT_ID();"            ' Requête : insère puis demande l'identifiant créé ; les @... sont des paramètres
-            Try                                       ' Début du bloc surveillé : toute erreur MySQL sera interceptée plus bas
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Crée la connexion ; Using la fermera automatiquement
-                    cn.Open()                         ' Ouvre la connexion à MySQL
-                    Using cmd As New MySqlCommand(sql, cn)          ' Crée la commande SQL liée à cette connexion
-                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)      ' Utilisateur connecté
-                        cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)        ' Produit concerné
-                        cmd.Parameters.AddWithValue("@magasin", alerte.IdMagasin)        ' Magasin concerné
-                        cmd.Parameters.AddWithValue("@type", alerte.Type.ToString().ToUpperInvariant())   ' Type en texte majuscule : HAUSSE ou SHRINKFLATION
-                        cmd.Parameters.AddWithValue("@valeur", Math.Round(alerte.Valeur, 4))             ' Variation en fraction (0,082 = +8,2 %), colonne DECIMAL(12,4)
-                        cmd.Parameters.AddWithValue("@precedent", Math.Round(alerte.PrixPrecedent, 6))   ' Prix unitaire précédent, colonne DECIMAL(14,6)
-                        cmd.Parameters.AddWithValue("@actuel", Math.Round(alerte.PrixActuel, 6))         ' Prix unitaire actuel, colonne DECIMAL(14,6)
-                        cmd.Parameters.AddWithValue("@date", alerte.DateAlerte)          ' Date de l'alerte
-                        cmd.Parameters.AddWithValue("@lue", alerte.Lue)                  ' État lue / non lue
-                        Return Convert.ToInt32(cmd.ExecuteScalar())                      ' Exécute et rend l'identifiant créé
-                    End Using                         ' Libère la commande
-                End Using                             ' Ferme la connexion
-            Catch ex As MySqlException                ' Si MySQL signale une erreur (serveur arrêté, table absente...)
-                Throw New InvalidOperationException("Impossible d'enregistrer l'alerte : " & ex.Message, ex)   ' On la transforme en message clair pour l'interface
-            End Try                                   ' Fin du bloc surveillé
-        End Function                                  ' Fin de Ajouter
+        ' ================= Outils =================
 
-        Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher   ' Recherche avec filtres (EF-09)
-            Dim sql As New StringBuilder(
-                "SELECT a.id, a.id_produit, a.id_magasin, a.`type`, a.valeur, a.date_alerte, a.lue, " &
-                "p.nom AS nom_produit, m.nom AS nom_magasin, a.prix_precedent, a.prix_actuel " &
-                "FROM alerte a " &
-                "INNER JOIN produit p ON p.id = a.id_produit " &
-                "INNER JOIN magasin m ON m.id = a.id_magasin " &
-                "WHERE a.id_utilisateur = @utilisateur")   ' Le magasin est dans l'alerte ; on ne lit que les alertes de l'utilisateur connecté
-            Dim parametres As New List(Of MySqlParameter) From {
-                New MySqlParameter("@utilisateur", _idUtilisateur)
-            }                                         ' Liste des paramètres à donner à la requête
+        Private Shared Function IdUtilisateur() As Integer
+            If Session.user Is Nothing Then Throw New InvalidOperationException("Aucun utilisateur connecté.")
+            Return Session.user.Id
+        End Function
 
-            If filtre IsNot Nothing Then              ' Si un filtre est fourni, on ajoute les conditions demandées
-                If filtre.DateDebut.HasValue Then     ' Une date de début est choisie
-                    sql.Append(" AND a.date_alerte >= @debut")   ' Ajoute la condition « à partir de » (minuit)
-                    parametres.Add(New MySqlParameter("@debut", filtre.DateDebut.Value.Date))   ' Valeur du paramètre @debut
-                End If                                ' Fin date de début
-                If filtre.DateFin.HasValue Then       ' Une date de fin est choisie
-                    sql.Append(" AND a.date_alerte < @finExclue")   ' Strictement avant le lendemain : inclut toute la journée de fin, heures comprises
-                    parametres.Add(New MySqlParameter("@finExclue", filtre.DateFin.Value.Date.AddDays(1)))   ' Lendemain de la date de fin
-                End If                                ' Fin date de fin
-                If filtre.IdMagasin.HasValue Then     ' Un magasin est choisi
-                    sql.Append(" AND a.id_magasin = @magasin")   ' Condition sur le magasin de l'alerte
-                    parametres.Add(New MySqlParameter("@magasin", filtre.IdMagasin.Value))      ' Valeur du paramètre @magasin
-                End If                                ' Fin magasin
-                If filtre.Type.HasValue Then          ' Un type d'alerte est choisi
-                    sql.Append(" AND a.`type` = @type")          ' Ajoute la condition sur le type
-                    parametres.Add(New MySqlParameter("@type", filtre.Type.Value.ToString().ToUpperInvariant()))   ' HAUSSE ou SHRINKFLATION
-                End If                                ' Fin type
-                If filtre.Lue.HasValue Then           ' Un statut est choisi
-                    sql.Append(" AND a.lue = @lue")              ' Ajoute la condition sur lu / non lu
-                    parametres.Add(New MySqlParameter("@lue", filtre.Lue.Value))                ' Valeur du paramètre @lue
-                End If                                ' Fin statut
-            End If                                    ' Fin des filtres
+        ' Les écrans n'attrapent que InvalidOperationException : on y convertit les erreurs MySQL
+        Private Shared Function Echec(ex As MySqlException) As InvalidOperationException
+            Return New InvalidOperationException("Accès aux données impossible : " & ex.Message, ex)
+        End Function
 
-            sql.Append(" ORDER BY a.date_alerte DESC, a.id DESC")   ' Tri : les plus récentes d'abord
+        Private Shared Function TypeEnTexte(t As TypeAlerte) As String
+            Return If(t = TypeAlerte.Hausse, "HAUSSE", "SHRINKFLATION")
+        End Function
 
-            Dim resultat As New List(Of Alerte)()     ' Liste (vide) des alertes trouvées
-            Try                                       ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion (fermée automatiquement)
-                    cn.Open()                         ' Ouvre la connexion
-                    Using cmd As New MySqlCommand(sql.ToString(), cn)   ' Commande avec le texte SQL construit
-                        cmd.Parameters.AddRange(parametres.ToArray())   ' Transmet tous les paramètres d'un coup
-                        Using lecteur As MySqlDataReader = cmd.ExecuteReader()   ' Exécute et obtient un « lecteur » de lignes
-                            While lecteur.Read()      ' Avance ligne par ligne tant qu'il en reste
-                                resultat.Add(LireAlerte(lecteur))   ' Convertit la ligne en objet Alerte et l'ajoute
-                            End While                 ' Fin de la boucle
-                        End Using                     ' Libère le lecteur
-                    End Using                         ' Libère la commande
-                End Using                             ' Ferme la connexion
-            Catch ex As MySqlException                ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de lire les alertes : " & ex.Message, ex)   ' Message clair
-            End Try                                   ' Fin du bloc surveillé
-            Return resultat                           ' Rend la liste des alertes
-        End Function                                  ' Fin de Rechercher
+        Private Shared Function TexteEnType(s As String) As TypeAlerte
+            Return If(String.Equals(s, "HAUSSE", StringComparison.OrdinalIgnoreCase), TypeAlerte.Hausse, TypeAlerte.Shrinkflation)
+        End Function
 
-        Private Shared Function LireAlerte(lecteur As MySqlDataReader) As Alerte   ' Transforme la ligne courante en objet Alerte
-            Dim typeLu As TypeAlerte              ' Variable qui recevra le type lu en base
-            If Not [Enum].TryParse(lecteur.GetString(3), True, typeLu) Then   ' Convertit le texte en TypeAlerte (True = sans tenir compte des majuscules)
-                typeLu = TypeAlerte.Hausse        ' Texte inconnu : valeur par défaut
-            End If                                ' Fin du contrôle
+        ' ================= Lecture =================
 
-            Dim valeur As Decimal = lecteur.GetDecimal(4)      ' Colonne 4 : variation (fraction)
-            Dim precedent As Decimal = lecteur.GetDecimal(9)   ' Colonne 9 : prix unitaire précédent
-            Dim actuel As Decimal = lecteur.GetDecimal(10)     ' Colonne 10 : prix unitaire actuel
+        Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher
+            Dim resultat As New List(Of Alerte)()
+            Try
+                Dim conditions As New List(Of String) From {"a.id_utilisateur = @u"}
+                Dim valeurs As New List(Of KeyValuePair(Of String, Object)) From {
+                    New KeyValuePair(Of String, Object)("@u", IdUtilisateur())}
 
-            Return New Alerte With {              ' Crée l'objet Alerte
-                .Id = lecteur.GetInt32(0),        ' Colonne 0 : identifiant
-                .IdProduit = lecteur.GetInt32(1), ' Colonne 1 : produit
-                .IdMagasin = lecteur.GetInt32(2), ' Colonne 2 : magasin
-                .Type = typeLu,                   ' Colonne 3 : type déjà converti
-                .Valeur = valeur,                 ' Variation
-                .DateAlerte = lecteur.GetDateTime(5),   ' Colonne 5 : date
-                .Lue = lecteur.GetBoolean(6),     ' Colonne 6 : lue ou non
-                .NomProduit = lecteur.GetString(7),     ' Colonne 7 : nom du produit (jointure)
-                .NomMagasin = lecteur.GetString(8),     ' Colonne 8 : nom du magasin (jointure)
-                .PrixPrecedent = precedent,       ' Prix unitaire précédent
-                .PrixActuel = actuel,             ' Prix unitaire actuel
-                .Detail = ConstruireDetail(typeLu, valeur, precedent, actuel)   ' Phrase explicative reconstruite
-            }                                     ' Fin de l'initialisation
-        End Function                              ' Fin de LireAlerte
+                If filtre IsNot Nothing Then
+                    If filtre.DateDebut.HasValue Then
+                        conditions.Add("a.date_alerte >= @debut")
+                        valeurs.Add(New KeyValuePair(Of String, Object)("@debut", filtre.DateDebut.Value.Date))
+                    End If
+                    If filtre.DateFin.HasValue Then
+                        conditions.Add("a.date_alerte < @fin")       ' fin incluse : strictement avant le lendemain
+                        valeurs.Add(New KeyValuePair(Of String, Object)("@fin", filtre.DateFin.Value.Date.AddDays(1)))
+                    End If
+                    If filtre.IdMagasin.HasValue Then
+                        conditions.Add("o.id_magasin = @mag")
+                        valeurs.Add(New KeyValuePair(Of String, Object)("@mag", filtre.IdMagasin.Value))
+                    End If
+                    If filtre.Type.HasValue Then
+                        conditions.Add("a.type = @type")
+                        valeurs.Add(New KeyValuePair(Of String, Object)("@type", TypeEnTexte(filtre.Type.Value)))
+                    End If
+                    If filtre.Lue.HasValue Then
+                        conditions.Add("a.lue = @lue")
+                        valeurs.Add(New KeyValuePair(Of String, Object)("@lue", filtre.Lue.Value))
+                    End If
+                End If
 
-        ''' <summary>Reconstruit le texte du détail (non stocké en base) à partir des prix précédent et actuel.</summary>
-        Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, precedent As Decimal, actuel As Decimal) As String   ' Texte affiché dans le panneau de détail
-            If type = TypeAlerte.Hausse Then      ' Cas d'une hausse
-                Return $"Prix unitaire : {precedent:N2} vers {actuel:N2} ({valeur:P1}), au-dessus du seuil de hausse."   ' Phrase pour une hausse
-            End If                                ' Fin du cas hausse
-            Return $"Quantité réduite sans baisse de prix ; prix unitaire réel : {precedent:N2} vers {actuel:N2} (hausse réelle de {valeur:P1})."   ' Phrase pour une shrinkflation
-        End Function                              ' Fin de ConstruireDetail
+                Dim sql As String =
+                    "SELECT a.id, a.id_produit, a.id_observation, o.id_magasin, a.type, a.valeur, a.date_alerte, a.lue, " &
+                    "       p.nom, p.marque, p.unite_base, m.nom, o.prix_unitaire, o.quantite_base, " &
+                    "       (SELECT o2.quantite_base FROM observation_prix o2 " &
+                    "         WHERE o2.id_utilisateur = o.id_utilisateur AND o2.id_produit = o.id_produit " &
+                    "           AND o2.id_magasin = o.id_magasin " &
+                    "           AND (o2.date_obs < o.date_obs OR (o2.date_obs = o.date_obs AND o2.id < o.id)) " &
+                    "         ORDER BY o2.date_obs DESC, o2.id DESC LIMIT 1) AS qte_precedente " &
+                    "FROM alerte a " &
+                    "INNER JOIN observation_prix o ON o.id = a.id_observation " &
+                    "INNER JOIN produit p ON p.id = a.id_produit " &
+                    "INNER JOIN magasin m ON m.id = o.id_magasin " &
+                    "WHERE " & String.Join(" AND ", conditions) & " " &
+                    "ORDER BY a.date_alerte DESC, a.id DESC"
 
-        Public Sub MarquerCommeLue(idAlerte As Integer) Implements IAlerteRepository.MarquerCommeLue   ' Marque une alerte comme lue
-            Try                                   ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
-                    cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE id = @id AND id_utilisateur = @utilisateur", cn)   ' Met à jour une seule alerte, seulement si elle appartient à l'utilisateur
-                        cmd.Parameters.AddWithValue("@id", idAlerte)   ' Identifiant de l'alerte
-                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
-                        cmd.ExecuteNonQuery()     ' Exécute une requête qui ne renvoie pas de lignes
-                    End Using                     ' Libère la commande
-                End Using                         ' Ferme la connexion
-            Catch ex As MySqlException           ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de marquer l'alerte comme lue : " & ex.Message, ex)   ' Message clair
-            End Try                               ' Fin du bloc surveillé
-        End Sub                                   ' Fin de MarquerCommeLue
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Dim seuilHausse As Decimal = 5D
+                    Dim seuilShrink As Decimal = 3D
+                    ChargerSeuils(cn, seuilHausse, seuilShrink)
 
-        Public Sub MarquerToutesCommeLues() Implements IAlerteRepository.MarquerToutesCommeLues   ' Marque toutes les alertes de l'utilisateur comme lues
-            Try                                   ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
-                    cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE lue = 0 AND id_utilisateur = @utilisateur", cn)   ' Met à « lue » celles de l'utilisateur qui ne le sont pas
-                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
-                        cmd.ExecuteNonQuery()     ' Exécute la mise à jour
-                    End Using                     ' Libère la commande
-                End Using                         ' Ferme la connexion
-            Catch ex As MySqlException           ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de marquer les alertes comme lues : " & ex.Message, ex)   ' Message clair
-            End Try                               ' Fin du bloc surveillé
-        End Sub                                   ' Fin de MarquerToutesCommeLues
+                    Using cmd As New MySqlCommand(sql, cn)
+                        For Each kv As KeyValuePair(Of String, Object) In valeurs
+                            cmd.Parameters.AddWithValue(kv.Key, kv.Value)
+                        Next
+                        Using rd As MySqlDataReader = cmd.ExecuteReader()
+                            While rd.Read()
+                                Dim type As TypeAlerte = TexteEnType(rd.GetString(4))
+                                Dim valeur As Decimal = rd.GetDecimal(5)
+                                Dim marque As String = rd.GetString(9)
+                                Dim unite As String = rd.GetString(10)
+                                Dim prixActuel As Decimal = rd.GetDecimal(12)
+                                Dim quantiteActuelle As Decimal = rd.GetDecimal(13)
+                                Dim quantitePrecedente As Decimal? = Nothing
+                                If Not rd.IsDBNull(14) Then quantitePrecedente = rd.GetDecimal(14)
 
-        Public Function CompterNonLues() As Integer Implements IAlerteRepository.CompterNonLues   ' Compte les alertes non lues de l'utilisateur
-            Try                                   ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
-                    cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE lue = 0 AND id_utilisateur = @utilisateur", cn)   ' Requête de comptage
-                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)   ' Utilisateur connecté
-                        Return Convert.ToInt32(cmd.ExecuteScalar())   ' Rend le nombre obtenu (première valeur du résultat)
-                    End Using                     ' Libère la commande
-                End Using                         ' Ferme la connexion
-            Catch ex As MySqlException           ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de compter les alertes non lues : " & ex.Message, ex)   ' Message clair
-            End Try                               ' Fin du bloc surveillé
-        End Function                              ' Fin de CompterNonLues
+                                Dim prixPrecedent As Decimal = Math.Round(prixActuel / (1D + valeur), 4)
 
-        Public Function ListerMagasins() As List(Of KeyValuePair(Of Integer, String)) Implements IAlerteRepository.ListerMagasins   ' Liste les magasins pour le filtre
-            Dim resultat As New List(Of KeyValuePair(Of Integer, String))()   ' Liste (vide) de couples (identifiant, nom)
-            Try                                   ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
-                    cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand("SELECT id, nom FROM magasin ORDER BY nom", cn)   ' Requête : magasins triés par nom
-                        Using lecteur As MySqlDataReader = cmd.ExecuteReader()   ' Exécute et lit les lignes
-                            While lecteur.Read()  ' Pour chaque magasin
-                                resultat.Add(New KeyValuePair(Of Integer, String)(lecteur.GetInt32(0), lecteur.GetString(1)))   ' Ajoute le couple (id, nom)
-                            End While             ' Fin de la boucle
-                        End Using                 ' Libère le lecteur
-                    End Using                     ' Libère la commande
-                End Using                         ' Ferme la connexion
-            Catch ex As MySqlException           ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de lire les magasins : " & ex.Message, ex)   ' Message clair
-            End Try                               ' Fin du bloc surveillé
-            Return resultat                       ' Rend la liste des magasins
-        End Function                              ' Fin de ListerMagasins
+                                resultat.Add(New Alerte With {
+                                    .Id = rd.GetInt32(0),
+                                    .IdProduit = rd.GetInt32(1),
+                                    .IdObservation = rd.GetInt32(2),
+                                    .IdMagasin = rd.GetInt32(3),
+                                    .Type = type,
+                                    .Valeur = valeur,
+                                    .DateAlerte = rd.GetDateTime(6),
+                                    .Lue = rd.GetBoolean(7),
+                                    .NomProduit = If(marque = "", rd.GetString(8), rd.GetString(8) & " " & marque),
+                                    .NomMagasin = rd.GetString(11),
+                                    .PrixActuel = prixActuel,
+                                    .PrixPrecedent = prixPrecedent,
+                                    .Detail = ConstruireDetail(type, valeur, prixPrecedent, prixActuel,
+                                                               quantitePrecedente, quantiteActuelle, unite,
+                                                               If(type = TypeAlerte.Hausse, seuilHausse, seuilShrink))
+                                })
+                            End While
+                        End Using
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+            Return resultat
+        End Function
 
-        Public Function ExisteDeja(alerte As Alerte) As Boolean Implements IAlerteRepository.ExisteDeja   ' Anti-doublon
-            Const sql As String =
-                "SELECT COUNT(*) FROM alerte " &
-                "WHERE id_utilisateur = @utilisateur AND id_produit = @produit AND id_magasin = @magasin AND `type` = @type " &
-                "AND DATE(date_alerte) = @jour " &
-                "AND ABS(prix_precedent - @precedent) < 0.00001 AND ABS(prix_actuel - @actuel) < 0.00001"   ' Même alerte : produit, magasin, type, jour et prix (petit écart toléré pour les arrondis)
-            Try                                   ' Début du bloc surveillé
-                Using cn As New MySqlConnection(_chaineConnexion)   ' Connexion
-                    cn.Open()                     ' Ouvre
-                    Using cmd As New MySqlCommand(sql, cn)          ' Commande SQL
-                        cmd.Parameters.AddWithValue("@utilisateur", _idUtilisateur)         ' Utilisateur connecté
-                        cmd.Parameters.AddWithValue("@produit", alerte.IdProduit)           ' Produit concerné
-                        cmd.Parameters.AddWithValue("@magasin", alerte.IdMagasin)           ' Magasin concerné
-                        cmd.Parameters.AddWithValue("@type", alerte.Type.ToString().ToUpperInvariant())   ' HAUSSE ou SHRINKFLATION
-                        cmd.Parameters.AddWithValue("@jour", alerte.DateAlerte.Date)        ' Jour de l'alerte
-                        cmd.Parameters.AddWithValue("@precedent", alerte.PrixPrecedent)     ' Prix précédent
-                        cmd.Parameters.AddWithValue("@actuel", alerte.PrixActuel)           ' Prix actuel
-                        Return Convert.ToInt32(cmd.ExecuteScalar()) > 0                     ' Vrai s'il en existe déjà au moins une
-                    End Using                     ' Libère la commande
-                End Using                         ' Ferme la connexion
-            Catch ex As MySqlException           ' Erreur MySQL
-                Throw New InvalidOperationException("Impossible de vérifier l'existence de l'alerte : " & ex.Message, ex)   ' Message clair
-            End Try                               ' Fin du bloc surveillé
-        End Function                              ' Fin de ExisteDeja
+        Public Function CompterNonLues() As Integer Implements IAlerteRepository.CompterNonLues
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Using cmd As New MySqlCommand("SELECT COUNT(*) FROM alerte WHERE id_utilisateur = @u AND lue = 0", cn)
+                        cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                        Return Convert.ToInt32(cmd.ExecuteScalar())
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+        End Function
 
-    End Class                                     ' Fin de la classe AlerteRepositoryMySql
+        Public Function ListerMagasins() As List(Of KeyValuePair(Of Integer, String)) Implements IAlerteRepository.ListerMagasins
+            Dim resultat As New List(Of KeyValuePair(Of Integer, String))()
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Using cmd As New MySqlCommand("SELECT id, nom FROM magasin ORDER BY nom", cn)
+                        Using rd As MySqlDataReader = cmd.ExecuteReader()
+                            While rd.Read()
+                                resultat.Add(New KeyValuePair(Of Integer, String)(rd.GetInt32(0), rd.GetString(1)))
+                            End While
+                        End Using
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+            Return resultat
+        End Function
 
-End Namespace                                     ' Fin de l'espace de noms Data
+        ' ================= Écriture =================
+
+        Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Dim idObservation As Integer = TrouverObservation(cn, alerte)
+                    If idObservation = 0 Then
+                        Throw New InvalidOperationException("Aucune observation de prix trouvée pour cette alerte.")
+                    End If
+
+                    Dim dateAlerte As Date = If(alerte.DateAlerte = Date.MinValue, Date.Now, alerte.DateAlerte)
+                    Using cmd As New MySqlCommand(
+                        "INSERT INTO alerte (id_utilisateur, id_produit, id_observation, type, valeur, date_alerte, lue) " &
+                        "VALUES (@u, @p, @o, @t, @v, @d, @l)", cn)
+                        cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                        cmd.Parameters.AddWithValue("@p", alerte.IdProduit)
+                        cmd.Parameters.AddWithValue("@o", idObservation)
+                        cmd.Parameters.AddWithValue("@t", TypeEnTexte(alerte.Type))
+                        cmd.Parameters.AddWithValue("@v", Math.Round(alerte.Valeur, 4))
+                        cmd.Parameters.AddWithValue("@d", dateAlerte)
+                        cmd.Parameters.AddWithValue("@l", alerte.Lue)
+                        cmd.ExecuteNonQuery()
+                        alerte.Id = CInt(cmd.LastInsertedId)
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+            Return alerte.Id
+        End Function
+
+        Public Sub MarquerCommeLue(idAlerte As Integer) Implements IAlerteRepository.MarquerCommeLue
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE id = @id AND id_utilisateur = @u", cn)
+                        cmd.Parameters.AddWithValue("@id", idAlerte)
+                        cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                        cmd.ExecuteNonQuery()
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+        End Sub
+
+        Public Sub MarquerToutesCommeLues() Implements IAlerteRepository.MarquerToutesCommeLues
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Using cmd As New MySqlCommand("UPDATE alerte SET lue = 1 WHERE id_utilisateur = @u AND lue = 0", cn)
+                        cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                        cmd.ExecuteNonQuery()
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+        End Sub
+
+        ' Anti-doublon : une alerte de ce type existe déjà pour la même observation de prix
+        Public Function ExisteDeja(alerte As Alerte) As Boolean Implements IAlerteRepository.ExisteDeja
+            Try
+                Using cn As MySqlConnection = GetConnection
+                    cn.Open()
+                    Dim idObservation As Integer = TrouverObservation(cn, alerte)
+                    If idObservation = 0 Then Return False
+                    Using cmd As New MySqlCommand(
+                        "SELECT COUNT(*) FROM alerte WHERE id_utilisateur = @u AND id_observation = @o AND type = @t", cn)
+                        cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                        cmd.Parameters.AddWithValue("@o", idObservation)
+                        cmd.Parameters.AddWithValue("@t", TypeEnTexte(alerte.Type))
+                        Return Convert.ToInt32(cmd.ExecuteScalar()) > 0
+                    End Using
+                End Using
+            Catch ex As MySqlException
+                Throw Echec(ex)
+            End Try
+        End Function
+
+        ' ================= Détails internes =================
+
+        ' Observation liée à l'alerte : celle indiquée, sinon la dernière du produit dans ce magasin à cette date
+        Private Shared Function TrouverObservation(cn As MySqlConnection, alerte As Alerte) As Integer
+            If alerte.IdObservation > 0 Then Return alerte.IdObservation
+
+            Using cmd As New MySqlCommand(
+                "SELECT id FROM observation_prix " &
+                "WHERE id_utilisateur = @u AND id_produit = @p AND id_magasin = @m AND date_obs < @fin " &
+                "ORDER BY date_obs DESC, id DESC LIMIT 1", cn)
+                cmd.Parameters.AddWithValue("@u", IdUtilisateur())
+                cmd.Parameters.AddWithValue("@p", alerte.IdProduit)
+                cmd.Parameters.AddWithValue("@m", alerte.IdMagasin)
+                cmd.Parameters.AddWithValue("@fin", alerte.DateAlerte.Date.AddDays(1))
+                Dim r As Object = cmd.ExecuteScalar()
+                Return If(r Is Nothing OrElse r Is DBNull.Value, 0, Convert.ToInt32(r))
+            End Using
+        End Function
+
+        ' Seuils (en %) de la table parametre ; valeurs par défaut conservées s'ils sont absents
+        Private Shared Sub ChargerSeuils(cn As MySqlConnection, ByRef seuilHausse As Decimal, ByRef seuilShrink As Decimal)
+            Using cmd As New MySqlCommand(
+                "SELECT nom, valeur FROM parametre WHERE nom IN ('seuil_hausse_prix', 'seuil_shrinkflation')", cn)
+                Using rd As MySqlDataReader = cmd.ExecuteReader()
+                    While rd.Read()
+                        If rd.GetString(0) = "seuil_hausse_prix" Then seuilHausse = rd.GetDecimal(1)
+                        If rd.GetString(0) = "seuil_shrinkflation" Then seuilShrink = rd.GetDecimal(1)
+                    End While
+                End Using
+            End Using
+        End Sub
+
+        ' ================= Texte explicatif =================
+
+        Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, prixPrecedent As Decimal,
+                                                 prixActuel As Decimal, quantitePrecedente As Decimal?,
+                                                 quantiteActuelle As Decimal, unite As String, seuil As Decimal) As String
+            Dim libelle As String = LibelleUnite(unite)
+            Dim variationPrix As String = Montant(prixPrecedent) & " vers " & Montant(prixActuel) &
+                                          " FCFA/" & libelle & " (+ " & Pourcentage(valeur) & " %)"
+
+            If type = TypeAlerte.Hausse Then
+                Return "Prix unitaire : " & Montant(prixPrecedent) & " FCFA/" & libelle & " vers " & Montant(prixActuel) &
+                       " FCFA/" & libelle & " (+ " & Pourcentage(valeur) & " %), au-dessus du seuil de " &
+                       seuil.ToString("0.##", Fr) & " %."
+            End If
+
+            If quantitePrecedente.HasValue AndAlso quantitePrecedente.Value > 0D Then
+                Dim baisse As Decimal = (quantitePrecedente.Value - quantiteActuelle) / quantitePrecedente.Value
+                Return "Quantité : " & Quantite(quantitePrecedente.Value, unite) & " vers " & Quantite(quantiteActuelle, unite) &
+                       " (- " & Pourcentage(baisse) & " %) sans baisse de prix (" & Montant(prixActuel * quantiteActuelle) &
+                       " FCFA) ; prix unitaire réel : " & variationPrix & "."
+            End If
+            Return "Quantité en baisse sans baisse de prix ; prix unitaire réel : " & variationPrix & "."
+        End Function
+
+        Private Shared Function LibelleUnite(unite As String) As String
+            Return If(unite = "piece", "pièce", unite)
+        End Function
+
+        Private Shared Function Montant(valeur As Decimal) As String
+            Return Math.Round(valeur, 0).ToString("#,##0", Fr)
+        End Function
+
+        Private Shared Function Pourcentage(fraction As Decimal) As String
+            Return Math.Abs(fraction * 100D).ToString("0.0", Fr)
+        End Function
+
+        Private Shared Function Quantite(q As Decimal, unite As String) As String
+            If unite = "kg" Then
+                Return If(q < 1D, (q * 1000D).ToString("0.##", Fr) & " g", q.ToString("0.###", Fr) & " kg")
+            End If
+            If unite = "L" Then
+                Return If(q < 1D, (q * 1000D).ToString("0.##", Fr) & " ml", q.ToString("0.###", Fr) & " L")
+            End If
+            Return q.ToString("0.###", Fr) & " pièce(s)"
+        End Function
+
+    End Class
+
+End Namespace

@@ -1,5 +1,7 @@
 ﻿Option Strict On
 Option Explicit On
+Imports PreisRontgen.Models
+Imports PreisRontgen.Services
 
 ''' <summary>Ligne en cours de saisie. Les valeurs calculées se mettent à jour quand une valeur change.</summary>
 Public Class LigneTicketSaisie
@@ -7,9 +9,10 @@ Public Class LigneTicketSaisie
     Public Property NomProduit As String = ""
     Public Property UniteBaseProduit As String = "piece"
     Public Property Conditionnement As Decimal
-    Public Property Unite As String = "piece"
+    Public Property Unite As Unite = Unite.Piece
     Public Property Prix As Decimal
     Public Property NbAchete As Integer = 1
+    Private normalisation As NormalisationService
 
     Public ReadOnly Property TotalLigne As Decimal
         Get
@@ -19,13 +22,13 @@ Public Class LigneTicketSaisie
 
     Public ReadOnly Property QuantiteBase As Decimal
         Get
-            Return NormalisationService.VersUniteBase(Conditionnement, Unite)
+            Return NormalisationService.ConvertirEnUniteBase(Conditionnement, Unite)
         End Get
     End Property
 
     Public ReadOnly Property PrixUnitaire As Decimal
         Get
-            Return NormalisationService.PrixUnitaire(Prix, Conditionnement, Unite)
+            Return NormalisationService.CalculerPrixUnitaire(Prix, Conditionnement, Unite)
         End Get
     End Property
 End Class

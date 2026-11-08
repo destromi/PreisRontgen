@@ -1,104 +1,235 @@
-﻿
-Option Strict On
-Option Explicit On
+﻿' ============================================================================
+' FICHIER : Services/NormalisationService.vb
+' RÔLE    : EF-05, prix unitaire normalisé. Permet de comparer des produits vendus
+'           dans des conditionnements différents (500 g, 1 kg, 33 cl, 1 L...).
+' PRINCIPE: tout est ramené à une unité de base (kg, L ou pièce), puis
+'           prix unitaire = prix de l'article / quantité en unité de base.
+'           Exemple du cahier des charges : 2,40 pour 500 g = 4,80 par kg.
+' NOTION  : « Shared » = méthode appelée directement sur la classe
+'           (NormalisationService.CalculerPrixUnitaire(...)) sans créer d'objet.
+' ============================================================================
+Option Strict On      ' Conversions implicites dangereuses interdites
+Option Explicit On    ' Variables obligatoirement déclarées
 
-Public Module NormalisationService
+Imports System.Globalization              ' Pour lire les nombres décimaux sans dépendre de la langue de Windows
+Imports System.Text.RegularExpressions   ' Pour lire « 6 x 33 cl » avec une expression régulière
+Imports PreisRontgen.Models    ' Permet d'écrire Unite, UniteBase, Observation sans préfixe
 
-    Public ReadOnly UnitesSaisie As String() =
-        {"g", "kg", "ml", "cl", "L", "piece"}
+Namespace Services             ' Espace de noms des classes « métier » : PreisRontgen.Services
 
     ''' <summary>
-    ''' Retourne l'unité de base d'un produit.
+    ''' EF-05 : prix unitaire normalisé.
+    ''' Convertit les quantités en unité de base (g vers kg, cl et ml vers L)
+    ''' et calcule le prix par unité de base, pour comparer les produits à unité égale.
+    ''' Tous les calculs utilisent Decimal pour éviter les erreurs d'arrondi.
     ''' </summary>
-    Public Function UniteBaseDe(unite As String) As String
+    Public NotInheritable Class NormalisationService   ' NotInheritable = aucune autre classe ne peut en hériter
 
-        Select Case If(unite, "").Trim().ToLowerInvariant()
+        Private Sub New()      ' Constructeur privé : personne ne peut faire « New NormalisationService »
+        End Sub                ' (la classe ne contient que des méthodes Shared, pas besoin d'objet)
 
-            Case "g", "kg"
-                Return "kg"
+        ''' <summary>Unité de base associée à une unité de saisie.</summary>
+        Public Shared Function UniteBaseDe(uniteSaisie As Unite) As UniteBase   ' Reçoit une unité de ticket, rend sa famille
+            Select Case uniteSaisie                                   ' Aiguillage selon la valeur de l'unité
+                Case Unite.Gramme, Unite.Kilogramme                   ' Si c'est du poids...
+                    Return UniteBase.Kg                               ' ...la famille est « kilogramme »
+                Case Unite.Millilitre, Unite.Centilitre, Unite.Litre  ' Si c'est du volume...
+                    Return UniteBase.Litre                            ' ...la famille est « litre »
+                Case Unite.Piece                                      ' Si c'est compté à l'unité...
+                    Return UniteBase.Piece                            ' ...la famille est « pièce »
+                Case Else                                             ' Toute autre valeur (ne devrait jamais arriver)
+                    Throw New ArgumentOutOfRangeException(NameOf(uniteSaisie), "Unité inconnue.")   ' On signale l'erreur par une exception
+            End Select                                                ' Fin de l'aiguillage
+        End Function                                                  ' Fin de UniteBaseDe
 
-            Case "ml", "cl", "l"
-                Return "L"
+        ''' <summary>
+        ''' Convertit une quantité dans l'unité de base correspondante.
+        ''' Exemples : 500 g donne 0,5 kg ; 33 cl donne 0,33 L ; 6 pièces donne 6.
+        ''' </summary>
+        ''' <exception cref="ArgumentOutOfRangeException">La quantité n'est pas strictement positive.</exception>
+        Public Shared Function ConvertirEnUniteBase(quantite As Decimal, uniteSaisie As Unite) As Decimal   ' Rend la quantité exprimée en kg, L ou pièce
+            If quantite <= 0D Then      ' Une quantité nulle ou négative n'a pas de sens (et provoquerait une division par zéro plus loin)
+                Throw New ArgumentOutOfRangeException(NameOf(quantite), "La quantité doit être strictement positive.")   ' On refuse avec un message clair
+            End If                      ' Fin du contrôle
 
-            Case "piece"
-                Return "piece"
+            Select Case uniteSaisie     ' Aiguillage selon l'unité saisie
+                Case Unite.Gramme, Unite.Millilitre    ' 1000 g = 1 kg et 1000 ml = 1 L
+                    Return quantite / 1000D            ' Divise par 1000 (ex. 500 g donne 0,5 kg)
+                Case Unite.Centilitre                  ' 100 cl = 1 L
+                    Return quantite / 100D             ' Divise par 100 (ex. 33 cl donne 0,33 L)
+                Case Unite.Kilogramme, Unite.Litre, Unite.Piece   ' Ces unités sont déjà des unités de base
+                    Return quantite                    ' Aucune conversion à faire
+                Case Else                              ' Toute autre valeur (ne devrait jamais arriver)
+                    Throw New ArgumentOutOfRangeException(NameOf(uniteSaisie), "Unité inconnue.")   ' Erreur explicite
+            End Select                                 ' Fin de l'aiguillage
+        End Function                                   ' Fin de ConvertirEnUniteBase
 
-            Case Else
+        ''' <summary>
+        ''' Prix par unité de base : prix de l'article divisé par sa quantité exprimée en unité de base.
+        ''' Exemple : 2,40 pour 500 g donne 4,80 par kg.
+        ''' </summary>
+        ''' <param name="prix">Prix d'un article (un conditionnement), positif ou nul.</param>
+        ''' <param name="quantiteConditionnement">Contenu de l'article dans l'unité du ticket (ex. 500).</param>
+        ''' <param name="uniteSaisie">Unité du conditionnement (ex. Gramme).</param>
+        Public Shared Function CalculerPrixUnitaire(prix As Decimal,
+                                                    quantiteConditionnement As Decimal,
+                                                    uniteSaisie As Unite) As Decimal   ' Rend le prix par kg, L ou pièce
+            If prix < 0D Then           ' Un prix négatif est impossible
+                Throw New ArgumentOutOfRangeException(NameOf(prix), "Le prix ne peut pas être négatif.")   ' On refuse
+            End If                      ' Fin du contrôle (un prix de 0 reste accepté : produit offert)
+            Return prix / ConvertirEnUniteBase(quantiteConditionnement, uniteSaisie)   ' Prix divisé par la quantité en unité de base
+        End Function                    ' Fin de CalculerPrixUnitaire (version simple)
+
+        ''' <summary>
+        ''' Idem, en vérifiant que l'unité saisie est compatible avec l'unité de base du produit
+        ''' (on ne peut pas enregistrer des grammes pour un produit vendu au litre).
+        ''' </summary>
+        ''' <exception cref="ArgumentException">Unité incompatible avec l'unité de base du produit.</exception>
+        Public Shared Function CalculerPrixUnitaire(prix As Decimal,
+                                                    quantiteConditionnement As Decimal,
+                                                    uniteSaisie As Unite,
+                                                    uniteBaseProduit As UniteBase) As Decimal   ' Surcharge : même nom, un paramètre de plus
+            VerifierCompatibilite(uniteSaisie, uniteBaseProduit)   ' Refuse (exception) si on mélange poids et volume par exemple
+            Return CalculerPrixUnitaire(prix, quantiteConditionnement, uniteSaisie)   ' Réutilise la version simple ci-dessus
+        End Function                    ' Fin de CalculerPrixUnitaire (version avec contrôle)
+
+        ''' <summary>Vérifie la compatibilité entre l'unité saisie et l'unité de base du produit.</summary>
+        Public Shared Sub VerifierCompatibilite(uniteSaisie As Unite, uniteBaseProduit As UniteBase)   ' Sub = ne renvoie rien, lève une exception si incompatible
+            If UniteBaseDe(uniteSaisie) <> uniteBaseProduit Then   ' La famille de l'unité saisie diffère de celle du produit
                 Throw New ArgumentException(
-                    "Unité inconnue : " & unite)
+                    $"L'unité saisie ({uniteSaisie}) est incompatible avec l'unité de base du produit ({uniteBaseProduit}).",
+                    NameOf(uniteSaisie))                           ' Message précis ($"..." insère les valeurs entre accolades)
+            End If                                                 ' Fin du contrôle
+        End Sub                                                    ' Fin de VerifierCompatibilite
 
-        End Select
+        ''' <summary>
+        ''' Construit l'observation de prix correspondant à une ligne de ticket.
+        ''' À appeler par la saisie de ticket (T2) avant d'enregistrer l'observation et d'appeler la détection.
+        ''' </summary>
+        Public Shared Function CreerObservation(idProduit As Integer,
+                                                idMagasin As Integer,
+                                                dateObs As Date,
+                                                prixLigne As Decimal,
+                                                quantiteConditionnement As Decimal,
+                                                uniteSaisie As Unite) As Observation   ' Rend une Observation prête à enregistrer
+            Dim quantiteBase As Decimal = ConvertirEnUniteBase(quantiteConditionnement, uniteSaisie)   ' Variable locale : quantité en kg/L/pièce
+            Return New Observation With {                                  ' Crée l'objet et remplit ses propriétés d'un coup
+                .IdProduit = idProduit,                                    ' Produit observé
+                .IdMagasin = idMagasin,                                    ' Magasin
+                .DateObs = dateObs,                                        ' Date du ticket
+                .PrixTotal = prixLigne,                                    ' Prix de l'article tel qu'écrit sur le ticket
+                .QuantiteBase = quantiteBase,                              ' Quantité convertie en unité de base
+                .PrixUnitaire = CalculerPrixUnitaire(prixLigne, quantiteConditionnement, uniteSaisie)   ' Prix par kg/L/pièce
+            }                                                              ' Fin de l'initialisation de l'objet
+        End Function                                                       ' Fin de CreerObservation
 
-    End Function
+        ''' <summary>
+        ''' Lit une unité écrite sur un ticket ou dans un fichier CSV : g, kg, ml, cl, l, pièce...
+        ''' Retourne False si le texte n'est pas reconnu.
+        ''' </summary>
+        Public Shared Function TryParseUnite(texte As String, ByRef uniteSaisie As Unite) As Boolean   ' ByRef : le résultat revient aussi par le 2e paramètre
+            If String.IsNullOrWhiteSpace(texte) Then    ' Texte absent, vide ou fait uniquement d'espaces
+                Return False                            ' Rien à reconnaître : échec
+            End If                                      ' Fin du contrôle
 
-    ''' <summary>
-    ''' Convertit une quantité vers son unité de base.
-    ''' </summary>
-    Public Function VersUniteBase(
-        quantite As Decimal,
-        unite As String
-    ) As Decimal
+            Select Case texte.Trim().TrimEnd("."c).ToLowerInvariant()   ' Nettoie : retire espaces et point final, passe en minuscules
+                Case "g", "gr", "gramme", "grammes"                      ' Écritures possibles du gramme
+                    uniteSaisie = Unite.Gramme                           ' On renvoie Gramme par le paramètre ByRef
+                Case "kg", "kilo", "kilos", "kilogramme", "kilogrammes"  ' Écritures possibles du kilogramme
+                    uniteSaisie = Unite.Kilogramme                       ' On renvoie Kilogramme
+                Case "ml", "millilitre", "millilitres"                   ' Écritures possibles du millilitre
+                    uniteSaisie = Unite.Millilitre                       ' On renvoie Millilitre
+                Case "cl", "centilitre", "centilitres"                   ' Écritures possibles du centilitre
+                    uniteSaisie = Unite.Centilitre                       ' On renvoie Centilitre
+                Case "l", "litre", "litres"                              ' Écritures possibles du litre (« L » est passé en minuscule)
+                    uniteSaisie = Unite.Litre                            ' On renvoie Litre
+                Case "piece", "pièce", "pieces", "pièces", "pc", "pcs", "u", "unite", "unité", "unités", "unites"   ' Écritures possibles de la pièce
+                    uniteSaisie = Unite.Piece                            ' On renvoie Piece
+                Case Else                                                ' Texte non reconnu
+                    Return False                                         ' Échec : l'appelant affichera une erreur
+            End Select                                                   ' Fin de l'aiguillage
+            Return True                                                  ' Texte reconnu : succès
+        End Function                                                     ' Fin de TryParseUnite
 
-        If quantite <= 0D Then
-            Throw New ArgumentException(
-                "La quantité doit être positive.")
-        End If
+        ''' <summary>
+        ''' Lit un conditionnement écrit sur un ticket : « 500 g », « 1,5 L », « 6 x 33 cl », « 12x1L ».
+        ''' Pour un paquet multiple, la quantité rendue est le TOTAL dans l'unité écrite
+        ''' (6 x 33 cl donne 198 cl, qui vaut 1,98 L une fois convertie en unité de base).
+        ''' Retourne False si le texte n'est pas reconnu (le contenu des paramètres est alors sans valeur).
+        ''' </summary>
+        Public Shared Function TryParseConditionnement(texte As String,
+                                                       ByRef quantiteTotale As Decimal,
+                                                       ByRef uniteSaisie As Unite) As Boolean   ' Rend la quantité et l'unité par les paramètres ByRef
+            quantiteTotale = 0D                         ' Valeur neutre en cas d'échec
+            If String.IsNullOrWhiteSpace(texte) Then    ' Texte absent ou vide
+                Return False                            ' Rien à lire : échec
+            End If                                      ' Fin du contrôle
 
-        Select Case If(unite, "").Trim().ToLowerInvariant()
+            ' Forme attendue : [nombre de paquets x] quantité unité   (le « x » peut aussi s'écrire × ou *)
+            Dim modele As Match = Regex.Match(texte.Trim(),
+                "^(?:(\d+)\s*[xX×*]\s*)?(\d+(?:[.,]\d+)?)\s*([^\d\s].*)$")   ' Groupe 1 : nombre de paquets (facultatif) ; groupe 2 : quantité ; groupe 3 : unité
+            If Not modele.Success Then                  ' Le texte ne ressemble pas à un conditionnement
+                Return False                            ' Échec
+            End If                                      ' Fin du contrôle
 
-            Case "g"
-                Return quantite / 1000D
+            Dim quantite As Decimal                     ' Quantité d'un paquet
+            If Not Decimal.TryParse(modele.Groups(2).Value.Replace(","c, "."c),
+                                    NumberStyles.Number,
+                                    CultureInfo.InvariantCulture, quantite) OrElse quantite <= 0D Then   ' Nombre illisible, nul ou négatif
+                Return False                            ' Échec
+            End If                                      ' Fin du contrôle
 
-            Case "kg"
-                Return quantite
+            Dim nombrePaquets As Integer = 1            ' Un seul paquet par défaut (« 500 g »)
+            If modele.Groups(1).Success Then            ' Un multiplicateur est écrit (« 6 x ... »)
+                If Not Integer.TryParse(modele.Groups(1).Value, nombrePaquets) OrElse nombrePaquets <= 0 Then   ' Multiplicateur illisible ou nul
+                    Return False                        ' Échec (« 0 x 33 cl » n'a pas de sens)
+                End If                                  ' Fin du contrôle
+            End If                                      ' Fin du test du multiplicateur
 
-            Case "ml"
-                Return quantite / 1000D
+            Dim uniteLue As Unite                       ' Unité lue
+            If Not TryParseUnite(modele.Groups(3).Value, uniteLue) Then   ' Réutilise la lecture d'unités existante
+                Return False                            ' Unité inconnue : échec
+            End If                                      ' Fin du contrôle
 
-            Case "cl"
-                Return quantite / 100D
+            quantiteTotale = quantite * nombrePaquets   ' Quantité totale : 6 x 33 = 198
+            uniteSaisie = uniteLue                      ' Unité lue
+            Return True                                 ' Succès
+        End Function                                    ' Fin de TryParseConditionnement
 
-            Case "l"
-                Return quantite
+        ''' <summary>
+        ''' Prix « pour 100 g » ou « pour 100 ml », plus parlant que le prix au kilo ou au litre
+        ''' pour les petits conditionnements. Retourne Nothing pour une unité comptée à la pièce
+        ''' (« pour 100 pièces » n'aurait pas de sens).
+        ''' </summary>
+        Public Shared Function PrixPourCent(prixUnitaire As Decimal, uniteBase As UniteBase) As Decimal?   ' Decimal? : peut rendre « pas de valeur »
+            If prixUnitaire < 0D Then                   ' Un prix négatif est impossible
+                Throw New ArgumentOutOfRangeException(NameOf(prixUnitaire), "Le prix unitaire ne peut pas être négatif.")   ' Refus
+            End If                                      ' Fin du contrôle
+            Select Case uniteBase                       ' Aiguillage selon la famille d'unité
+                Case UniteBase.Kg, UniteBase.Litre      ' 100 g = 0,1 kg et 100 ml = 0,1 L
+                    Return prixUnitaire / 10D           ' Le prix de 0,1 kg ou 0,1 L est le dixième du prix au kg ou au L
+                Case Else                               ' Pièce : pas d'échelle « pour 100 »
+                    Return Nothing                      ' Pas de valeur
+            End Select                                  ' Fin de l'aiguillage
+        End Function                                    ' Fin de PrixPourCent
 
-            Case "piece"
-                Return quantite
+        ''' <summary>Texte de l'échelle correspondante : « 100 g » ou « 100 ml » (Nothing pour une pièce).</summary>
+        Public Shared Function LibelleEchelleCent(uniteBase As UniteBase) As String   ' Sert à écrire « 0,48 € / 100 g » dans les écrans
+            Select Case uniteBase                       ' Aiguillage selon la famille d'unité
+                Case UniteBase.Kg                       ' Poids
+                    Return "100 g"                      ' Échelle des poids
+                Case UniteBase.Litre                    ' Volume
+                    Return "100 ml"                     ' Échelle des volumes
+                Case Else                               ' Pièce
+                    Return Nothing                      ' Pas d'échelle
+            End Select                                  ' Fin de l'aiguillage
+        End Function                                    ' Fin de LibelleEchelleCent
 
-            Case Else
-                Throw New ArgumentException(
-                    "Unité inconnue : " & unite)
+        ''' <summary>Arrondit un prix ou une variation à 4 décimales, pour l'affichage ou le stockage.</summary>
+        Public Shared Function Arrondir(valeur As Decimal) As Decimal    ' Rend la valeur arrondie
+            Return Math.Round(valeur, 4, MidpointRounding.AwayFromZero)  ' 4 décimales ; 0,5 s'arrondit « vers le haut » comme à l'école
+        End Function                                                     ' Fin de Arrondir
 
-        End Select
+    End Class                                                            ' Fin de la classe NormalisationService
 
-    End Function
-
-    ''' <summary>
-    ''' Calcule le prix par unité de base.
-    ''' </summary>
-    Public Function PrixUnitaire(
-        prix As Decimal,
-        conditionnement As Decimal,
-        unite As String
-    ) As Decimal
-
-        If prix < 0D Then
-            Throw New ArgumentException(
-                "Le prix ne peut pas être négatif.")
-        End If
-
-        Dim quantiteBase As Decimal =
-            VersUniteBase(conditionnement, unite)
-
-        If quantiteBase <= 0D Then
-            Throw New ArgumentException(
-                "Quantité de base invalide.")
-        End If
-
-        Return Math.Round(
-            prix / quantiteBase,
-            4,
-            MidpointRounding.AwayFromZero)
-
-    End Function
-
-End Module
+End Namespace                                                            ' Fin de l'espace de noms Services

@@ -23,6 +23,7 @@ Partial Class MainForm
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         components = New ComponentModel.Container()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Panel1 = New Panel()
         BtnLogOut = New Button()
         LabelAlerte = New Label()
@@ -45,6 +46,8 @@ Partial Class MainForm
         ToolStripSeparator6 = New ToolStripSeparator()
         BtnCSV = New ToolStripButton()
         ToolStripSeparator8 = New ToolStripSeparator()
+        BtnPlus = New ToolStripButton()
+        ToolStripSeparator9 = New ToolStripSeparator()
         PanelAffichage = New Panel()
         Timer1 = New Timer(components)
         Panel1.SuspendLayout()
@@ -127,7 +130,7 @@ Partial Class MainForm
         ' 
         ToolStrip1.BackColor = SystemColors.ControlLight
         ToolStrip1.ImageScalingSize = New Size(20, 20)
-        ToolStrip1.Items.AddRange(New ToolStripItem() {ToolStripSeparator7, BtnAccueil, ToolStripSeparator1, BtnSaisieTicket, ToolStripSeparator2, BtnHistorique, ToolStripSeparator3, BtnAlertes, ToolStripSeparator4, BtnAnalyses, ToolStripSeparator5, BtnReferentiels, ToolStripSeparator6, BtnCSV, ToolStripSeparator8})
+        ToolStrip1.Items.AddRange(New ToolStripItem() {ToolStripSeparator7, BtnAccueil, ToolStripSeparator1, BtnSaisieTicket, ToolStripSeparator2, BtnHistorique, ToolStripSeparator3, BtnAlertes, ToolStripSeparator4, BtnAnalyses, ToolStripSeparator5, BtnReferentiels, ToolStripSeparator6, BtnCSV, ToolStripSeparator8, BtnPlus, ToolStripSeparator9})
         ToolStrip1.Location = New Point(0, 125)
         ToolStrip1.Name = "ToolStrip1"
         ToolStrip1.Size = New Size(1211, 37)
@@ -263,6 +266,21 @@ Partial Class MainForm
         ToolStripSeparator8.Name = "ToolStripSeparator8"
         ToolStripSeparator8.Size = New Size(6, 37)
         ' 
+        ' BtnPlus
+        ' 
+        BtnPlus.DisplayStyle = ToolStripItemDisplayStyle.Text
+        BtnPlus.Font = New Font("Bookman Old Style", 10.2F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
+        BtnPlus.Image = CType(resources.GetObject("BtnPlus.Image"), Image)
+        BtnPlus.ImageTransparentColor = Color.Magenta
+        BtnPlus.Name = "BtnPlus"
+        BtnPlus.Size = New Size(51, 34)
+        BtnPlus.Text = "Plus"
+        ' 
+        ' ToolStripSeparator9
+        ' 
+        ToolStripSeparator9.Name = "ToolStripSeparator9"
+        ToolStripSeparator9.Size = New Size(6, 37)
+        ' 
         ' PanelAffichage
         ' 
         PanelAffichage.BackColor = Color.White
@@ -318,4 +336,6 @@ Partial Class MainForm
     Friend WithEvents ToolStripSeparator6 As ToolStripSeparator
     Friend WithEvents ToolStripSeparator8 As ToolStripSeparator
     Friend WithEvents Timer1 As Timer
+    Friend WithEvents BtnPlus As ToolStripButton
+    Friend WithEvents ToolStripSeparator9 As ToolStripSeparator
 End Class

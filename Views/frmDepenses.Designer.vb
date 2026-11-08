@@ -23,342 +23,294 @@ Partial Class frmDepenses  ' Partial : la classe est coupée en deux fichiers (a
 
     <System.Diagnostics.DebuggerStepThrough()>  ' Le débogueur ne s'arrête pas ici
     Private Sub InitializeComponent()  ' Crée et règle tous les contrôles ; appelée par le constructeur
-        pnlTitre = New System.Windows.Forms.Panel()  ' Crée pnlTitre
-        lblTitre = New System.Windows.Forms.Label()  ' Crée lblTitre
-        pnlRappel = New System.Windows.Forms.Panel()  ' Crée pnlRappel
-        lblRappel = New System.Windows.Forms.Label()  ' Crée lblRappel
-        pnlForm = New System.Windows.Forms.Panel()  ' Crée pnlForm
-        lblFormTitre = New System.Windows.Forms.Label()  ' Crée lblFormTitre
-        lblNom = New System.Windows.Forms.Label()  ' Crée lblNom
-        txtNom = New System.Windows.Forms.TextBox()  ' Crée txtNom
-        lblMontant = New System.Windows.Forms.Label()  ' Crée lblMontant
-        txtMontant = New System.Windows.Forms.TextBox()  ' Crée txtMontant
-        lblPeriodicite = New System.Windows.Forms.Label()  ' Crée lblPeriodicite
-        cmbPeriodicite = New System.Windows.Forms.ComboBox()  ' Crée cmbPeriodicite
-        lblEcheance = New System.Windows.Forms.Label()  ' Crée lblEcheance
-        dtpEcheance = New System.Windows.Forms.DateTimePicker()  ' Crée dtpEcheance
-        btnEnregistrer = New System.Windows.Forms.Button()  ' Crée btnEnregistrer
-        btnNouveau = New System.Windows.Forms.Button()  ' Crée btnNouveau
-        btnEcheanceSuivante = New System.Windows.Forms.Button()  ' Crée btnEcheanceSuivante
-        btnDesactiver = New System.Windows.Forms.Button()  ' Crée btnDesactiver
-        lblNote = New System.Windows.Forms.Label()  ' Crée lblNote
-        dgvDepenses = New System.Windows.Forms.DataGridView()  ' Crée dgvDepenses
-        colNom = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colNom
-        colMontant = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colMontant
-        colPeriodicite = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colPeriodicite
-        colEcheance = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colEcheance
-        colRappel = New System.Windows.Forms.DataGridViewTextBoxColumn()  ' Crée colRappel
-        pnlTitre.SuspendLayout()  ' Suspend la mise en page de pnlTitre pendant le réglage
-        pnlRappel.SuspendLayout()  ' Suspend la mise en page de pnlRappel pendant le réglage
-        pnlForm.SuspendLayout()  ' Suspend la mise en page de pnlForm pendant le réglage
-        CType(dgvDepenses, System.ComponentModel.ISupportInitialize).BeginInit()  ' Début de l'initialisation de la grille
-        SuspendLayout()  ' Suspend la mise en page du formulaire
-        '
-        'pnlTitre
-        '
-        pnlTitre.Controls.Add(lblTitre)  ' Place lblTitre dans pnlTitre
-        pnlTitre.BackColor = System.Drawing.Color.FromArgb(244, 247, 245)
-        pnlTitre.Dock = System.Windows.Forms.DockStyle.Top
-        pnlTitre.Size = New System.Drawing.Size(100, 44)
-        pnlTitre.Name = "pnlTitre"  ' Nom interne
-        pnlTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'lblTitre
-        '
-        lblTitre.AutoSize = True
-        lblTitre.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblTitre.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblTitre.Location = New System.Drawing.Point(14, 10)
-        lblTitre.Text = "Dépenses récurrentes"
-        lblTitre.Name = "lblTitre"  ' Nom interne
-        lblTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'pnlRappel
-        '
-        pnlRappel.Controls.Add(lblRappel)  ' Place lblRappel dans pnlRappel
-        pnlRappel.BackColor = System.Drawing.Color.FromArgb(253, 243, 214)
-        pnlRappel.Dock = System.Windows.Forms.DockStyle.Bottom
-        pnlRappel.Size = New System.Drawing.Size(100, 44)
-        pnlRappel.Name = "pnlRappel"  ' Nom interne
-        pnlRappel.TabIndex = 1  ' Ordre de tabulation
-        '
-        'lblRappel
-        '
-        lblRappel.AutoSize = False
-        lblRappel.Dock = System.Windows.Forms.DockStyle.Fill
-        lblRappel.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblRappel.ForeColor = System.Drawing.Color.FromArgb(122, 51, 0)
-        lblRappel.Padding = New System.Windows.Forms.Padding(14, 0, 0, 0)
-        lblRappel.Text = ""
-        lblRappel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        lblRappel.Name = "lblRappel"  ' Nom interne
-        lblRappel.TabIndex = 0  ' Ordre de tabulation
-        '
-        'pnlForm
-        '
-        pnlForm.Controls.Add(lblFormTitre)  ' Place lblFormTitre dans pnlForm
-        pnlForm.Controls.Add(lblNom)  ' Place lblNom dans pnlForm
-        pnlForm.Controls.Add(txtNom)  ' Place txtNom dans pnlForm
-        pnlForm.Controls.Add(lblMontant)  ' Place lblMontant dans pnlForm
-        pnlForm.Controls.Add(txtMontant)  ' Place txtMontant dans pnlForm
-        pnlForm.Controls.Add(lblPeriodicite)  ' Place lblPeriodicite dans pnlForm
-        pnlForm.Controls.Add(cmbPeriodicite)  ' Place cmbPeriodicite dans pnlForm
-        pnlForm.Controls.Add(lblEcheance)  ' Place lblEcheance dans pnlForm
-        pnlForm.Controls.Add(dtpEcheance)  ' Place dtpEcheance dans pnlForm
-        pnlForm.Controls.Add(btnEnregistrer)  ' Place btnEnregistrer dans pnlForm
-        pnlForm.Controls.Add(btnNouveau)  ' Place btnNouveau dans pnlForm
-        pnlForm.Controls.Add(btnEcheanceSuivante)  ' Place btnEcheanceSuivante dans pnlForm
-        pnlForm.Controls.Add(btnDesactiver)  ' Place btnDesactiver dans pnlForm
-        pnlForm.Controls.Add(lblNote)  ' Place lblNote dans pnlForm
-        pnlForm.BackColor = System.Drawing.Color.White
-        pnlForm.Dock = System.Windows.Forms.DockStyle.Right
-        pnlForm.Size = New System.Drawing.Size(320, 100)
-        pnlForm.Name = "pnlForm"  ' Nom interne
-        pnlForm.TabIndex = 2  ' Ordre de tabulation
-        '
-        'lblFormTitre
-        '
+        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        pnlTitre = New Panel()
+        pnlRappel = New Panel()
+        lblRappel = New Label()
+        pnlForm = New Panel()
+        lblFormTitre = New Label()
+        lblNom = New Label()
+        txtNom = New TextBox()
+        lblMontant = New Label()
+        txtMontant = New TextBox()
+        lblPeriodicite = New Label()
+        cmbPeriodicite = New ComboBox()
+        lblEcheance = New Label()
+        dtpEcheance = New DateTimePicker()
+        btnEnregistrer = New Button()
+        btnNouveau = New Button()
+        btnEcheanceSuivante = New Button()
+        btnDesactiver = New Button()
+        lblNote = New Label()
+        dgvDepenses = New DataGridView()
+        pnlRappel.SuspendLayout()
+        pnlForm.SuspendLayout()
+        CType(dgvDepenses, ComponentModel.ISupportInitialize).BeginInit()
+        SuspendLayout()
+        ' 
+        ' pnlTitre
+        ' 
+        pnlTitre.BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        pnlTitre.Dock = DockStyle.Top
+        pnlTitre.Location = New Point(0, 0)
+        pnlTitre.Margin = New Padding(3, 4, 3, 4)
+        pnlTitre.Name = "pnlTitre"
+        pnlTitre.Size = New Size(1415, 59)
+        pnlTitre.TabIndex = 0
+        ' 
+        ' pnlRappel
+        ' 
+        pnlRappel.BackColor = Color.FromArgb(CByte(253), CByte(243), CByte(214))
+        pnlRappel.Controls.Add(lblRappel)
+        pnlRappel.Dock = DockStyle.Bottom
+        pnlRappel.Location = New Point(0, 728)
+        pnlRappel.Margin = New Padding(3, 4, 3, 4)
+        pnlRappel.Name = "pnlRappel"
+        pnlRappel.Size = New Size(1415, 59)
+        pnlRappel.TabIndex = 1
+        ' 
+        ' lblRappel
+        ' 
+        lblRappel.Dock = DockStyle.Fill
+        lblRappel.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
+        lblRappel.ForeColor = Color.FromArgb(CByte(122), CByte(51), CByte(0))
+        lblRappel.Location = New Point(0, 0)
+        lblRappel.Name = "lblRappel"
+        lblRappel.Padding = New Padding(16, 0, 0, 0)
+        lblRappel.Size = New Size(1415, 59)
+        lblRappel.TabIndex = 0
+        lblRappel.TextAlign = ContentAlignment.MiddleLeft
+        ' 
+        ' pnlForm
+        ' 
+        pnlForm.BackColor = Color.White
+        pnlForm.Controls.Add(lblFormTitre)
+        pnlForm.Controls.Add(lblNom)
+        pnlForm.Controls.Add(txtNom)
+        pnlForm.Controls.Add(lblMontant)
+        pnlForm.Controls.Add(txtMontant)
+        pnlForm.Controls.Add(lblPeriodicite)
+        pnlForm.Controls.Add(cmbPeriodicite)
+        pnlForm.Controls.Add(lblEcheance)
+        pnlForm.Controls.Add(dtpEcheance)
+        pnlForm.Controls.Add(btnEnregistrer)
+        pnlForm.Controls.Add(btnNouveau)
+        pnlForm.Controls.Add(btnEcheanceSuivante)
+        pnlForm.Controls.Add(btnDesactiver)
+        pnlForm.Controls.Add(lblNote)
+        pnlForm.Dock = DockStyle.Right
+        pnlForm.Location = New Point(919, 59)
+        pnlForm.Margin = New Padding(3, 4, 3, 4)
+        pnlForm.Name = "pnlForm"
+        pnlForm.Size = New Size(496, 669)
+        pnlForm.TabIndex = 2
+        ' 
+        ' lblFormTitre
+        ' 
         lblFormTitre.AutoSize = True
-        lblFormTitre.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblFormTitre.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblFormTitre.Location = New System.Drawing.Point(16, 14)
+        lblFormTitre.Font = New Font("Segoe UI", 12F, FontStyle.Bold)
+        lblFormTitre.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblFormTitre.Location = New Point(18, 19)
+        lblFormTitre.Name = "lblFormTitre"
+        lblFormTitre.Size = New Size(93, 28)
+        lblFormTitre.TabIndex = 0
         lblFormTitre.Text = "Dépense"
-        lblFormTitre.Name = "lblFormTitre"  ' Nom interne
-        lblFormTitre.TabIndex = 0  ' Ordre de tabulation
-        '
-        'lblNom
-        '
+        ' 
+        ' lblNom
+        ' 
         lblNom.AutoSize = True
-        lblNom.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblNom.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblNom.Location = New System.Drawing.Point(16, 48)
+        lblNom.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        lblNom.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblNom.Location = New Point(18, 64)
+        lblNom.Name = "lblNom"
+        lblNom.Size = New Size(49, 23)
+        lblNom.TabIndex = 1
         lblNom.Text = "Nom"
-        lblNom.Name = "lblNom"  ' Nom interne
-        lblNom.TabIndex = 1  ' Ordre de tabulation
-        '
-        'txtNom
-        '
-        txtNom.Location = New System.Drawing.Point(16, 68)
-        txtNom.Size = New System.Drawing.Size(284, 23)
+        ' 
+        ' txtNom
+        ' 
+        txtNom.Location = New Point(18, 91)
+        txtNom.Margin = New Padding(3, 4, 3, 4)
         txtNom.MaxLength = 180
-        txtNom.Name = "txtNom"  ' Nom interne
-        txtNom.TabIndex = 2  ' Ordre de tabulation
-        '
-        'lblMontant
-        '
+        txtNom.Name = "txtNom"
+        txtNom.Size = New Size(436, 27)
+        txtNom.TabIndex = 2
+        ' 
+        ' lblMontant
+        ' 
         lblMontant.AutoSize = True
-        lblMontant.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblMontant.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblMontant.Location = New System.Drawing.Point(16, 102)
+        lblMontant.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        lblMontant.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblMontant.Location = New Point(18, 136)
+        lblMontant.Name = "lblMontant"
+        lblMontant.Size = New Size(136, 23)
+        lblMontant.TabIndex = 3
         lblMontant.Text = "Montant (FCFA)"
-        lblMontant.Name = "lblMontant"  ' Nom interne
-        lblMontant.TabIndex = 3  ' Ordre de tabulation
-        '
-        'txtMontant
-        '
-        txtMontant.Location = New System.Drawing.Point(16, 122)
-        txtMontant.Size = New System.Drawing.Size(284, 23)
-        txtMontant.Name = "txtMontant"  ' Nom interne
-        txtMontant.TabIndex = 4  ' Ordre de tabulation
-        '
-        'lblPeriodicite
-        '
+        ' 
+        ' txtMontant
+        ' 
+        txtMontant.Location = New Point(18, 163)
+        txtMontant.Margin = New Padding(3, 4, 3, 4)
+        txtMontant.Name = "txtMontant"
+        txtMontant.Size = New Size(436, 27)
+        txtMontant.TabIndex = 4
+        ' 
+        ' lblPeriodicite
+        ' 
         lblPeriodicite.AutoSize = True
-        lblPeriodicite.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblPeriodicite.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblPeriodicite.Location = New System.Drawing.Point(16, 156)
+        lblPeriodicite.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        lblPeriodicite.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblPeriodicite.Location = New Point(18, 208)
+        lblPeriodicite.Name = "lblPeriodicite"
+        lblPeriodicite.Size = New Size(95, 23)
+        lblPeriodicite.TabIndex = 5
         lblPeriodicite.Text = "Périodicité"
-        lblPeriodicite.Name = "lblPeriodicite"  ' Nom interne
-        lblPeriodicite.TabIndex = 5  ' Ordre de tabulation
-        '
-        'cmbPeriodicite
-        '
-        cmbPeriodicite.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        ' 
+        ' cmbPeriodicite
+        ' 
+        cmbPeriodicite.DropDownStyle = ComboBoxStyle.DropDownList
         cmbPeriodicite.FormattingEnabled = True
-        cmbPeriodicite.Location = New System.Drawing.Point(16, 176)
-        cmbPeriodicite.Size = New System.Drawing.Size(284, 23)
-        cmbPeriodicite.Name = "cmbPeriodicite"  ' Nom interne
-        cmbPeriodicite.TabIndex = 6  ' Ordre de tabulation
-        '
-        'lblEcheance
-        '
+        cmbPeriodicite.Location = New Point(18, 235)
+        cmbPeriodicite.Margin = New Padding(3, 4, 3, 4)
+        cmbPeriodicite.Name = "cmbPeriodicite"
+        cmbPeriodicite.Size = New Size(436, 28)
+        cmbPeriodicite.TabIndex = 6
+        ' 
+        ' lblEcheance
+        ' 
         lblEcheance.AutoSize = True
-        lblEcheance.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        lblEcheance.ForeColor = System.Drawing.Color.FromArgb(23, 38, 31)
-        lblEcheance.Location = New System.Drawing.Point(16, 210)
+        lblEcheance.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        lblEcheance.ForeColor = Color.FromArgb(CByte(23), CByte(38), CByte(31))
+        lblEcheance.Location = New Point(18, 280)
+        lblEcheance.Name = "lblEcheance"
+        lblEcheance.Size = New Size(165, 23)
+        lblEcheance.TabIndex = 7
         lblEcheance.Text = "Prochaine échéance"
-        lblEcheance.Name = "lblEcheance"  ' Nom interne
-        lblEcheance.TabIndex = 7  ' Ordre de tabulation
-        '
-        'dtpEcheance
-        '
-        dtpEcheance.Format = System.Windows.Forms.DateTimePickerFormat.Short
-        dtpEcheance.Location = New System.Drawing.Point(16, 230)
-        dtpEcheance.Size = New System.Drawing.Size(284, 23)
-        dtpEcheance.Name = "dtpEcheance"  ' Nom interne
-        dtpEcheance.TabIndex = 8  ' Ordre de tabulation
-        '
-        'btnEnregistrer
-        '
-        btnEnregistrer.BackColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEnregistrer.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnEnregistrer.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEnregistrer.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnEnregistrer.ForeColor = System.Drawing.Color.White
-        btnEnregistrer.Location = New System.Drawing.Point(16, 274)
-        btnEnregistrer.Size = New System.Drawing.Size(130, 30)
+        ' 
+        ' dtpEcheance
+        ' 
+        dtpEcheance.Format = DateTimePickerFormat.Short
+        dtpEcheance.Location = New Point(18, 307)
+        dtpEcheance.Margin = New Padding(3, 4, 3, 4)
+        dtpEcheance.Name = "dtpEcheance"
+        dtpEcheance.Size = New Size(436, 27)
+        dtpEcheance.TabIndex = 8
+        ' 
+        ' btnEnregistrer
+        ' 
+        btnEnregistrer.BackColor = Color.ForestGreen
+        btnEnregistrer.FlatAppearance.BorderColor = Color.LimeGreen
+        btnEnregistrer.FlatStyle = FlatStyle.Flat
+        btnEnregistrer.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        btnEnregistrer.ForeColor = Color.White
+        btnEnregistrer.Location = New Point(18, 371)
+        btnEnregistrer.Margin = New Padding(3, 4, 3, 4)
+        btnEnregistrer.Name = "btnEnregistrer"
+        btnEnregistrer.Size = New Size(215, 40)
+        btnEnregistrer.TabIndex = 9
         btnEnregistrer.Text = "Enregistrer"
         btnEnregistrer.UseVisualStyleBackColor = False
-        btnEnregistrer.Name = "btnEnregistrer"  ' Nom interne
-        btnEnregistrer.TabIndex = 9  ' Ordre de tabulation
-        '
-        'btnNouveau
-        '
-        btnNouveau.BackColor = System.Drawing.Color.White
-        btnNouveau.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnNouveau.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnNouveau.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnNouveau.ForeColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnNouveau.Location = New System.Drawing.Point(154, 274)
-        btnNouveau.Size = New System.Drawing.Size(146, 30)
+        ' 
+        ' btnNouveau
+        ' 
+        btnNouveau.BackColor = Color.White
+        btnNouveau.FlatAppearance.BorderColor = Color.ForestGreen
+        btnNouveau.FlatStyle = FlatStyle.Flat
+        btnNouveau.Font = New Font("Segoe UI", 8.5F, FontStyle.Bold)
+        btnNouveau.ForeColor = Color.ForestGreen
+        btnNouveau.Location = New Point(240, 371)
+        btnNouveau.Margin = New Padding(3, 4, 3, 4)
+        btnNouveau.Name = "btnNouveau"
+        btnNouveau.Size = New Size(215, 40)
+        btnNouveau.TabIndex = 10
         btnNouveau.Text = "Nouvelle dépense"
         btnNouveau.UseVisualStyleBackColor = False
-        btnNouveau.Name = "btnNouveau"  ' Nom interne
-        btnNouveau.TabIndex = 10  ' Ordre de tabulation
-        '
-        'btnEcheanceSuivante
-        '
-        btnEcheanceSuivante.BackColor = System.Drawing.Color.White
-        btnEcheanceSuivante.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnEcheanceSuivante.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEcheanceSuivante.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnEcheanceSuivante.ForeColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnEcheanceSuivante.Location = New System.Drawing.Point(16, 314)
-        btnEcheanceSuivante.Size = New System.Drawing.Size(284, 30)
+        ' 
+        ' btnEcheanceSuivante
+        ' 
+        btnEcheanceSuivante.BackColor = Color.White
+        btnEcheanceSuivante.FlatAppearance.BorderColor = Color.ForestGreen
+        btnEcheanceSuivante.FlatStyle = FlatStyle.Flat
+        btnEcheanceSuivante.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        btnEcheanceSuivante.ForeColor = Color.ForestGreen
+        btnEcheanceSuivante.Location = New Point(18, 419)
+        btnEcheanceSuivante.Margin = New Padding(3, 4, 3, 4)
+        btnEcheanceSuivante.Name = "btnEcheanceSuivante"
+        btnEcheanceSuivante.Size = New Size(437, 40)
+        btnEcheanceSuivante.TabIndex = 11
         btnEcheanceSuivante.Text = "Échéance suivante"
         btnEcheanceSuivante.UseVisualStyleBackColor = False
-        btnEcheanceSuivante.Name = "btnEcheanceSuivante"  ' Nom interne
-        btnEcheanceSuivante.TabIndex = 11  ' Ordre de tabulation
-        '
-        'btnDesactiver
-        '
-        btnDesactiver.BackColor = System.Drawing.Color.White
-        btnDesactiver.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        btnDesactiver.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnDesactiver.Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point)
-        btnDesactiver.ForeColor = System.Drawing.Color.FromArgb(30, 77, 58)
-        btnDesactiver.Location = New System.Drawing.Point(16, 354)
-        btnDesactiver.Size = New System.Drawing.Size(284, 30)
+        ' 
+        ' btnDesactiver
+        ' 
+        btnDesactiver.BackColor = Color.White
+        btnDesactiver.FlatAppearance.BorderColor = Color.ForestGreen
+        btnDesactiver.FlatStyle = FlatStyle.Flat
+        btnDesactiver.Font = New Font("Segoe UI", 10F, FontStyle.Bold)
+        btnDesactiver.ForeColor = Color.ForestGreen
+        btnDesactiver.Location = New Point(18, 472)
+        btnDesactiver.Margin = New Padding(3, 4, 3, 4)
+        btnDesactiver.Name = "btnDesactiver"
+        btnDesactiver.Size = New Size(437, 40)
+        btnDesactiver.TabIndex = 12
         btnDesactiver.Text = "Désactiver"
         btnDesactiver.UseVisualStyleBackColor = False
-        btnDesactiver.Name = "btnDesactiver"  ' Nom interne
-        btnDesactiver.TabIndex = 12  ' Ordre de tabulation
-        '
-        'lblNote
-        '
-        lblNote.AutoSize = False
-        lblNote.Font = New System.Drawing.Font("Segoe UI", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point)
-        lblNote.ForeColor = System.Drawing.Color.FromArgb(90, 106, 98)
-        lblNote.Location = New System.Drawing.Point(16, 402)
-        lblNote.Size = New System.Drawing.Size(284, 60)
+        ' 
+        ' lblNote
+        ' 
+        lblNote.Font = New Font("Segoe UI", 8F)
+        lblNote.ForeColor = Color.FromArgb(CByte(90), CByte(106), CByte(98))
+        lblNote.Location = New Point(18, 536)
+        lblNote.Name = "lblNote"
+        lblNote.Size = New Size(325, 80)
+        lblNote.TabIndex = 13
         lblNote.Text = "Aucun paiement automatique : l'application rappelle seulement l'échéance."
-        lblNote.Name = "lblNote"  ' Nom interne
-        lblNote.TabIndex = 13  ' Ordre de tabulation
-        '
-        'dgvDepenses
-        '
-        dgvDepenses.AllowUserToAddRows = False  ' Lecture seule : pas d'ajout par l'utilisateur
-        dgvDepenses.AllowUserToDeleteRows = False  ' Pas de suppression
-        dgvDepenses.AllowUserToResizeRows = False  ' Hauteur des lignes fixe
-        dgvDepenses.AutoGenerateColumns = False  ' Colonnes définies à la main ci-dessous
-        dgvDepenses.BackgroundColor = System.Drawing.Color.White  ' Fond blanc
-        dgvDepenses.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle  ' Fine bordure
-        dgvDepenses.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Single  ' Quadrillage complet
-        dgvDepenses.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single  ' En-têtes avec bordure simple
-        dgvDepenses.ColumnHeadersDefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.BackColor = System.Drawing.Color.FromArgb(227, 237, 230), .ForeColor = System.Drawing.Color.FromArgb(23, 38, 31), .Font = New System.Drawing.Font("Segoe UI", 8.5!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point), .SelectionBackColor = System.Drawing.Color.FromArgb(227, 237, 230), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' En-tête vert très clair
-        dgvDepenses.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize  ' Hauteur d'en-tête automatique
-        dgvDepenses.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {colNom, colMontant, colPeriodicite, colEcheance, colRappel})  ' Ajoute les colonnes dans l'ordre de la maquette
-        dgvDepenses.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.SelectionBackColor = System.Drawing.Color.FromArgb(221, 235, 226), .SelectionForeColor = System.Drawing.Color.FromArgb(23, 38, 31)}  ' Ligne sélectionnée : vert clair
-        dgvDepenses.Dock = System.Windows.Forms.DockStyle.Fill  ' Occupe tout l'espace restant
-        dgvDepenses.EnableHeadersVisualStyles = False  ' Obligatoire pour appliquer la couleur d'en-tête
-        dgvDepenses.GridColor = System.Drawing.Color.FromArgb(195, 208, 200)  ' Couleur du quadrillage
-        dgvDepenses.Location = New System.Drawing.Point(0, 0)  ' Position (recalculée par Dock)
-        dgvDepenses.MultiSelect = False  ' Une seule ligne sélectionnée
-        dgvDepenses.ReadOnly = True  ' Lecture seule
-        dgvDepenses.RowHeadersVisible = False  ' Cache la colonne grise de gauche
-        dgvDepenses.RowTemplate.Height = 28  ' Hauteur des lignes : 28 px
-        dgvDepenses.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect  ' Un clic sélectionne la ligne
-        dgvDepenses.Size = New System.Drawing.Size(300, 200)  ' Taille (recalculée par Dock)
-        dgvDepenses.TabIndex = 3  ' Ordre de tabulation
-        '
-        'colNom
-        '
-        colNom.DataPropertyName = "Nom"  ' Propriété de la ligne affichée
-        colNom.FillWeight = 30.0!  ' Largeur relative
-        colNom.HeaderText = "Dépense"  ' Titre de la colonne
-        colNom.Name = "colNom"  ' Nom interne
-        colNom.ReadOnly = True  ' Lecture seule
-        colNom.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colMontant
-        '
-        colMontant.DataPropertyName = "MontantTexte"  ' Propriété de la ligne affichée
-        colMontant.DefaultCellStyle = New System.Windows.Forms.DataGridViewCellStyle() With {.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight}  ' Nombres alignés à droite
-        colMontant.FillWeight = 18.0!  ' Largeur relative
-        colMontant.HeaderText = "Montant"  ' Titre de la colonne
-        colMontant.Name = "colMontant"  ' Nom interne
-        colMontant.ReadOnly = True  ' Lecture seule
-        colMontant.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colPeriodicite
-        '
-        colPeriodicite.DataPropertyName = "PeriodiciteTexte"  ' Propriété de la ligne affichée
-        colPeriodicite.FillWeight = 18.0!  ' Largeur relative
-        colPeriodicite.HeaderText = "Périodicité"  ' Titre de la colonne
-        colPeriodicite.Name = "colPeriodicite"  ' Nom interne
-        colPeriodicite.ReadOnly = True  ' Lecture seule
-        colPeriodicite.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colEcheance
-        '
-        colEcheance.DataPropertyName = "EcheanceTexte"  ' Propriété de la ligne affichée
-        colEcheance.FillWeight = 18.0!  ' Largeur relative
-        colEcheance.HeaderText = "Prochaine échéance"  ' Titre de la colonne
-        colEcheance.Name = "colEcheance"  ' Nom interne
-        colEcheance.ReadOnly = True  ' Lecture seule
-        colEcheance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'colRappel
-        '
-        colRappel.DataPropertyName = "RappelTexte"  ' Propriété de la ligne affichée
-        colRappel.FillWeight = 16.0!  ' Largeur relative
-        colRappel.HeaderText = "Rappel"  ' Titre de la colonne
-        colRappel.Name = "colRappel"  ' Nom interne
-        colRappel.ReadOnly = True  ' Lecture seule
-        colRappel.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable  ' Pas de tri par clic (l'ordre est celui du service)
-        '
-        'frmDepenses
-        '
-        AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)  ' Dimensions de référence (DPI)
-        AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font  ' S'adapte à la police de l'écran
-        BackColor = System.Drawing.Color.FromArgb(244, 247, 245)  ' Fond gris très clair
-        ClientSize = New System.Drawing.Size(1100, 590)  ' Taille intérieure
-        Controls.Add(dgvDepenses)  ' Ajoute dgvDepenses (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlForm)  ' Ajoute pnlForm (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlRappel)  ' Ajoute pnlRappel (le contrôle Fill d'abord, puis les bords)
-        Controls.Add(pnlTitre)  ' Ajoute pnlTitre (le contrôle Fill d'abord, puis les bords)
-        MinimumSize = New System.Drawing.Size(1116, 520)  ' Taille minimale
-        Name = "frmDepenses"  ' Nom interne
-        StartPosition = System.Windows.Forms.FormStartPosition.CenterParent  ' Centrée sur la fenêtre parente
-        Text = "Dépenses récurrentes"  ' Titre de la fenêtre
-        pnlTitre.ResumeLayout(False)  ' Reprend la mise en page de pnlTitre
-        pnlTitre.PerformLayout()  ' Applique la mise en page
-        pnlRappel.ResumeLayout(False)  ' Reprend la mise en page de pnlRappel
-        pnlRappel.PerformLayout()  ' Applique la mise en page
-        pnlForm.ResumeLayout(False)  ' Reprend la mise en page de pnlForm
-        pnlForm.PerformLayout()  ' Applique la mise en page
-        CType(dgvDepenses, System.ComponentModel.ISupportInitialize).EndInit()  ' Fin de l'initialisation de la grille
-        ResumeLayout(False)  ' Reprend la mise en page du formulaire
+        ' 
+        ' dgvDepenses
+        ' 
+        dgvDepenses.AllowUserToAddRows = False
+        dgvDepenses.AllowUserToDeleteRows = False
+        dgvDepenses.AllowUserToResizeRows = False
+        dgvDepenses.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+        dgvDepenses.BackgroundColor = Color.White
+        dgvDepenses.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single
+        dgvDepenses.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
+        dgvDepenses.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        dgvDepenses.Dock = DockStyle.Fill
+        dgvDepenses.EnableHeadersVisualStyles = False
+        dgvDepenses.GridColor = Color.FromArgb(CByte(195), CByte(208), CByte(200))
+        dgvDepenses.Location = New Point(0, 59)
+        dgvDepenses.Margin = New Padding(3, 4, 3, 4)
+        dgvDepenses.MultiSelect = False
+        dgvDepenses.Name = "dgvDepenses"
+        dgvDepenses.ReadOnly = True
+        dgvDepenses.RowHeadersVisible = False
+        dgvDepenses.RowHeadersWidth = 51
+        dgvDepenses.RowTemplate.Height = 28
+        dgvDepenses.SelectionMode = DataGridViewSelectionMode.FullRowSelect
+        dgvDepenses.Size = New Size(919, 669)
+        dgvDepenses.TabIndex = 3
+        ' 
+        ' frmDepenses
+        ' 
+        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleMode = AutoScaleMode.Font
+        BackColor = Color.FromArgb(CByte(244), CByte(247), CByte(245))
+        ClientSize = New Size(1415, 787)
+        Controls.Add(dgvDepenses)
+        Controls.Add(pnlForm)
+        Controls.Add(pnlRappel)
+        Controls.Add(pnlTitre)
+        Margin = New Padding(3, 4, 3, 4)
+        MinimumSize = New Size(1273, 678)
+        Name = "frmDepenses"
+        StartPosition = FormStartPosition.CenterParent
+        Text = "Dépenses récurrentes"
+        pnlRappel.ResumeLayout(False)
+        pnlForm.ResumeLayout(False)
+        pnlForm.PerformLayout()
+        CType(dgvDepenses, ComponentModel.ISupportInitialize).EndInit()
+        ResumeLayout(False)
     End Sub  ' Fin de InitializeComponent
 
     Friend WithEvents pnlTitre As System.Windows.Forms.Panel  ' Bandeau du titre

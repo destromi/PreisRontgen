@@ -122,7 +122,7 @@ Public Class frmHistorique                         ' Début de la classe (Partia
         Catch ex As InvalidOperationException      ' Erreur d'accès aux données
             MessageBox.Show(ex.Message, "Historique", MessageBoxButtons.OK, MessageBoxIcon.Error)   ' Affiche l'erreur
         End Try                                    ' Fin du bloc surveillé
-        pnlGraphique.Invalidate()                  ' Demande le redessin du graphique (déclenche Paint)
+        If pnlGraphique IsNot Nothing Then pnlGraphique.Invalidate()                 ' Demande le redessin du graphique (déclenche Paint)
     End Sub                                        ' Fin de Rafraichir
 
     Private Shared Function ConstruireResume(points As List(Of PointPrix)) As String   ' Texte sous le graphique

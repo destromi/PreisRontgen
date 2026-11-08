@@ -14,7 +14,12 @@ Public Class TableauBord
         DataGridView2.DataSource = TB.EcheanceTotal(Session.user.Id, Date.Now)
         LabelDepenseTotal.Text = depense & " FCFA"
         LabelAlertesTotal.Text = nombrealerte
-        LabelIndice.Text = SessionIndice.resultat.Indice.Value.ToString("0.00")
+        Dim r = SessionIndice.resultat
+        If r IsNot Nothing AndAlso r.Indice.HasValue Then
+            LabelIndice.Text = r.Indice.Value.ToString("0.00")
+        Else
+            LabelIndice.Text = "—"
+        End If
     End Sub
 
 

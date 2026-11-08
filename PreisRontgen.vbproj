@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HIC.System.Windows.Forms.DataVisualization" Version="1.0.1" />
     <PackageReference Include="MSTest.TestFramework" Version="4.5.2" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <PackageReference Include="NPOI" Version="2.8.1" />
@@ -41,6 +42,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Views\FenetreDemo.vb">
+      <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
 

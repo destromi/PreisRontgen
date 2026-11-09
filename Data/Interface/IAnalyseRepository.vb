@@ -1,11 +1,3 @@
-' ============================================================================
-' FICHIER : Data/IAnalyseRepository.vb
-' RÔLE    : définit les « contrats » d'accès aux données du rôle T4 :
-'           - IAnalyseRepository : lectures pour l'historique, l'indice et les comparaisons ;
-'           - IDepenseRepository : dépenses récurrentes (EF-14).
-' NOTION  : comme IAlerteRepository, ces interfaces permettent de tester la logique
-'           avec de faux dépôts en mémoire, puis d'utiliser MySQL en production.
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

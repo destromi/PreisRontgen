@@ -29,6 +29,8 @@
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <PackageReference Include="NPOI" Version="2.8.1" />
     <PackageReference Include="NUnit" Version="5.0.0" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
+    <PackageReference Include="TesseractOCR" Version="5.5.2" />
     <PackageReference Include="xunit.assert" Version="2.9.2" />
     <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.14" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />

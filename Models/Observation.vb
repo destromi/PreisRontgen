@@ -1,11 +1,3 @@
-' ============================================================================
-' FICHIER : Models/Observation.vb
-' RÔLE    : représente UNE observation de prix = « tel produit coûtait tel prix
-'           unitaire dans tel magasin à telle date ». Elle correspond à une ligne
-'           de la table observation_prix. C'est la donnée que compare la détection.
-' NOTION  : une « Property » est un champ de la classe avec un nom lisible.
-'           Elle se lit (x = obs.PrixUnitaire) et s'écrit (obs.PrixUnitaire = 4.8D).
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

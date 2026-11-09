@@ -26,6 +26,8 @@ Partial Class FrmTickets
         pnlEntete = New Panel()
         lblTitre = New Label()
         grpEntete = New GroupBox()
+        LblInfo = New Label()
+        BtnOCR = New Button()
         lblMagasin = New Label()
         cmbMagasin = New ComboBox()
         lblDate = New Label()
@@ -82,6 +84,9 @@ Partial Class FrmTickets
         ' grpEntete
         ' 
         grpEntete.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        grpEntete.BackColor = Color.White
+        grpEntete.Controls.Add(LblInfo)
+        grpEntete.Controls.Add(BtnOCR)
         grpEntete.Controls.Add(lblMagasin)
         grpEntete.Controls.Add(cmbMagasin)
         grpEntete.Controls.Add(lblDate)
@@ -90,10 +95,31 @@ Partial Class FrmTickets
         grpEntete.Margin = New Padding(3, 4, 3, 4)
         grpEntete.Name = "grpEntete"
         grpEntete.Padding = New Padding(3, 4, 3, 4)
-        grpEntete.Size = New Size(1115, 85)
+        grpEntete.Size = New Size(1115, 120)
         grpEntete.TabIndex = 0
         grpEntete.TabStop = False
         grpEntete.Text = "En-tête du ticket"
+        ' 
+        ' LblInfo
+        ' 
+        LblInfo.AutoSize = True
+        LblInfo.Location = New Point(877, 76)
+        LblInfo.Name = "LblInfo"
+        LblInfo.Size = New Size(53, 20)
+        LblInfo.TabIndex = 3
+        LblInfo.Text = "Label1"
+        ' 
+        ' BtnOCR
+        ' 
+        BtnOCR.FlatAppearance.BorderColor = Color.ForestGreen
+        BtnOCR.FlatStyle = FlatStyle.Flat
+        BtnOCR.ForeColor = Color.ForestGreen
+        BtnOCR.Location = New Point(833, 33)
+        BtnOCR.Name = "BtnOCR"
+        BtnOCR.Size = New Size(177, 29)
+        BtnOCR.TabIndex = 2
+        BtnOCR.Text = "Lire une photo (OCR)"
+        BtnOCR.UseVisualStyleBackColor = True
         ' 
         ' lblMagasin
         ' 
@@ -134,6 +160,7 @@ Partial Class FrmTickets
         ' grpLigne
         ' 
         grpLigne.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        grpLigne.BackColor = Color.White
         grpLigne.Controls.Add(lblProduit)
         grpLigne.Controls.Add(txtProduit)
         grpLigne.Controls.Add(lblConditionnement)
@@ -146,11 +173,11 @@ Partial Class FrmTickets
         grpLigne.Controls.Add(txtNombre)
         grpLigne.Controls.Add(btnAjouter)
         grpLigne.Controls.Add(lblProduitInfo)
-        grpLigne.Location = New Point(14, 179)
+        grpLigne.Location = New Point(14, 227)
         grpLigne.Margin = New Padding(3, 4, 3, 4)
         grpLigne.Name = "grpLigne"
         grpLigne.Padding = New Padding(3, 4, 3, 4)
-        grpLigne.Size = New Size(1115, 157)
+        grpLigne.Size = New Size(1115, 109)
         grpLigne.TabIndex = 1
         grpLigne.TabStop = False
         grpLigne.Text = "Ajout d'un article"
@@ -158,7 +185,7 @@ Partial Class FrmTickets
         ' lblProduit
         ' 
         lblProduit.AutoSize = True
-        lblProduit.Location = New Point(18, 35)
+        lblProduit.Location = New Point(8, 37)
         lblProduit.Name = "lblProduit"
         lblProduit.Size = New Size(57, 20)
         lblProduit.TabIndex = 0
@@ -166,7 +193,7 @@ Partial Class FrmTickets
         ' 
         ' txtProduit
         ' 
-        txtProduit.Location = New Point(18, 61)
+        txtProduit.Location = New Point(8, 63)
         txtProduit.Margin = New Padding(3, 4, 3, 4)
         txtProduit.Name = "txtProduit"
         txtProduit.Size = New Size(342, 27)
@@ -175,7 +202,7 @@ Partial Class FrmTickets
         ' lblConditionnement
         ' 
         lblConditionnement.AutoSize = True
-        lblConditionnement.Location = New Point(377, 35)
+        lblConditionnement.Location = New Point(367, 37)
         lblConditionnement.Name = "lblConditionnement"
         lblConditionnement.Size = New Size(124, 20)
         lblConditionnement.TabIndex = 1
@@ -183,7 +210,7 @@ Partial Class FrmTickets
         ' 
         ' txtConditionnement
         ' 
-        txtConditionnement.Location = New Point(377, 61)
+        txtConditionnement.Location = New Point(367, 63)
         txtConditionnement.Margin = New Padding(3, 4, 3, 4)
         txtConditionnement.Name = "txtConditionnement"
         txtConditionnement.Size = New Size(125, 27)
@@ -192,7 +219,7 @@ Partial Class FrmTickets
         ' lblUnite
         ' 
         lblUnite.AutoSize = True
-        lblUnite.Location = New Point(517, 35)
+        lblUnite.Location = New Point(507, 37)
         lblUnite.Name = "lblUnite"
         lblUnite.Size = New Size(44, 20)
         lblUnite.TabIndex = 2
@@ -201,7 +228,7 @@ Partial Class FrmTickets
         ' cmbUnite
         ' 
         cmbUnite.DropDownStyle = ComboBoxStyle.DropDownList
-        cmbUnite.Location = New Point(517, 61)
+        cmbUnite.Location = New Point(507, 63)
         cmbUnite.Margin = New Padding(3, 4, 3, 4)
         cmbUnite.Name = "cmbUnite"
         cmbUnite.Size = New Size(102, 28)
@@ -210,7 +237,7 @@ Partial Class FrmTickets
         ' lblPrix
         ' 
         lblPrix.AutoSize = True
-        lblPrix.Location = New Point(633, 35)
+        lblPrix.Location = New Point(623, 37)
         lblPrix.Name = "lblPrix"
         lblPrix.Size = New Size(151, 20)
         lblPrix.TabIndex = 3
@@ -218,7 +245,7 @@ Partial Class FrmTickets
         ' 
         ' txtPrix
         ' 
-        txtPrix.Location = New Point(633, 61)
+        txtPrix.Location = New Point(623, 63)
         txtPrix.Margin = New Padding(3, 4, 3, 4)
         txtPrix.Name = "txtPrix"
         txtPrix.Size = New Size(148, 27)
@@ -227,7 +254,7 @@ Partial Class FrmTickets
         ' lblNombre
         ' 
         lblNombre.AutoSize = True
-        lblNombre.Location = New Point(795, 35)
+        lblNombre.Location = New Point(785, 37)
         lblNombre.Name = "lblNombre"
         lblNombre.Size = New Size(112, 20)
         lblNombre.TabIndex = 4
@@ -235,7 +262,7 @@ Partial Class FrmTickets
         ' 
         ' txtNombre
         ' 
-        txtNombre.Location = New Point(795, 61)
+        txtNombre.Location = New Point(785, 63)
         txtNombre.Margin = New Padding(3, 4, 3, 4)
         txtNombre.Name = "txtNombre"
         txtNombre.Size = New Size(102, 27)
@@ -244,11 +271,11 @@ Partial Class FrmTickets
         ' 
         ' btnAjouter
         ' 
-        btnAjouter.BackColor = Color.ForestGreen
+        btnAjouter.BackColor = Color.White
         btnAjouter.FlatAppearance.BorderColor = Color.ForestGreen
         btnAjouter.FlatStyle = FlatStyle.Flat
-        btnAjouter.ForeColor = Color.White
-        btnAjouter.Location = New Point(914, 56)
+        btnAjouter.ForeColor = Color.ForestGreen
+        btnAjouter.Location = New Point(904, 58)
         btnAjouter.Margin = New Padding(3, 4, 3, 4)
         btnAjouter.Name = "btnAjouter"
         btnAjouter.Size = New Size(183, 40)
@@ -259,7 +286,7 @@ Partial Class FrmTickets
         ' lblProduitInfo
         ' 
         lblProduitInfo.ForeColor = Color.FromArgb(CByte(34), CByte(85), CByte(51))
-        lblProduitInfo.Location = New Point(18, 109)
+        lblProduitInfo.Location = New Point(10, 66)
         lblProduitInfo.Name = "lblProduitInfo"
         lblProduitInfo.Size = New Size(686, 29)
         lblProduitInfo.TabIndex = 6
@@ -277,15 +304,15 @@ Partial Class FrmTickets
         dgvLignes.RowHeadersVisible = False
         dgvLignes.RowHeadersWidth = 51
         dgvLignes.SelectionMode = DataGridViewSelectionMode.FullRowSelect
-        dgvLignes.Size = New Size(1115, 360)
+        dgvLignes.Size = New Size(1115, 517)
         dgvLignes.TabIndex = 2
         ' 
         ' lblSomme
         ' 
         lblSomme.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
         lblSomme.AutoSize = True
-        lblSomme.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        lblSomme.Location = New Point(14, 735)
+        lblSomme.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        lblSomme.Location = New Point(14, 892)
         lblSomme.Name = "lblSomme"
         lblSomme.Size = New Size(195, 20)
         lblSomme.TabIndex = 3
@@ -295,7 +322,7 @@ Partial Class FrmTickets
         ' 
         lblTotalSaisi.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
         lblTotalSaisi.AutoSize = True
-        lblTotalSaisi.Location = New Point(389, 735)
+        lblTotalSaisi.Location = New Point(389, 892)
         lblTotalSaisi.Name = "lblTotalSaisi"
         lblTotalSaisi.Size = New Size(149, 20)
         lblTotalSaisi.TabIndex = 4
@@ -304,7 +331,7 @@ Partial Class FrmTickets
         ' txtTotalSaisi
         ' 
         txtTotalSaisi.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
-        txtTotalSaisi.Location = New Point(549, 729)
+        txtTotalSaisi.Location = New Point(549, 886)
         txtTotalSaisi.Margin = New Padding(3, 4, 3, 4)
         txtTotalSaisi.Name = "txtTotalSaisi"
         txtTotalSaisi.Size = New Size(148, 27)
@@ -316,7 +343,7 @@ Partial Class FrmTickets
         btnSupprimerLigne.FlatAppearance.BorderColor = Color.ForestGreen
         btnSupprimerLigne.FlatStyle = FlatStyle.Flat
         btnSupprimerLigne.ForeColor = Color.ForestGreen
-        btnSupprimerLigne.Location = New Point(731, 721)
+        btnSupprimerLigne.Location = New Point(731, 878)
         btnSupprimerLigne.Margin = New Padding(3, 4, 3, 4)
         btnSupprimerLigne.Name = "btnSupprimerLigne"
         btnSupprimerLigne.Size = New Size(183, 45)
@@ -331,7 +358,7 @@ Partial Class FrmTickets
         btnEnregistrer.FlatAppearance.BorderColor = Color.ForestGreen
         btnEnregistrer.FlatStyle = FlatStyle.Flat
         btnEnregistrer.ForeColor = Color.White
-        btnEnregistrer.Location = New Point(926, 721)
+        btnEnregistrer.Location = New Point(926, 878)
         btnEnregistrer.Margin = New Padding(3, 4, 3, 4)
         btnEnregistrer.Name = "btnEnregistrer"
         btnEnregistrer.Size = New Size(203, 45)
@@ -346,9 +373,9 @@ Partial Class FrmTickets
         ' 
         ' FrmTickets
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1143, 787)
+        ClientSize = New Size(1143, 944)
         Controls.Add(grpEntete)
         Controls.Add(grpLigne)
         Controls.Add(dgvLignes)
@@ -358,7 +385,7 @@ Partial Class FrmTickets
         Controls.Add(btnSupprimerLigne)
         Controls.Add(btnEnregistrer)
         Controls.Add(pnlEntete)
-        Font = New Font("Segoe UI", 9F)
+        Font = New Font("Segoe UI", 9.0F)
         Margin = New Padding(3, 4, 3, 4)
         MinimumSize = New Size(1159, 823)
         Name = "FrmTickets"
@@ -403,4 +430,6 @@ Partial Class FrmTickets
     Friend WithEvents btnSupprimerLigne As Button
     Friend WithEvents btnEnregistrer As Button
     Friend WithEvents errProvider As ErrorProvider
+    Friend WithEvents BtnOCR As Button
+    Friend WithEvents LblInfo As Label
 End Class

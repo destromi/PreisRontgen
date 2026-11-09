@@ -15,7 +15,6 @@ Namespace Data
     Public Class AnalyseRepositoryMySql
         Implements IAnalyseRepository
 
-        ' ================= Outils =================
 
         Private Shared Function IdUtilisateur() As Integer
             If Session.user Is Nothing Then Throw New InvalidOperationException("Aucun utilisateur connecté.")
@@ -56,7 +55,6 @@ Namespace Data
             Return resultat
         End Function
 
-        ' ================= Listes de référence =================
 
         Public Function ListerProduits() As List(Of ProduitRef) Implements IAnalyseRepository.ListerProduits
             Dim resultat As New List(Of ProduitRef)()
@@ -91,7 +89,6 @@ Namespace Data
             Return ListerCles("SELECT id, nom FROM categorie ORDER BY nom")
         End Function
 
-        ' ================= Relevés de prix =================
 
         ' Historique d'un produit, du plus récent au plus ancien (idMagasin = Nothing : tous les magasins)
         Public Function ListerObservations(idProduit As Integer, idMagasin As Integer?) As List(Of PointPrix) _

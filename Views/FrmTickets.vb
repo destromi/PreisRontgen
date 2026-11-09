@@ -1,21 +1,18 @@
-﻿Imports System.ComponentModel
+﻿Option Strict On
+Option Explicit On
+
+Imports System.ComponentModel
 Imports System.Globalization
+Imports System.IO
 Imports System.Linq
 Imports MySqlConnector
+Imports PreisRontgen.LigneTicketSaisie
+Imports PreisRontgen.Models
 
-' =====================================================================
-' FrmTickets.vb : code du formulaire "Saisie d'un ticket".
-' Le fichier FrmTickets.Designer.vb contient déjà les contrôles.
-'
-' A ADAPTER SI BESOIN (3 points) :
-'   1. GetConnection()  : doit renvoyer une MySqlConnection (comme dans vos Depot).
-'   2. Session.user.Id  : l'utilisateur connecté (comme dans vos Depot).
-'   3. "Imports MySql.Data.MySqlClient" : mettez "Imports MySqlConnector"
-'      si votre projet utilise le package MySqlConnector.
-' =====================================================================
+
 Public Class FrmTickets
 
-    ' ----- Types internes -----
+    '  Types internes 
 
     ' Une ligne saisie, avant l'enregistrement du ticket
     Public Class LigneSaisie
@@ -34,6 +31,7 @@ Public Class FrmTickets
         End Property
     End Class
 
+
     ' Un produit du référentiel
     Private Class ProduitConnu
         Public Property Id As Integer
@@ -42,15 +40,15 @@ Public Class FrmTickets
         Public Property UniteBase As String
     End Class
 
-    ' ----- Données du formulaire -----
+    'Données du formulaire 
 
     Private ReadOnly _lignes As New BindingList(Of LigneSaisie)()
-    Private ReadOnly _produits As New List(Of ProduitConnu)()
-    Private _produitCourant As ProduitConnu
-
-    ' ----- Chargement -----
+    Private ReadOnly _produits As New List(Of Produit)()
+    Private _produitCourant As Produit
+    Private CheminImageSelectionner As String = String.Empty
 
     Private Sub FrmTickets_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LblInfo.Text = String.Empty
         If LicenseManager.UsageMode = LicenseUsageMode.Designtime Then Return
 
         ConfigurerGrille()
@@ -135,12 +133,13 @@ Public Class FrmTickets
                     While rd.Read()
                         Dim nom As String = rd.GetString(1)
                         Dim marque As String = rd.GetString(2)
-                        _produits.Add(New ProduitConnu With {
+                        _produits.Add(New Produit With {
                             .Id = rd.GetInt32(0),
-                            .Libelle = If(marque = "", nom, nom & " - " & marque),
-                            .Categorie = rd.GetString(3),
-                            .UniteBase = rd.GetString(4)
-                        })
+                            .Nom = rd.GetString(1),
+                            .Marque = rd.GetString(2),
+                            .CategorieNom = rd.GetString(3),
+                            .UniteBase = VersUniteBase(rd.GetString(4))
+})
                     End While
                 End Using
             End Using
@@ -154,7 +153,19 @@ Public Class FrmTickets
         txtProduit.AutoCompleteSource = AutoCompleteSource.CustomSource
     End Sub
 
-    ' ----- Produit saisi -----
+    Private Shared Function VersUniteBase(texte As String) As UniteBase
+        If texte = "kg" Then Return UniteBase.Kg
+        If texte = "L" Then Return UniteBase.Litre
+        Return UniteBase.Piece
+    End Function
+
+    Private Shared Function TexteUnite(u As UniteBase) As String
+        If u = UniteBase.Kg Then Return "kg"
+        If u = UniteBase.Litre Then Return "L"
+        Return "piece"
+    End Function
+
+    'Produit saisi
 
     Private Sub txtProduit_TextChanged(sender As Object, e As EventArgs) Handles txtProduit.TextChanged
         Dim texte As String = txtProduit.Text.Trim()
@@ -168,8 +179,8 @@ Public Class FrmTickets
             lblProduitInfo.Text = "Produit introuvable : ajoutez-le d'abord dans les référentiels."
         Else
             lblProduitInfo.ForeColor = Color.FromArgb(34, 85, 51)
-            lblProduitInfo.Text = "Catégorie : " & _produitCourant.Categorie &
-                                  "  |  Unité de base : " & _produitCourant.UniteBase
+            lblProduitInfo.Text = "Catégorie : " & _produitCourant.CategorieNom &
+                                  "  |  Unité de base : " & TexteUnite(_produitCourant.UniteBase)
             ' Propose l'unité de base du produit
             If cmbUnite.Items.Contains(_produitCourant.UniteBase) Then
                 cmbUnite.SelectedItem = _produitCourant.UniteBase
@@ -177,7 +188,7 @@ Public Class FrmTickets
         End If
     End Sub
 
-    ' ----- Ajouter / supprimer une ligne -----
+    'Ajouter / supprimer une ligne
 
     Private Sub btnAjouter_Click(sender As Object, e As EventArgs) Handles btnAjouter.Click
         errProvider.Clear()
@@ -201,10 +212,10 @@ Public Class FrmTickets
         End If
         Dim unite As String = cmbUnite.SelectedItem.ToString()
 
-        Dim quantiteBase As Decimal? = ConvertirVersBase(conditionnement, unite, _produitCourant.UniteBase)
+        Dim quantiteBase As Decimal? = ConvertirVersBase(conditionnement, unite, TexteUnite(_produitCourant.UniteBase))
         If Not quantiteBase.HasValue Then
             errProvider.SetError(cmbUnite, "Unité incompatible avec l'unité de base du produit (" &
-                                 _produitCourant.UniteBase & ").")
+                                 TexteUnite(_produitCourant.UniteBase) & ").")
             Return
         End If
 
@@ -251,7 +262,7 @@ Public Class FrmTickets
         lblSomme.Text = "Somme des lignes : " & somme.ToString("#,##0") & " FCFA"
     End Sub
 
-    ' ----- Enregistrement du ticket -----
+    'Enregistrement du ticket
 
     Private Sub btnEnregistrer_Click(sender As Object, e As EventArgs) Handles btnEnregistrer.Click
         errProvider.Clear()
@@ -361,7 +372,7 @@ Public Class FrmTickets
         End Using
     End Sub
 
-    ' ----- Outils -----
+    '  Outils
 
     ' Accepte "1500", "1 500", "1500,50" ou "1500.50"
     Private Shared Function TryLireDecimal(texte As String, ByRef valeur As Decimal) As Boolean
@@ -385,4 +396,76 @@ Public Class FrmTickets
         Return Nothing
     End Function
 
+    ' Renvoie False si la ligne est incomplète : l'utilisateur la saisit alors à la main
+    Private Function AjouterLigneOcr(l As LigneOcr) As Boolean
+        Dim produit As Produit = l.Produit
+        Dim uniteBaseTexte As String = TexteUnite(produit.UniteBase)
+
+        Dim lueConditionnement As Decimal? = l.QuantiteConditionnement
+        Dim luePrix As Decimal? = l.PrixLu
+        Dim lueNombre As Decimal? = l.NombreAchete
+
+        Dim conditionnement As Decimal = lueConditionnement.GetValueOrDefault()
+        Dim unite As String = If(l.UniteConditionnement, String.Empty)
+
+        If conditionnement <= 0D Then
+            ' Conditionnement non lu : acceptable seulement pour un produit vendu à la pièce
+            If produit.UniteBase <> UniteBase.Piece Then Return False
+            conditionnement = 1D
+            unite = "piece"
+        End If
+
+        If unite = "ml" Then unite = "mL"
+        If unite = "cl" Then unite = "cL"
+        If String.IsNullOrEmpty(unite) Then unite = uniteBaseTexte
+
+        Dim quantiteBase As Decimal? = ConvertirVersBase(conditionnement, unite, uniteBaseTexte)
+        If Not quantiteBase.HasValue Then Return False       ' unité inconnue (ex. mg) ou incompatible
+
+        Dim nombre As Integer = 1
+        If lueNombre.GetValueOrDefault() >= 1D Then nombre = CInt(Math.Round(lueNombre.GetValueOrDefault()))
+
+        _lignes.Add(New LigneSaisie With {
+        .IdProduit = CInt(produit.Id),
+        .Produit = produit.Libelle,
+        .Conditionnement = conditionnement,
+        .Unite = unite,
+        .Prix = luePrix.GetValueOrDefault(),
+        .Nombre = nombre,
+        .QuantiteBase = quantiteBase.Value
+    })
+        Return True
+    End Function
+
+    Private Async Sub BtnOCR_Click(sender As Object, e As EventArgs) Handles BtnOCR.Click
+        Using Ofd As New OpenFileDialog
+            Ofd.Title = "Choisir une image pour la lecture OCR "
+            Ofd.Filter = "Fichiers image (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|Tous les fichiers (*.*)|*.*"
+            'affichage de la boîte de dialogue
+            If Ofd.ShowDialog() = DialogResult.OK Then
+                'récupération du chemin du fichier sélectionné
+                CheminImageSelectionner = Ofd.FileName
+            End If
+        End Using
+        Cursor = Cursors.WaitCursor
+        LblInfo.Text = "Lecture en cours..."
+        Try
+            Dim service As New TesseractOcrService()
+            Dim lues As List(Of LigneOcr) = Await service.LireTicketAsync(CheminImageSelectionner, _produits)
+
+            Dim ajoutees As Integer = 0
+            For Each l As LigneOcr In lues
+                If AjouterLigneOcr(l) Then ajoutees += 1
+            Next
+
+            LblInfo.Text = ajoutees.ToString() & " ligne(s) ajoutée(s) sur " & lues.Count.ToString() &
+                           " reconnue(s). Vérifiez prix et quantités avant d'enregistrer."
+        Catch ex As Exception
+            LblInfo.Text = ex.Message
+            'MessageBox.Show("Lecture impossible : " & ex.Message, "OCR", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            Cursor = Cursors.Default
+            BtnOCR.Enabled = True
+        End Try
+    End Sub
 End Class

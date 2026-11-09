@@ -31,4 +31,34 @@ Public Class LigneTicketSaisie
             Return NormalisationService.CalculerPrixUnitaire(Prix, Conditionnement, Unite)
         End Get
     End Property
+
+    Public NotInheritable Class Produit
+        Public Property Id As Integer
+        Public Property Nom As String = String.Empty
+        Public Property Marque As String = String.Empty
+        Public Property CategorieId As Long
+        Public Property CategorieNom As String = String.Empty
+        Public Property UniteBase As UniteBase
+        Public Property CodeBarres As String = String.Empty
+        Public ReadOnly Property Libelle As String
+            Get
+                Return ToString()
+            End Get
+        End Property
+        Public Overrides Function ToString() As String
+            If String.IsNullOrWhiteSpace(Marque) Then Return Nom
+            Return Nom & " — " & Marque
+        End Function
+    End Class
+
+    Public NotInheritable Class LigneOcr
+        Public Property Produit As Produit
+        Public Property PrixLu As Decimal
+        Public Property TexteOriginal As String = String.Empty
+        Public Property Confiance As Decimal
+        Public Property QuantiteConditionnement As Decimal?
+        Public Property UniteConditionnement As String = String.Empty
+        Public Property NombreAchete As Decimal?
+    End Class
+
 End Class

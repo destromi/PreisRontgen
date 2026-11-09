@@ -1,11 +1,3 @@
-' ============================================================================
-' FICHIER : Data/IAlerteRepository.vb
-' RÔLE    : définit deux « contrats » (interfaces) entre la logique métier et la base.
-' NOTION  : une Interface liste des méthodes SANS code. Toute classe qui
-'           « implémente » l'interface s'engage à fournir ces méthodes.
-'           Avantage : la détection ne dépend pas de MySQL. Dans les tests, on
-'           lui donne de faux dépôts en mémoire ; en production, les vrais (MySQL).
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

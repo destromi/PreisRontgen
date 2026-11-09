@@ -1,10 +1,3 @@
-' ============================================================================
-' FICHIER : Models/Alerte.vb
-' RÔLE    : contient trois types :
-'           - TypeAlerte  : les deux sortes d'alerte (Hausse, Shrinkflation)
-'           - Alerte      : une alerte produite par la détection (EF-07, EF-08)
-'           - FiltreAlerte: les critères de recherche de la liste d'alertes (EF-09)
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

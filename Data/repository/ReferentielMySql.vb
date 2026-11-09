@@ -45,7 +45,7 @@ Public Class ReferentielMySql
                 End If
             End Using
         Catch ex As MySqlException
-            Dim reponse As DialogResult = MessageBox.Show("Cette catégorie est désactivé. Voulez-vous le réactiver ? ", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            Dim reponse As DialogResult = MessageBox.Show("Cette catégorie est désactivé. Voulez-vous le réactiver  ? " & vbCrLf, "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
             If reponse = DialogResult.Yes Then
                 'Reactive la catégorie
                 activeCategorie(name)
@@ -79,7 +79,7 @@ Public Class ReferentielMySql
         End Using
         Return Categorie
     End Function
-    Public Sub desactiveMagasins(id As Integer)
+    Public Sub desactiveMagasins(id As Integer) Implements IReferentiel.desactiveMagasins
         Try
             Using connection As MySqlConnection = GetConnection
                 If connection.State <> ConnectionState.Open Then
@@ -96,7 +96,7 @@ Public Class ReferentielMySql
         End Try
     End Sub
 
-    Public Sub activeMagasins(nom As String)
+    Public Sub activeMagasins(nom As String) Implements IReferentiel.activeMagasins
         Try
             Using connection As MySqlConnection = GetConnection
                 If connection.State <> ConnectionState.Open Then
@@ -113,7 +113,7 @@ Public Class ReferentielMySql
         End Try
     End Sub
 
-    Public Sub desactiveCategorie(id As Integer)
+    Public Sub desactiveCategorie(id As Integer) Implements IReferentiel.desactiverCategorie
         Try
             Using connection As MySqlConnection = GetConnection
                 If connection.State <> ConnectionState.Open Then
@@ -130,7 +130,7 @@ Public Class ReferentielMySql
         End Try
     End Sub
 
-    Public Sub activeCategorie(nom As String)
+    Public Sub activeCategorie(nom As String) Implements IReferentiel.activeCategorie
         Try
             Using connection As MySqlConnection = GetConnection
                 If connection.State <> ConnectionState.Open Then

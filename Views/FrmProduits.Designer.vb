@@ -28,6 +28,7 @@ Partial Class FrmProduits
         txtRecherche = New TextBox()
         dgvProduits = New DataGridView()
         grpFiche = New GroupBox()
+        Label1 = New Label()
         lblCodeBarres = New Label()
         txtCodeBarres = New TextBox()
         btnRechercherOFF = New Button()
@@ -65,7 +66,7 @@ Partial Class FrmProduits
         grpCatalogue.Margin = New Padding(3, 4, 3, 4)
         grpCatalogue.Name = "grpCatalogue"
         grpCatalogue.Padding = New Padding(3, 4, 3, 4)
-        grpCatalogue.Size = New Size(725, 747)
+        grpCatalogue.Size = New Size(860, 747)
         grpCatalogue.TabIndex = 2
         grpCatalogue.TabStop = False
         grpCatalogue.Text = "Catalogue des produits"
@@ -85,7 +86,7 @@ Partial Class FrmProduits
         txtRecherche.Location = New Point(114, 35)
         txtRecherche.Margin = New Padding(3, 4, 3, 4)
         txtRecherche.Name = "txtRecherche"
-        txtRecherche.Size = New Size(597, 27)
+        txtRecherche.Size = New Size(732, 27)
         txtRecherche.TabIndex = 0
         ' 
         ' dgvProduits
@@ -103,11 +104,12 @@ Partial Class FrmProduits
         dgvProduits.RowHeadersVisible = False
         dgvProduits.RowHeadersWidth = 51
         dgvProduits.SelectionMode = DataGridViewSelectionMode.FullRowSelect
-        dgvProduits.Size = New Size(698, 651)
+        dgvProduits.Size = New Size(833, 651)
         dgvProduits.TabIndex = 1
         ' 
         ' grpFiche
         ' 
+        grpFiche.Controls.Add(Label1)
         grpFiche.Controls.Add(lblCodeBarres)
         grpFiche.Controls.Add(txtCodeBarres)
         grpFiche.Controls.Add(btnRechercherOFF)
@@ -128,15 +130,26 @@ Partial Class FrmProduits
         grpFiche.Margin = New Padding(3, 4, 3, 4)
         grpFiche.Name = "grpFiche"
         grpFiche.Padding = New Padding(3, 4, 3, 4)
-        grpFiche.Size = New Size(569, 747)
+        grpFiche.Size = New Size(678, 747)
         grpFiche.TabIndex = 1
         grpFiche.TabStop = False
         grpFiche.Text = "Fiche produit"
         ' 
+        ' Label1
+        ' 
+        Label1.AutoSize = True
+        Label1.Font = New Font("Segoe UI", 8.0F)
+        Label1.ForeColor = Color.DimGray
+        Label1.Location = New Point(18, 569)
+        Label1.Name = "Label1"
+        Label1.Size = New Size(637, 38)
+        Label1.TabIndex = 9
+        Label1.Text = "La recherche est facultative et envoie uniquement le code barre après confirmation. Vérifier les champs " & vbCrLf & " importés; la catégorie et l'unité restent à confirmer "
+        ' 
         ' lblCodeBarres
         ' 
         lblCodeBarres.AutoSize = True
-        lblCodeBarres.Location = New Point(18, 43)
+        lblCodeBarres.Location = New Point(18, 191)
         lblCodeBarres.Name = "lblCodeBarres"
         lblCodeBarres.Size = New Size(164, 20)
         lblCodeBarres.TabIndex = 0
@@ -144,20 +157,20 @@ Partial Class FrmProduits
         ' 
         ' txtCodeBarres
         ' 
-        txtCodeBarres.Location = New Point(18, 69)
+        txtCodeBarres.Location = New Point(18, 217)
         txtCodeBarres.Margin = New Padding(3, 4, 3, 4)
         txtCodeBarres.MaxLength = 50
         txtCodeBarres.Name = "txtCodeBarres"
-        txtCodeBarres.Size = New Size(261, 27)
+        txtCodeBarres.Size = New Size(519, 27)
         txtCodeBarres.TabIndex = 0
         ' 
         ' btnRechercherOFF
         ' 
-        btnRechercherOFF.BackColor = Color.ForestGreen
+        btnRechercherOFF.BackColor = Color.White
         btnRechercherOFF.FlatAppearance.BorderColor = Color.ForestGreen
         btnRechercherOFF.FlatStyle = FlatStyle.Flat
-        btnRechercherOFF.ForeColor = Color.White
-        btnRechercherOFF.Location = New Point(304, 59)
+        btnRechercherOFF.ForeColor = Color.ForestGreen
+        btnRechercherOFF.Location = New Point(18, 271)
         btnRechercherOFF.Margin = New Padding(3, 4, 3, 4)
         btnRechercherOFF.Name = "btnRechercherOFF"
         btnRechercherOFF.Size = New Size(222, 37)
@@ -167,16 +180,16 @@ Partial Class FrmProduits
         ' 
         ' lblInfoOFF
         ' 
-        lblInfoOFF.ForeColor = Color.FromArgb(CByte(34), CByte(85), CByte(51))
-        lblInfoOFF.Location = New Point(18, 112)
+        lblInfoOFF.ForeColor = Color.ForestGreen
+        lblInfoOFF.Location = New Point(18, 509)
         lblInfoOFF.Name = "lblInfoOFF"
-        lblInfoOFF.Size = New Size(402, 59)
+        lblInfoOFF.Size = New Size(402, 39)
         lblInfoOFF.TabIndex = 2
         ' 
         ' lblNom
         ' 
         lblNom.AutoSize = True
-        lblNom.Location = New Point(18, 181)
+        lblNom.Location = New Point(18, 44)
         lblNom.Name = "lblNom"
         lblNom.Size = New Size(116, 20)
         lblNom.TabIndex = 3
@@ -184,17 +197,17 @@ Partial Class FrmProduits
         ' 
         ' txtNom
         ' 
-        txtNom.Location = New Point(18, 208)
+        txtNom.Location = New Point(18, 71)
         txtNom.Margin = New Padding(3, 4, 3, 4)
         txtNom.MaxLength = 150
         txtNom.Name = "txtNom"
-        txtNom.Size = New Size(402, 27)
+        txtNom.Size = New Size(519, 27)
         txtNom.TabIndex = 2
         ' 
         ' lblMarque
         ' 
         lblMarque.AutoSize = True
-        lblMarque.Location = New Point(18, 253)
+        lblMarque.Location = New Point(18, 116)
         lblMarque.Name = "lblMarque"
         lblMarque.Size = New Size(60, 20)
         lblMarque.TabIndex = 4
@@ -202,17 +215,17 @@ Partial Class FrmProduits
         ' 
         ' txtMarque
         ' 
-        txtMarque.Location = New Point(18, 280)
+        txtMarque.Location = New Point(18, 143)
         txtMarque.Margin = New Padding(3, 4, 3, 4)
         txtMarque.MaxLength = 100
         txtMarque.Name = "txtMarque"
-        txtMarque.Size = New Size(402, 27)
+        txtMarque.Size = New Size(519, 27)
         txtMarque.TabIndex = 3
         ' 
         ' lblCategorie
         ' 
         lblCategorie.AutoSize = True
-        lblCategorie.Location = New Point(18, 325)
+        lblCategorie.Location = New Point(18, 342)
         lblCategorie.Name = "lblCategorie"
         lblCategorie.Size = New Size(74, 20)
         lblCategorie.TabIndex = 5
@@ -221,16 +234,16 @@ Partial Class FrmProduits
         ' cmbCategorie
         ' 
         cmbCategorie.DropDownStyle = ComboBoxStyle.DropDownList
-        cmbCategorie.Location = New Point(18, 352)
+        cmbCategorie.Location = New Point(18, 369)
         cmbCategorie.Margin = New Padding(3, 4, 3, 4)
         cmbCategorie.Name = "cmbCategorie"
-        cmbCategorie.Size = New Size(402, 28)
+        cmbCategorie.Size = New Size(295, 28)
         cmbCategorie.TabIndex = 4
         ' 
         ' lblUnite
         ' 
         lblUnite.AutoSize = True
-        lblUnite.Location = New Point(18, 397)
+        lblUnite.Location = New Point(360, 342)
         lblUnite.Name = "lblUnite"
         lblUnite.Size = New Size(100, 20)
         lblUnite.TabIndex = 6
@@ -239,10 +252,10 @@ Partial Class FrmProduits
         ' cmbUnite
         ' 
         cmbUnite.DropDownStyle = ComboBoxStyle.DropDownList
-        cmbUnite.Location = New Point(18, 424)
+        cmbUnite.Location = New Point(360, 369)
         cmbUnite.Margin = New Padding(3, 4, 3, 4)
         cmbUnite.Name = "cmbUnite"
-        cmbUnite.Size = New Size(402, 28)
+        cmbUnite.Size = New Size(177, 28)
         cmbUnite.TabIndex = 5
         ' 
         ' btnEnregistrer
@@ -251,7 +264,7 @@ Partial Class FrmProduits
         btnEnregistrer.FlatAppearance.BorderColor = Color.ForestGreen
         btnEnregistrer.FlatStyle = FlatStyle.Flat
         btnEnregistrer.ForeColor = Color.White
-        btnEnregistrer.Location = New Point(18, 507)
+        btnEnregistrer.Location = New Point(18, 438)
         btnEnregistrer.Margin = New Padding(3, 4, 3, 4)
         btnEnregistrer.Name = "btnEnregistrer"
         btnEnregistrer.Size = New Size(194, 48)
@@ -265,10 +278,10 @@ Partial Class FrmProduits
         btnNouveau.FlatAppearance.BorderColor = Color.ForestGreen
         btnNouveau.FlatStyle = FlatStyle.Flat
         btnNouveau.ForeColor = Color.ForestGreen
-        btnNouveau.Location = New Point(222, 507)
+        btnNouveau.Location = New Point(238, 438)
         btnNouveau.Margin = New Padding(3, 4, 3, 4)
         btnNouveau.Name = "btnNouveau"
-        btnNouveau.Size = New Size(91, 48)
+        btnNouveau.Size = New Size(143, 48)
         btnNouveau.TabIndex = 7
         btnNouveau.Text = "Nouveau"
         btnNouveau.UseVisualStyleBackColor = True
@@ -279,10 +292,10 @@ Partial Class FrmProduits
         btnDesactiver.FlatAppearance.BorderColor = Color.ForestGreen
         btnDesactiver.FlatStyle = FlatStyle.Flat
         btnDesactiver.ForeColor = Color.ForestGreen
-        btnDesactiver.Location = New Point(322, 507)
+        btnDesactiver.Location = New Point(401, 438)
         btnDesactiver.Margin = New Padding(3, 4, 3, 4)
         btnDesactiver.Name = "btnDesactiver"
-        btnDesactiver.Size = New Size(98, 48)
+        btnDesactiver.Size = New Size(136, 48)
         btnDesactiver.TabIndex = 8
         btnDesactiver.Text = "Désactiver"
         btnDesactiver.UseVisualStyleBackColor = True
@@ -305,17 +318,17 @@ Partial Class FrmProduits
         ' SplitContainer1.Panel2
         ' 
         SplitContainer1.Panel2.Controls.Add(grpFiche)
-        SplitContainer1.Size = New Size(1298, 747)
-        SplitContainer1.SplitterDistance = 725
+        SplitContainer1.Size = New Size(1542, 747)
+        SplitContainer1.SplitterDistance = 860
         SplitContainer1.TabIndex = 3
         ' 
         ' FrmProduits
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1298, 747)
+        ClientSize = New Size(1542, 747)
         Controls.Add(SplitContainer1)
-        Font = New Font("Segoe UI", 9F)
+        Font = New Font("Segoe UI", 9.0F)
         Margin = New Padding(3, 4, 3, 4)
         MinimumSize = New Size(1026, 731)
         Name = "FrmProduits"
@@ -355,4 +368,5 @@ Partial Class FrmProduits
     Friend WithEvents btnDesactiver As Button
     Friend WithEvents errProvider As ErrorProvider
     Friend WithEvents SplitContainer1 As SplitContainer
+    Friend WithEvents Label1 As Label
 End Class

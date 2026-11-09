@@ -3,13 +3,11 @@ Imports System.Globalization
 Imports System.IO
 Imports MySqlConnector
 
-' =====================================================================
-' CSV_Depense.vb : code du formulaire.
-' - Onglet "Dépenses récurrentes" : code existant, repris tel quel
-'   (d'après votre capture : adaptez-le si vous avez ajouté autre chose).
-' - Onglet "Import & Export CSV" : affichage seulement ; le traitement
-'   est dans ImportExportService.vb.
-' =====================================================================
+''' <summary>
+''' Fenêtre d'import/export de relevés de prix au format CSV.
+''' Permet aussi de gérer les dépenses récurrentes (onglet "Dépenses"). 
+''' </summary>
+
 Public Class CSV_Depense
 
     ' ----- Partie dépenses (existante, reprise telle quelle) -----

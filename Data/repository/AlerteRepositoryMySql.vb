@@ -25,7 +25,6 @@ Namespace Data
             Return nf
         End Function
 
-        ' ================= Outils =================
 
         Private Shared Function IdUtilisateur() As Integer
             If Session.user Is Nothing Then Throw New InvalidOperationException("Aucun utilisateur connecté.")
@@ -45,7 +44,6 @@ Namespace Data
             Return If(String.Equals(s, "HAUSSE", StringComparison.OrdinalIgnoreCase), TypeAlerte.Hausse, TypeAlerte.Shrinkflation)
         End Function
 
-        ' ================= Lecture =================
 
         Public Function Rechercher(filtre As FiltreAlerte) As List(Of Alerte) Implements IAlerteRepository.Rechercher
             Dim resultat As New List(Of Alerte)()
@@ -175,7 +173,6 @@ Namespace Data
             Return resultat
         End Function
 
-        ' ================= Écriture =================
 
         Public Function Ajouter(alerte As Alerte) As Integer Implements IAlerteRepository.Ajouter
             Try
@@ -256,7 +253,6 @@ Namespace Data
             End Try
         End Function
 
-        ' ================= Détails internes =================
 
         ' Observation liée à l'alerte : celle indiquée, sinon la dernière du produit dans ce magasin à cette date
         Private Shared Function TrouverObservation(cn As MySqlConnection, alerte As Alerte) As Integer
@@ -288,7 +284,6 @@ Namespace Data
             End Using
         End Sub
 
-        ' ================= Texte explicatif =================
 
         Private Shared Function ConstruireDetail(type As TypeAlerte, valeur As Decimal, prixPrecedent As Decimal,
                                                  prixActuel As Decimal, quantitePrecedente As Decimal?,

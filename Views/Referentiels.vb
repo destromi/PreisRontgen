@@ -20,7 +20,7 @@
 
     Private Sub BtnNewCateg_Click(sender As Object, e As EventArgs) Handles BtnNewCateg.Click
         TextBoxCateg.Clear()
-        ListBoxCateg.SelectedValue = Nothing
+        'ListBoxCateg.SelectedValue = Nothing
     End Sub
 
     Private Sub BtnEnregistrerCateg_Click(sender As Object, e As EventArgs) Handles BtnEnregistrerCateg.Click

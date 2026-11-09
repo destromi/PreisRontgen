@@ -1,11 +1,3 @@
-' ============================================================================
-' FICHIER : Models/Unites.vb
-' RÔLE    : définit les deux listes d'unités utilisées par le module (EF-05).
-'           - Unite     : l'unité écrite sur le ticket (g, kg, ml, cl, L, pièce)
-'           - UniteBase : l'unité commune de comparaison (kg, L, pièce)
-' NOTION  : une « Enum » est une liste de valeurs nommées. Au lieu d'écrire le
-'           texte "kg" partout (risque de faute de frappe), on écrit Unite.Kilogramme.
-' ============================================================================
 Option Strict On      ' Interdit les conversions implicites dangereuses (ex. texte vers nombre) : exigé par le cahier des charges
 Option Explicit On    ' Oblige à déclarer chaque variable avant de l'utiliser : exigé par le cahier des charges
 

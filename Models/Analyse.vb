@@ -1,10 +1,3 @@
-' ============================================================================
-' FICHIER : Models/Analyse.vb
-' RÔLE    : classes « données » du rôle T4 (analyses et comparaisons) :
-'           historique d'un produit (EF-06), indice personnel (EF-10),
-'           comparaison de magasins (EF-11), produits équivalents (EF-12)
-'           et dépenses récurrentes (EF-14).
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

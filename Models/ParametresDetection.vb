@@ -1,8 +1,3 @@
-' ============================================================================
-' FICHIER : Models/ParametresDetection.vb
-' RÔLE    : regroupe les deux seuils de la détection. Ils sont modifiables par
-'           l'administrateur (table parametre, module de T1).
-' ============================================================================
 Option Strict On      ' Conversions implicites dangereuses interdites
 Option Explicit On    ' Variables obligatoirement déclarées
 

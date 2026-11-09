@@ -127,6 +127,7 @@ Partial Class Referentiels
         ListBoxMagasins.Name = "ListBoxMagasins"
         ListBoxMagasins.Size = New Size(454, 569)
         ListBoxMagasins.TabIndex = 0
+        ListBoxMagasins.ValueMember = "id"
         ' 
         ' Label3
         ' 
@@ -244,6 +245,7 @@ Partial Class Referentiels
         ListBoxCateg.Name = "ListBoxCateg"
         ListBoxCateg.Size = New Size(459, 575)
         ListBoxCateg.TabIndex = 1
+        ListBoxCateg.ValueMember = "id"
         ' 
         ' BtnDelCateg
         ' 

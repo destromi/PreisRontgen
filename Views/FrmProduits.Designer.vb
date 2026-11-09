@@ -311,11 +311,11 @@ Partial Class FrmProduits
         ' 
         ' FrmProduits
         ' 
-        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
+        AutoScaleDimensions = New SizeF(8F, 20F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(1298, 747)
         Controls.Add(SplitContainer1)
-        Font = New Font("Segoe UI", 9.0F)
+        Font = New Font("Segoe UI", 9F)
         Margin = New Padding(3, 4, 3, 4)
         MinimumSize = New Size(1026, 731)
         Name = "FrmProduits"

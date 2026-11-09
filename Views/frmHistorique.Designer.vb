@@ -204,6 +204,7 @@ Partial Class frmHistorique  ' Partial : la classe est coupée en deux fichiers 
         dgvHistorique.AllowUserToAddRows = False
         dgvHistorique.AllowUserToDeleteRows = False
         dgvHistorique.AllowUserToResizeRows = False
+        dgvHistorique.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         dgvHistorique.BackgroundColor = Color.White
         dgvHistorique.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single
         dgvHistorique.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1

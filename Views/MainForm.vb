@@ -98,7 +98,7 @@ Public Class MainForm
     Private Sub BtnAlertes_Click(sender As Object, e As EventArgs) Handles BtnAlertes.Click
         BtnColor("BtnAlertes")
         If alerte Is Nothing Then
-            alerte = New frmAlertes
+            alerte = New frmAlertes(New AlerteRepositoryMySql())
             alerte.TopLevel = False
             alerte.FormBorderStyle = FormBorderStyle.None
             alerte.Dock = DockStyle.Fill
@@ -128,7 +128,7 @@ Public Class MainForm
     Private Sub BtnHistorique_Click(sender As Object, e As EventArgs) Handles BtnHistorique.Click
         BtnColor("BtnHistorique")
         If historique Is Nothing Then
-            historique = New frmHistorique
+            historique = New frmHistorique(New AnalyseRepositoryMySql)
             historique.TopLevel = False
             historique.FormBorderStyle = FormBorderStyle.None
             historique.Dock = DockStyle.Fill
@@ -170,18 +170,22 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub BtnPlus_Click(sender As Object, e As EventArgs) Handles BtnPlus.Click
+    Private Sub BtnPlus_Click(sender As Object, e As EventArgs)
         BtnColor("BtnPlus")
         If demo Is Nothing Then
-            demo = New FenetreDemo(depot)
+            demo = New FenetreDemo(New AlerteRepositoryMySql)
             demo.TopLevel = False
             demo.FormBorderStyle = FormBorderStyle.None
             demo.Dock = DockStyle.Fill
             PanelAffichage.Controls.Add(demo)
-            demo.Show()
-            demo.BringToFront()
+            demo.Show
+            demo.BringToFront
         Else
-            demo.BringToFront()
+            demo.BringToFront
         End If
+    End Sub
+
+    Private Sub MainForm_Closed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        Application.Exit()
     End Sub
 End Class

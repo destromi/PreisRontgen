@@ -23,7 +23,7 @@ Public Class frmDepenses                           ' Début de la classe (Partia
     Friend Class LigneDepense                      ' Une ligne déjà mise en forme
         Public Property Source As DepenseRecurrente = New DepenseRecurrente()   ' Dépense d'origine (non affichée)
         Public Property Nom As String = String.Empty               ' Colonne « Dépense »
-        Public Property MontantTexte As String = String.Empty      ' Colonne « Montant »
+        Public Property MontantTexte As String = String.Empty      ' Colonne « Montant » 
         Public Property PeriodiciteTexte As String = String.Empty  ' Colonne « Périodicité »
         Public Property EcheanceTexte As String = String.Empty     ' Colonne « Prochaine échéance »
         Public Property RappelTexte As String = String.Empty       ' Colonne « Rappel »

@@ -273,10 +273,11 @@ Partial Class frmAlertes   ' Partial : la classe est coupée en deux fichiers (c
         dgvAlertes.AllowUserToAddRows = False
         dgvAlertes.AllowUserToDeleteRows = False
         dgvAlertes.AllowUserToResizeRows = False
+        dgvAlertes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         dgvAlertes.BackgroundColor = Color.White
         dgvAlertes.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single
         dgvAlertes.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
-        dgvAlertes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        dgvAlertes.ColumnHeadersHeight = 29
         dgvAlertes.Dock = DockStyle.Fill
         dgvAlertes.EnableHeadersVisualStyles = False
         dgvAlertes.GridColor = Color.FromArgb(CByte(195), CByte(208), CByte(200))

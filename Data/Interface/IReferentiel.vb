@@ -1,6 +1,6 @@
 ﻿Public Interface IReferentiel
-    Sub saveMagasins(name As String)
+    Function saveMagasins(name As String) As Integer
     Function GetMagasin() As DataTable
-    Sub saveCategorie(name As String)
+    Function saveCategorie(name As String) As Integer
     Function GetCategorie() As DataTable
 End Interface

@@ -3,9 +3,12 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <StartupObject>PreisRontgen.My.MyApplication</StartupObject>
+    <!--<StartupObject>PreisRontgen.My.MyApplication</StartupObject>-->
+	  <!--<StartupObject>PreisRontgen.My.MyApplicationWithCustomSubMain</StartupObject>-->
+	  <StartupObject>Sub Main</StartupObject>
     <UseWindowsForms>true</UseWindowsForms>
-    <MyType>WindowsForms</MyType>
+    <!--<MyType>WindowsForms</MyType>-->
+	  <MyType>WindowsFormsWithCustomSubMain</MyType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,6 +49,7 @@
     <Compile Update="Views\FenetreDemo.vb">
       <SubType>Form</SubType>
     </Compile>
+	  <Compile Remove="My Project\Application.Designer.vb" />
   </ItemGroup>
 
   <ItemGroup>
